@@ -1,5 +1,5 @@
-import ImageFixed from "next/image"
 import { useEffect, useState } from "react"
+import ImageFixed from "next/image"
 
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"

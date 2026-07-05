@@ -1,11 +1,25 @@
+/** @type {import('prettier').Config} */
 module.exports = {
-  // These settings are handled in .editorconfig:
-  tabWidth: 2, // indent_size = 2
-  useTabs: false, // indent_style = space
-  endOfLine: "lf", // end_of_line = lf
-  semi: false, // default: true
-  singleQuote: false,
-  printWidth: 80,
-  trailingComma: "es5",
-  bracketSpacing: true,
+  semi: false,
+  plugins: ["@ianvs/prettier-plugin-sort-imports"],
+  importOrder: [
+    "^(react/(.*)$)|^(react$)",
+    "^(next/(.*)$)|^(next$)",
+    "<THIRD_PARTY_MODULES>",
+    "",
+    "^types$",
+    "^@/src/types/(.*)$",
+    "^@/src/config/(.*)$",
+    "^@/src/lib/(.*)$",
+    "^@/src/hooks/(.*)$",
+    "^@/src/components/ui/(.*)$",
+    "^@/src/components/(.*)$",
+    "^@/src/registry/(.*)$",
+    "^@/src/styles/(.*)$",
+    "^@/src/app/(.*)$",
+    "",
+    "^[./]",
+  ],
+  importOrderParserPlugins: ["typescript", "jsx", "decorators-legacy"],
+  importOrderTypeScriptVersion: "5.0.0",
 }

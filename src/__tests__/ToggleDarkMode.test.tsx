@@ -1,6 +1,7 @@
-import ToggleDarkMode from "@/src/components/ToggleDarkMode"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+
+import ToggleDarkMode from "@/src/components/ToggleDarkMode"
 
 function renderToggleDarkMode() {
   render(<ToggleDarkMode />)

@@ -1,9 +1,10 @@
+import { server } from "@/src/utils/setup-tests"
+import { render, screen, waitFor } from "@testing-library/react"
+
 import CityWeather, {
   KtoF,
   upperCaseFirstLetterOfEachWord,
 } from "@/src/components/CityWeather"
-import { server } from "@/src/utils/setup-tests"
-import { render, screen, waitFor } from "@testing-library/react"
 
 const currentWeatherConditions = "Overcast clouds"
 const currentTemperatureInKelvin = 295.372

@@ -28,10 +28,13 @@ importers:
         version: 7.29.7(supports-color@8.1.1)
       "@babel/preset-env":
         specifier: ^7.15.6
-        version: 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)
+        version: 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))
       "@babel/preset-typescript":
         specifier: ^7.15.0
         version: 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))
+      "@ianvs/prettier-plugin-sort-imports":
+        specifier: ^4.7.1
+        version: 4.7.1(prettier@2.8.8)
       "@svgr/webpack":
         specifier: ^5.5.0
         version: 5.5.0
@@ -1232,6 +1235,27 @@ packages:
         integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==,
       }
     deprecated: Use @eslint/object-schema instead
+
+  "@ianvs/prettier-plugin-sort-imports@4.7.1":
+    resolution:
+      {
+        integrity: sha512-jmTNYGlg95tlsoG3JLCcuC4BrFELJtLirLAkQW/71lXSyOhVt/Xj7xWbbGcuVbNq1gwWgSyMrPjJc9Z30hynVw==,
+      }
+    peerDependencies:
+      "@prettier/plugin-oxc": ^0.0.4 || ^0.1.0
+      "@vue/compiler-sfc": 2.7.x || 3.x
+      content-tag: ^4.0.0
+      prettier: 2 || 3 || ^4.0.0-0
+      prettier-plugin-ember-template-tag: ^2.1.0
+    peerDependenciesMeta:
+      "@prettier/plugin-oxc":
+        optional: true
+      "@vue/compiler-sfc":
+        optional: true
+      content-tag:
+        optional: true
+      prettier-plugin-ember-template-tag:
+        optional: true
 
   "@inquirer/external-editor@1.0.3":
     resolution:
@@ -8971,7 +8995,7 @@ snapshots:
       regexpu-core: 6.4.0
       semver: 6.3.1
 
-  "@babel/helper-define-polyfill-provider@0.6.8(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)":
+  "@babel/helper-define-polyfill-provider@0.6.8(@babel/core@7.29.7(supports-color@8.1.1))":
     dependencies:
       "@babel/core": 7.29.7(supports-color@8.1.1)
       "@babel/helper-compilation-targets": 7.29.7
@@ -9594,7 +9618,7 @@ snapshots:
       "@babel/helper-create-regexp-features-plugin": 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))
       "@babel/helper-plugin-utils": 7.29.7
 
-  "@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)":
+  "@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@8.1.1))":
     dependencies:
       "@babel/compat-data": 7.29.7
       "@babel/core": 7.29.7(supports-color@8.1.1)
@@ -9663,7 +9687,7 @@ snapshots:
       "@babel/plugin-transform-unicode-regex": 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))
       "@babel/plugin-transform-unicode-sets-regex": 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))
       "@babel/preset-modules": 0.1.6-no-external-plugins(@babel/core@7.29.7(supports-color@8.1.1))
-      babel-plugin-polyfill-corejs2: 0.4.17(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)
+      babel-plugin-polyfill-corejs2: 0.4.17(@babel/core@7.29.7(supports-color@8.1.1))
       babel-plugin-polyfill-corejs3: 0.14.2(@babel/core@7.29.7(supports-color@8.1.1))
       babel-plugin-polyfill-regenerator: 0.6.8(@babel/core@7.29.7(supports-color@8.1.1))
       core-js-compat: 3.49.0
@@ -9771,6 +9795,17 @@ snapshots:
       - supports-color
 
   "@humanwhocodes/object-schema@1.2.1": {}
+
+  "@ianvs/prettier-plugin-sort-imports@4.7.1(prettier@2.8.8)":
+    dependencies:
+      "@babel/generator": 7.29.7
+      "@babel/parser": 7.29.7
+      "@babel/traverse": 7.29.7(supports-color@8.1.1)
+      "@babel/types": 7.29.7
+      prettier: 2.8.8
+      semver: 7.8.5
+    transitivePeerDependencies:
+      - supports-color
 
   "@inquirer/external-editor@1.0.3(@types/node@16.18.126)":
     dependencies:
@@ -10157,7 +10192,7 @@ snapshots:
     dependencies:
       "@babel/core": 7.29.7(supports-color@8.1.1)
       "@babel/plugin-transform-react-constant-elements": 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))
-      "@babel/preset-env": 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)
+      "@babel/preset-env": 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))
       "@babel/preset-react": 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))
       "@svgr/core": 5.5.0
       "@svgr/plugin-jsx": 5.5.0
@@ -10821,11 +10856,11 @@ snapshots:
       "@types/babel__core": 7.20.5
       "@types/babel__traverse": 7.28.0
 
-  babel-plugin-polyfill-corejs2@0.4.17(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1):
+  babel-plugin-polyfill-corejs2@0.4.17(@babel/core@7.29.7(supports-color@8.1.1)):
     dependencies:
       "@babel/compat-data": 7.29.7
       "@babel/core": 7.29.7(supports-color@8.1.1)
-      "@babel/helper-define-polyfill-provider": 0.6.8(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)
+      "@babel/helper-define-polyfill-provider": 0.6.8(@babel/core@7.29.7(supports-color@8.1.1))
       semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
@@ -10833,7 +10868,7 @@ snapshots:
   babel-plugin-polyfill-corejs3@0.14.2(@babel/core@7.29.7(supports-color@8.1.1)):
     dependencies:
       "@babel/core": 7.29.7(supports-color@8.1.1)
-      "@babel/helper-define-polyfill-provider": 0.6.8(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)
+      "@babel/helper-define-polyfill-provider": 0.6.8(@babel/core@7.29.7(supports-color@8.1.1))
       core-js-compat: 3.49.0
     transitivePeerDependencies:
       - supports-color
@@ -10841,7 +10876,7 @@ snapshots:
   babel-plugin-polyfill-regenerator@0.6.8(@babel/core@7.29.7(supports-color@8.1.1)):
     dependencies:
       "@babel/core": 7.29.7(supports-color@8.1.1)
-      "@babel/helper-define-polyfill-provider": 0.6.8(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)
+      "@babel/helper-define-polyfill-provider": 0.6.8(@babel/core@7.29.7(supports-color@8.1.1))
     transitivePeerDependencies:
       - supports-color
 

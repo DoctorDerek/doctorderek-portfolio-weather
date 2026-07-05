@@ -1,8 +1,9 @@
 import "isomorphic-unfetch" // helper to allow direct testing of fetch requests
 
-import CityWeather from "@/src/components/CityWeather"
 import { loadEnvConfig } from "@next/env"
 import { render, screen, waitFor } from "@testing-library/react"
+
+import CityWeather from "@/src/components/CityWeather"
 
 beforeAll(() => loadEnvConfig(process.cwd()))
 // load .env.test to get API_KEY for live data tests

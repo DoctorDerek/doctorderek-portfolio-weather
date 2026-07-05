@@ -2,10 +2,9 @@
 import "isomorphic-unfetch"
 import "@testing-library/jest-dom/extend-expect" // add better assertions
 
+import { loadEnvConfig } from "@next/env"
 import { rest } from "msw"
 import { setupServer } from "msw/node"
-
-import { loadEnvConfig } from "@next/env"
 
 // load environment variables from .env.test file via Next.js
 const projectDir = process.cwd()

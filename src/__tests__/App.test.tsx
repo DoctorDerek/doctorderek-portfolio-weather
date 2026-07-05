@@ -1,7 +1,8 @@
-import App from "@/src/components/App"
 import { server } from "@/src/utils/setup-tests"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+
+import App from "@/src/components/App"
 
 const currentWeatherConditions = "Overcast clouds"
 // const currentTemperatureInKelvin = 295.372

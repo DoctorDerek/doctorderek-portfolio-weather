@@ -1,5 +1,4 @@
 import ImageFixed from "next/image"
-
 import unsplash from "@/public/john-fowler-RsRTIofe0HE-unsplash.jpg"
 
 export default function BackgroundImage() {
