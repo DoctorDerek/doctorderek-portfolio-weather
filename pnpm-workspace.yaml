@@ -1,0 +1,8 @@
+packages:
+  - "."
+
+allowBuilds:
+  sharp: true
+  core-js: true
+  unrs-resolver: true
+  msw: true

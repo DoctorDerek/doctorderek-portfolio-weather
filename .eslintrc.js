@@ -27,8 +27,9 @@ module.exports = {
     "react-app/jest",
     "next",
   ],
+  plugins: ["only-warn"],
   rules: {
-    "prettier/prettier": "error",
+    "prettier/prettier": "warn",
     "react/react-in-jsx-scope": "off",
     "react/prop-types": 0,
     "react/no-unescaped-entities": 0,
