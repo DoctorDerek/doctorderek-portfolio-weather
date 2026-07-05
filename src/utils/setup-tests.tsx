@@ -2,10 +2,9 @@
 import "isomorphic-unfetch"
 import "@testing-library/jest-dom/extend-expect" // add better assertions
 
+import { loadEnvConfig } from "@next/env"
 import { rest } from "msw"
 import { setupServer } from "msw/node"
-
-import { loadEnvConfig } from "@next/env"
 
 // load environment variables from .env.test file via Next.js
 const projectDir = process.cwd()
@@ -42,7 +41,7 @@ export const server = setupServer(
         ctx.json({
           cod: 404, // "NOT FOUND" https://http.cat/404
           message: "city not found",
-        })
+        }),
       )
     }
     if (city && new RegExp("no.*weather.*array", "i").exec(city)) {
@@ -50,7 +49,7 @@ export const server = setupServer(
       return res(
         ctx.json({
           weather: "No weather array",
-        })
+        }),
       )
     }
     return res(
@@ -66,9 +65,9 @@ export const server = setupServer(
         },
         name: city,
         cod: 200, // "OK" https://http.cat/200
-      })
+      }),
     )
-  })
+  }),
 )
 
 jest.mock(
@@ -77,5 +76,5 @@ jest.mock(
     function Image({ src, alt }: { src: string; alt: string }) {
       // eslint-disable-next-line @next/next/no-img-element
       return <img src={src} alt={alt} />
-    }
+    },
 )

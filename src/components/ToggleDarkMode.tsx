@@ -1,5 +1,5 @@
-import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
+import { useTheme } from "next-themes"
 import { CSSTransition } from "react-transition-group"
 
 const classNames = (...args: string[]) => args.filter(Boolean).join(" ")
@@ -21,10 +21,10 @@ export default function ToggleDarkMode() {
       aria-label={classNames(
         "Toggle Dark Mode",
         "-",
-        inProp ? "enabled" : "disabled"
+        inProp ? "enabled" : "disabled",
       )}
       type="button"
-      className="absolute right-0 z-20 h-10 text-gray-900 bg-transparent top-10"
+      className="absolute right-0 top-10 z-20 h-10 bg-transparent text-gray-900"
       onClick={() => {
         setTheme(resolvedTheme === "dark" ? "light" : "dark")
         setInProp(inProp ? false : true)

@@ -1,6 +1,5 @@
-import { getPage } from "next-page-tester"
-
 import { screen } from "@testing-library/react"
+import { getPage } from "next-page-tester"
 
 it("renders the homepage /", async () => {
   const { render } = await getPage({
