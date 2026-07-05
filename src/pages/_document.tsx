@@ -6,7 +6,7 @@ import Document, { Head, Html, Main, NextScript } from "next/document"
 class MyDocument extends Document {
   render() {
     return (
-      <Html lang="en" className="w-full h-full">
+      <Html lang="en" className="h-full w-full">
         <Head>
           <meta charSet="utf-8" />
           <link
@@ -35,7 +35,7 @@ class MyDocument extends Document {
           <noscript>You need to enable JavaScript to run this app.</noscript>
         </Head>
 
-        <body className="w-full h-full subpixel-antialiased">
+        <body className="h-full w-full subpixel-antialiased">
           <Main />
           <NextScript />
         </body>

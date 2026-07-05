@@ -21,7 +21,7 @@ type CurrentWeatherData = {
       description: string
       /** icon: "01d" */
       icon: string
-    }
+    },
   ]
   /** base: "stations" */
   base: string
