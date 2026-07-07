@@ -1,7 +1,6 @@
-//eslint-disable-next-line
+
 import Document, { Head, Html, Main, NextScript } from "next/document"
 
-// ignore "next/document should not be imported outside of pages/_document.js" See https://nextjs.org/docs/messages/no-document-import-in-page.eslint(@next/next/no-document-import-in-page)
 
 class MyDocument extends Document {
   render() {

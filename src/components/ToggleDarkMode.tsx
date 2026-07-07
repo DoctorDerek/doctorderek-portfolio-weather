@@ -8,14 +8,12 @@ export default function ToggleDarkMode() {
   const [inProp, setInProp] = useState(false)
   const { resolvedTheme, setTheme } = useTheme()
 
-  // Transition the "in" prop from false to true after mounting to show
-  // the dark toggle correctly when refreshing with dark mode enabled
+
   useEffect(() => {
     if (resolvedTheme === "dark") setInProp(true)
   }, [resolvedTheme])
 
-  // SVG source: https://codesandbox.io/s/dark-mode-toggle-si6k2 by @bartkozal
-  // used with permission
+
   return (
     <CSSTransition
       aria-label={classNames(

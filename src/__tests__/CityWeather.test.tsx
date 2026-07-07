@@ -30,20 +30,20 @@ test("upperCaseFirstLetterOfEachWord function works correctly", () => {
 
 test("<CityWeather> renders nothing with default props", () => {
   renderCityWeather()
-  expect(screen.queryByText(/Temp/i)).toBeNull() // Temperature
+  expect(screen.queryByText(/Temp/i)).toBeNull()
 })
 
 test("<CityWeather> renders correctly with prop city='Memphis'", async () => {
   const city = "Memphis"
   renderCityWeather(city)
   await waitFor(() => expect(screen.getByText(/loading/i)).toBeVisible())
-  await waitFor(() => expect(screen.getByText(/Temp/i)).toBeVisible()) // Temperature
+  await waitFor(() => expect(screen.getByText(/Temp/i)).toBeVisible())
   expect(screen.getByText(new RegExp(city, "i"))).toBeVisible()
   expect(
     screen.getByText(new RegExp(currentWeatherConditions, "i")),
   ).toBeVisible()
   expect(
-    screen.getByText(new RegExp(`${currentTemperatureInFahrenheit}.*°`, "i")),
+    screen.getByText(new RegExp(`${currentTemperatureInFahrenheit}.*Ã‚Â°`, "i")),
   ).toBeVisible()
 })
 
@@ -54,7 +54,7 @@ test("<CityWeather> renders 'not found' with prop city='FakeCity'", async () => 
   await waitFor(() => expect(screen.getByText(/not found/i)).toBeVisible())
   expect(screen.getByText(/error/i)).toBeVisible()
   expect(screen.queryByText(new RegExp(city, "i"))).toBeNull()
-  expect(screen.queryByText(/Temp/i)).toBeNull() // Temperature
+  expect(screen.queryByText(/Temp/i)).toBeNull()
 })
 
 test("<CityWeather> shows error if there is no weather array in the response", async () => {
@@ -63,5 +63,5 @@ test("<CityWeather> shows error if there is no weather array in the response", a
   await waitFor(() => expect(screen.getByText(/loading/i)).toBeVisible())
   await waitFor(() => expect(screen.getByText(/error/i)).toBeVisible())
   expect(screen.queryByText(new RegExp(city, "i"))).toBeNull()
-  expect(screen.queryByText(/Temp/i)).toBeNull() // Temperature
+  expect(screen.queryByText(/Temp/i)).toBeNull()
 })

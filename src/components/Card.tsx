@@ -8,7 +8,7 @@ export default function Card({
   heading: string
 }) {
   const useSmallFont = heading.length >= 12
-  // large font: "MEMPHIS" and "LOS ANGELES"; small font: "PUERTO MORELOS"
+
   return (
     <div className="flex flex-col items-center justify-center">
       {/* take advantage of flex-shrink to generate auto-width <Card> */}
