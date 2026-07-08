@@ -8,7 +8,8 @@
     "test": "jest test --collectCoverage",
     "test:watch": "jest test --watch",
     "test:watchAll": "jest test --watchAll",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "lint": "eslint ."
   },
   "browserslist": [
     ">0.2%",
@@ -40,24 +41,19 @@
     "@types/react": "^17",
     "@types/react-dom": "^17",
     "@types/react-transition-group": "^4",
-    "@typescript-eslint/eslint-plugin": "^4",
-    "@typescript-eslint/parser": "^4",
     "autoprefixer": "^10",
-    "babel-eslint": "^10",
     "babel-jest": "^27",
-    "eslint": "^7",
-    "eslint-config-next": "^11",
-    "eslint-config-prettier": "^8",
-    "eslint-config-react-app": "^6",
+    "eslint": "^9",
+    "eslint-config-flat-gitignore": "^0.2.0",
+    "eslint-config-prettier": "^9",
     "eslint-plugin-import": "^2",
-    "eslint-plugin-jest": "^24",
     "eslint-plugin-jsx-a11y": "^6",
     "eslint-plugin-only-warn": "^1",
-    "eslint-plugin-prettier": "^4",
+    "eslint-plugin-prettier": "^5",
     "eslint-plugin-react": "^7",
-    "eslint-plugin-react-hooks": "^4",
-    "eslint-plugin-testing-library": "^4",
+    "eslint-plugin-react-hooks": "^5",
     "file-loader": "^6",
+    "globals": "^15",
     "isomorphic-unfetch": "^3",
     "jest": "^27",
     "jest-axe": "^5",
@@ -72,7 +68,8 @@
     "react-test-renderer": "^17",
     "stylelint-config-recommended": "^5",
     "tailwindcss": "^2",
-    "typescript": "^4"
+    "typescript": "^4",
+    "typescript-eslint": "^8"
   },
   "license": "MIT"
 }
