@@ -7,7 +7,7 @@ module.exports = {
     domains: ["openweathermap.org"],
   },
 
-  webpack: (config, { dev, isServer, webpack }) => {
+  webpack: (config) => {
     config.module.rules.push({
       test: /\.svg$/,
       use: ["@svgr/webpack"],

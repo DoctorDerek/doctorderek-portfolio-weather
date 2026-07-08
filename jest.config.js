@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Modified from kcd-scripts:
 // https://github.com/kentcdodds/kcd-scripts/blob/main/src/config/jest.config.js
 const fs = require("fs")

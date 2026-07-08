@@ -30,16 +30,16 @@ export default function CityWeather({ city }: { city?: string }) {
 
   const Error = () => (
     <Card heading={`Error ${weatherResult?.cod}`}>
-      <div>{upperCaseFirstLetterOfEachWord(weatherResult?.message)}</div>
+      <div>{upperCaseFirstLetterOfEachWord(weatherResult?.message ?? "")}</div>
     </Card>
   )
   if (weatherResult.cod !== 200) return <Error />
   if (!Array.isArray(weatherResult?.weather)) return <Error />
 
-  const { icon, description } = weatherResult?.weather[0]
+  const { icon, description } = weatherResult.weather[0]
   const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`
 
-  const temperature = KtoF(weatherResult?.main?.temp)
+  const temperature = KtoF(weatherResult.main?.temp)
 
   function WeatherIcon() {
     return (
