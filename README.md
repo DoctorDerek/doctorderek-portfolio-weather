@@ -12,6 +12,17 @@ Additionally, I added 7 other major features, including best practices and exten
 
 Below you will find a complete feature set, discussion section, and technical journal.
 
+## Local Development
+
+Use [fnm](https://github.com/Schniz/fnm) for Node version management and [pnpm](https://pnpm.io/) as the package manager:
+
+```bash
+fnm use
+corepack enable pnpm
+pnpm install
+pnpm dev
+```
+
 ## Required Features
 
 1. ✅ Fix the bug where the app crashes when trying to request the weather
