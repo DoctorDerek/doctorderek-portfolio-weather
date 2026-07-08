@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react"
 import ImageFixed from "next/image"
+import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
+import { KtoF } from "@/src/utils/weather"
 
+import { CurrentWeatherData } from "@/src/types/weather"
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
 
-// to get api key: https://openweathermap.org/appid
 const API_KEY = process.env.NEXT_PUBLIC_OPEN_WEATHER_MAP_API_KEY
 
 export default function CityWeather({ city }: { city?: string }) {
@@ -24,11 +26,9 @@ export default function CityWeather({ city }: { city?: string }) {
 
   if (!city) return null
 
-  // Display a loading message if we have a city but no weatherResult
   const Loading = () => <Card heading="...loading" aria-live="polite" />
   if (!weatherResult) return <Loading />
 
-  // Display an error message if we don't get a 200 HTTP OK response
   const Error = () => (
     <Card heading={`Error ${weatherResult?.cod}`}>
       <div>{upperCaseFirstLetterOfEachWord(weatherResult?.message)}</div>
@@ -38,8 +38,8 @@ export default function CityWeather({ city }: { city?: string }) {
   if (!Array.isArray(weatherResult?.weather)) return <Error />
 
   const { icon, description } = weatherResult?.weather[0]
-  const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png` // 4x size
-  // Reference: https://openweathermap.org/weather-conditions
+  const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`
+
   const temperature = KtoF(weatherResult?.main?.temp)
 
   function WeatherIcon() {
@@ -59,16 +59,4 @@ export default function CityWeather({ city }: { city?: string }) {
       <Temperature degreesF={temperature} />
     </Card>
   )
-}
-
-export function upperCaseFirstLetterOfEachWord(string?: string) {
-  if (!string) return ""
-  return string
-    .split(" ")
-    .map((word) => word[0].toUpperCase() + word.slice(1))
-    .join(" ")
-}
-
-export function KtoF(tempKelvin: number) {
-  return Math.round(((tempKelvin - 273.15) * 9) / 5 + 32)
 }

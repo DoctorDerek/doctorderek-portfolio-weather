@@ -7,7 +7,8 @@
     "build": "next build",
     "test": "jest test --collectCoverage",
     "test:watch": "jest test --watch",
-    "test:watchAll": "jest test --watchAll"
+    "test:watchAll": "jest test --watchAll",
+    "format": "prettier --write ."
   },
   "browserslist": [
     ">0.2%",

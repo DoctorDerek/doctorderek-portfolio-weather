@@ -9,13 +9,12 @@ export default function App() {
   const router = useRouter()
   const query = router?.query ? router?.query : {}
   const qParam = query?.q ? String(query?.q) : null
-  // http://localhost:3000/?q=Puerto+Morelos
+
   const cityParam = query?.city ? String(query?.city) : null
-  // https://weather-app-demo-doctorderek.vercel.app/?city=Puerto+Morelos
+
   const defaultCity = qParam || cityParam
   const [city, setCity] = useState<string | null>(defaultCity)
   useEffect(() => {
-    // load the defaultCity in case we need an extra render to read the query
     setCity(defaultCity)
   }, [defaultCity])
 
