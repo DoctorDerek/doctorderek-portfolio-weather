@@ -1,8 +1,6 @@
 import "isomorphic-unfetch"
-
 import { loadEnvConfig } from "@next/env"
 import { render, screen, waitFor } from "@testing-library/react"
-
 import CityWeather from "@/src/components/CityWeather"
 
 beforeAll(() => loadEnvConfig(process.cwd()))

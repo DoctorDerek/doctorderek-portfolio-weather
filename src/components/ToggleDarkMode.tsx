@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 import { CSSTransition } from "react-transition-group"
 
 const classNames = (...args: string[]) => args.filter(Boolean).join(" ")
@@ -39,7 +39,7 @@ export default function ToggleDarkMode() {
       >
         <mask
           id="mask0"
-          mask-type="alpha"
+          style={{ maskType: "alpha" }}
           maskUnits="userSpaceOnUse"
           x="0"
           y="0"

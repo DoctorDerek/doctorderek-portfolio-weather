@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react"
 import { useRouter } from "next/router"
-
+import { useEffect, useState } from "react"
 import BackgroundImage from "@/src/components/BackgroundImage"
 import CityWeather from "@/src/components/CityWeather"
 import ToggleDarkMode from "@/src/components/ToggleDarkMode"
