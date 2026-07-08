@@ -7,7 +7,6 @@ import CityWeather from "@/src/components/CityWeather"
 
 beforeAll(() => loadEnvConfig(process.cwd()))
 
-
 function renderCityWeatherLiveData(city?: string) {
   if (city) return render(<CityWeather city={city} />)
   render(<CityWeather />)

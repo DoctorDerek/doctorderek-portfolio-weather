@@ -1,14 +1,11 @@
-
 export type CurrentWeatherData = {
   coord: {
-
     lon: number
 
     lat: number
   }
   weather: [
     {
-
       id: number
 
       main: string
@@ -21,7 +18,6 @@ export type CurrentWeatherData = {
 
   base: string
   main: {
-
     temp: number
 
     feels_like: number
@@ -37,19 +33,16 @@ export type CurrentWeatherData = {
 
   visibility: number
   wind: {
-
     speed: number
 
     deg: number
   }
   clouds: {
-
     all: number
   }
 
   dt: number
   sys: {
-
     type: number
 
     id: number

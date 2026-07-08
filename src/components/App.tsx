@@ -15,7 +15,6 @@ export default function App() {
   const defaultCity = qParam || cityParam
   const [city, setCity] = useState<string | null>(defaultCity)
   useEffect(() => {
-
     setCity(defaultCity)
   }, [defaultCity])
 

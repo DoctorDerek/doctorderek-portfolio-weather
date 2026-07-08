@@ -40,7 +40,9 @@ test("it has accessible labels and displays results for 'Memphis'", async () => 
     screen.getByText(new RegExp(currentWeatherConditions, "i")),
   ).toBeVisible()
   expect(
-    screen.getByText(new RegExp(`${currentTemperatureInFahrenheit}.*Ã‚Â°`, "i")),
+    screen.getByText(
+      new RegExp(`${currentTemperatureInFahrenheit}.*Ã‚Â°`, "i"),
+    ),
   ).toBeVisible()
 })
 
@@ -56,7 +58,9 @@ test("it shows weather results when clicking the button for 'Memphis'", async ()
     screen.getByText(new RegExp(currentWeatherConditions, "i")),
   ).toBeVisible()
   expect(
-    screen.getByText(new RegExp(`${currentTemperatureInFahrenheit}.*Ã‚Â°`, "i")),
+    screen.getByText(
+      new RegExp(`${currentTemperatureInFahrenheit}.*Ã‚Â°`, "i"),
+    ),
   ).toBeVisible()
 })
 

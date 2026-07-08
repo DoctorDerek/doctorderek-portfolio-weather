@@ -8,11 +8,9 @@ export default function ToggleDarkMode() {
   const [inProp, setInProp] = useState(false)
   const { resolvedTheme, setTheme } = useTheme()
 
-
   useEffect(() => {
     if (resolvedTheme === "dark") setInProp(true)
   }, [resolvedTheme])
-
 
   return (
     <CSSTransition

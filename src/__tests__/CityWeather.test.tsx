@@ -1,9 +1,9 @@
 import { server } from "@/src/utils/setup-tests"
+import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
+import { KtoF } from "@/src/utils/weather"
 import { render, screen, waitFor } from "@testing-library/react"
 
 import CityWeather from "@/src/components/CityWeather"
-import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
-import { KtoF } from "@/src/utils/weather"
 
 const currentWeatherConditions = "Overcast clouds"
 const currentTemperatureInKelvin = 295.372
@@ -43,7 +43,9 @@ test("<CityWeather> renders correctly with prop city='Memphis'", async () => {
     screen.getByText(new RegExp(currentWeatherConditions, "i")),
   ).toBeVisible()
   expect(
-    screen.getByText(new RegExp(`${currentTemperatureInFahrenheit}.*Ã‚Â°`, "i")),
+    screen.getByText(
+      new RegExp(`${currentTemperatureInFahrenheit}.*Ã‚Â°`, "i"),
+    ),
   ).toBeVisible()
 })
 

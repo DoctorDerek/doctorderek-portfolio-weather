@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react"
 import ImageFixed from "next/image"
-
 import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
 import { KtoF } from "@/src/utils/weather"
-import { CurrentWeatherData } from "@/src/types/weather"
 
+import { CurrentWeatherData } from "@/src/types/weather"
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
 

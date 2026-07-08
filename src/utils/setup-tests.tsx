@@ -1,4 +1,3 @@
-
 import "isomorphic-unfetch"
 import "@testing-library/jest-dom/extend-expect"
 
@@ -8,8 +7,6 @@ import { setupServer } from "msw/node"
 
 const projectDir = process.cwd()
 loadEnvConfig(projectDir)
-
-
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
@@ -28,12 +25,10 @@ Object.defineProperty(window, "matchMedia", {
 const currentWeatherConditions = "Overcast clouds"
 const currentTemperatureInKelvin = 295.372
 
-
 export const server = setupServer(
   rest.get("https://api.openweathermap.org/*", (req, res, ctx) => {
     const city = req.url.searchParams.get("q")
     if (city && new RegExp("fake", "i").exec(city)) {
-
       return res(
         ctx.json({
           cod: 404,
@@ -42,7 +37,6 @@ export const server = setupServer(
       )
     }
     if (city && new RegExp("no.*weather.*array", "i").exec(city)) {
-
       return res(
         ctx.json({
           weather: "No weather array",
@@ -57,7 +51,6 @@ export const server = setupServer(
           },
         ],
         main: {
-
           temp: currentTemperatureInKelvin,
         },
         name: city,
@@ -71,7 +64,6 @@ jest.mock(
   "next/image",
   () =>
     function Image({ src, alt }: { src: string; alt: string }) {
-
       return <img src={src} alt={alt} />
     },
 )
