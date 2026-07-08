@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
 import { CurrentWeatherData } from "@/src/types/weather"
+import { getErrorMessage } from "@/src/utils/error"
 import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
 import { KtoF } from "@/src/utils/weather"
 
@@ -20,6 +21,12 @@ export default function CityWeather({ city }: { city?: string }) {
       )
         .then((r) => r.json())
         .then((result) => setWeatherResult(result))
+        .catch((error) => {
+          setWeatherResult({
+            cod: 500,
+            message: getErrorMessage(error),
+          } as CurrentWeatherData)
+        })
     }
   }, [city])
 
