@@ -1,6 +1,5 @@
 import "isomorphic-unfetch"
 import "@testing-library/jest-dom/extend-expect"
-
 import { loadEnvConfig } from "@next/env"
 import { rest } from "msw"
 import { setupServer } from "msw/node"

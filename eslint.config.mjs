@@ -1,11 +1,11 @@
-import gitignore from "eslint-config-flat-gitignore"
 import eslint from "@eslint/js"
-import tseslint from "typescript-eslint"
+import gitignore from "eslint-config-flat-gitignore"
+import prettierConfig from "eslint-config-prettier"
+import jsxA11yPlugin from "eslint-plugin-jsx-a11y"
 import reactPlugin from "eslint-plugin-react"
 import reactHooksPlugin from "eslint-plugin-react-hooks"
-import jsxA11yPlugin from "eslint-plugin-jsx-a11y"
-import prettierConfig from "eslint-config-prettier"
 import globals from "globals"
+import tseslint from "typescript-eslint"
 import "eslint-plugin-only-warn"
 
 export default tseslint.config(

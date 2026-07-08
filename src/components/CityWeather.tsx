@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react"
 import ImageFixed from "next/image"
-import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
-import { KtoF } from "@/src/utils/weather"
-
-import { CurrentWeatherData } from "@/src/types/weather"
+import { useEffect, useState } from "react"
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
+import { CurrentWeatherData } from "@/src/types/weather"
+import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
+import { KtoF } from "@/src/utils/weather"
 
 const API_KEY = process.env.NEXT_PUBLIC_OPEN_WEATHER_MAP_API_KEY
 
