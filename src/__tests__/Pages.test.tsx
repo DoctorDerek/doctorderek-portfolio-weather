@@ -4,7 +4,7 @@ import { getPage } from "next-page-tester"
 it("renders the homepage /", async () => {
   const { render } = await getPage({
     route: "/",
-    useApp: false, // don't load custom _app.tsx
+    useApp: false,
   })
 
   render()

@@ -5,7 +5,6 @@ import userEvent from "@testing-library/user-event"
 import App from "@/src/components/App"
 
 const currentWeatherConditions = "Overcast clouds"
-// const currentTemperatureInKelvin = 295.372
 const currentTemperatureInFahrenheit = 72
 
 beforeAll(() => server.listen())
@@ -35,13 +34,15 @@ test("it has accessible labels and displays results for 'Memphis'", async () => 
   userEvent.type(screen.getByText(/search/i), city)
   userEvent.click(screen.getByText(/submit/i))
   await waitFor(() => expect(screen.getByText(/loading/i)).toBeVisible())
-  await waitFor(() => expect(screen.getByText(/Temp/i)).toBeVisible()) // Temperature
+  await waitFor(() => expect(screen.getByText(/Temp/i)).toBeVisible())
   expect(screen.getByText(new RegExp(city, "i"))).toBeVisible()
   expect(
     screen.getByText(new RegExp(currentWeatherConditions, "i")),
   ).toBeVisible()
   expect(
-    screen.getByText(new RegExp(`${currentTemperatureInFahrenheit}.*°`, "i")),
+    screen.getByText(
+      new RegExp(`${currentTemperatureInFahrenheit}.*Ã‚Â°`, "i"),
+    ),
   ).toBeVisible()
 })
 
@@ -51,13 +52,15 @@ test("it shows weather results when clicking the button for 'Memphis'", async ()
   userEvent.type(screen.getByRole("textbox"), city)
   userEvent.click(screen.getByRole("button"))
   await waitFor(() => expect(screen.getByText(/loading/i)).toBeVisible())
-  await waitFor(() => expect(screen.getByText(/Temp/i)).toBeVisible()) // Temperature
+  await waitFor(() => expect(screen.getByText(/Temp/i)).toBeVisible())
   expect(screen.getByText(new RegExp(city, "i"))).toBeVisible()
   expect(
     screen.getByText(new RegExp(currentWeatherConditions, "i")),
   ).toBeVisible()
   expect(
-    screen.getByText(new RegExp(`${currentTemperatureInFahrenheit}.*°`, "i")),
+    screen.getByText(
+      new RegExp(`${currentTemperatureInFahrenheit}.*Ã‚Â°`, "i"),
+    ),
   ).toBeVisible()
 })
 
@@ -70,5 +73,5 @@ test("it shows an error when clicking the button for 'FakeCity'", async () => {
   await waitFor(() => expect(screen.getByText(/not found/i)).toBeVisible())
   expect(screen.getByText(/error/i)).toBeVisible()
   expect(screen.queryByText(new RegExp(city, "i"))).toBeNull()
-  expect(screen.queryByText(/Temp/i)).toBeNull() // Temperature
+  expect(screen.queryByText(/Temp/i)).toBeNull()
 })

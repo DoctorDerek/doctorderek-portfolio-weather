@@ -7,7 +7,7 @@ export default function Temperature({
     <div className="text-xs">
       Temperature:
       <span className="ml-2 text-3xl font-semibold tracking-tighter text-black dark:text-white">
-        {degreesF} °F
+        {degreesF} Ã‚Â°F
       </span>
     </div>
   )
