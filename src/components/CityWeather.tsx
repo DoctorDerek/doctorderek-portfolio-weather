@@ -7,8 +7,6 @@ import { getErrorMessage } from "@/src/utils/error"
 import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
 import { KtoF } from "@/src/utils/weather"
 
-const API_KEY = process.env.NEXT_PUBLIC_OPEN_WEATHER_MAP_API_KEY
-
 export default function CityWeather({ city }: { city?: string }) {
   const [weatherResult, setWeatherResult] = useState<CurrentWeatherData | null>(
     null,
@@ -16,9 +14,7 @@ export default function CityWeather({ city }: { city?: string }) {
 
   useEffect(() => {
     if (city) {
-      fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}`,
-      )
+      fetch(`/api/weather?city=${encodeURIComponent(city)}`)
         .then((r) => r.json())
         .then((result) => setWeatherResult(result))
         .catch((error) => {
