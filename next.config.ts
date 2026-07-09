@@ -1,6 +1,7 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
   pageExtensions: ["js", "jsx", "ts", "tsx"],
 
   images: {
@@ -19,6 +20,15 @@ const nextConfig: NextConfig = {
     })
 
     return config
+  },
+
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
+    },
   },
 }
 
