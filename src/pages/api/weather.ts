@@ -14,7 +14,6 @@ export default async function handler(
     return res.status(400).json({ cod: 400, message: "City is required" })
   }
 
-  // Only use the private variable, no fallback
   const API_KEY = process.env.OPEN_WEATHER_MAP_API_KEY
 
   if (!API_KEY) {
@@ -32,7 +31,6 @@ export default async function handler(
 
     const data = await response.json()
 
-    // OpenWeather map returns 200 on success, other codes like 404 on failure
     return res.status(response.status).json(data)
   } catch (error) {
     console.error("Error fetching weather data:", error)
