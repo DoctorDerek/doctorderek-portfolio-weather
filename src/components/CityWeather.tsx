@@ -48,7 +48,12 @@ export default function CityWeather({ city }: { city?: string }) {
     return (
       <div className="grid h-20 w-20">
         <div className="relative">
-          <ImageFixed src={iconUrl} layout="fill" className="object-cover" />
+          <ImageFixed
+            src={iconUrl}
+            alt={description}
+            layout="fill"
+            className="object-cover"
+          />
         </div>
       </div>
     )

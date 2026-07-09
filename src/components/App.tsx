@@ -31,7 +31,7 @@ export default function App() {
           }}
         >
           <label htmlFor="city">
-            <h1 className="mb-2 rounded-xl px-4 py-1 text-2xl font-semibold tracking-tight dark:bg-black sm:mb-0 sm:py-2 sm:text-base">
+            <h1 className="mb-2 rounded-xl px-4 py-1 text-2xl font-semibold tracking-tight sm:mb-0 sm:py-2 sm:text-base dark:bg-black">
               Weather Search:
             </h1>
           </label>
@@ -46,7 +46,7 @@ export default function App() {
               defaultValue={city || ""}
             />
             <button
-              className="h-10 rounded-r-lg bg-[#4683c8] p-2 text-xs font-bold uppercase text-white"
+              className="h-10 rounded-r-lg bg-[#4683c8] p-2 text-xs font-bold text-white uppercase"
               type="submit"
             >
               Submit
