@@ -29,9 +29,9 @@
     "@babel/preset-env": "^7",
     "@babel/preset-typescript": "^7",
     "@ianvs/prettier-plugin-sort-imports": "^4",
-    "@next/env": "^16.2.10",
+    "@next/env": "^16",
     "@svgr/webpack": "^5",
-    "@tailwindcss/postcss": "^4.3.2",
+    "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^8",
     "@testing-library/jest-dom": "^5",
     "@testing-library/react": "^12",
@@ -64,7 +64,7 @@
     "prettier-plugin-tailwindcss": "^0.8.0",
     "react-test-renderer": "^19",
     "stylelint-config-recommended": "^5",
-    "tailwindcss": "^4.3.2",
+    "tailwindcss": "^4",
     "typescript": "^6"
   },
   "license": "MIT"
