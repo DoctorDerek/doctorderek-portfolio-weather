@@ -9,18 +9,27 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "downlevelIteration": true,
     "baseUrl": ".",
     "paths": {
       "@/public/*": ["public/*"],
       "@/src/*": ["src/*"]
-    }
+    },
+    "incremental": true,
+    "ignoreDeprecations": "6.0"
   },
-  "exclude": ["node_modules"],
+  "exclude": [
+    "node_modules",
+    "src/**/*.test.tsx",
+    "src/**/*.test.ts",
+    "src/utils/setup-tests.tsx",
+    "src/__mocks__/**/*",
+    "src/__tests__/**/*"
+  ],
   "include": [
     "next-env.d.ts",
     "types.d.ts",
