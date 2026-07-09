@@ -16,7 +16,7 @@ const eslintConfig: Linter.Config[] = [
   eslintConfigPrettier,
   {
     plugins: {
-      "only-warn": onlyWarn,
+      "only-warn": onlyWarn as any,
     },
   },
 ]
