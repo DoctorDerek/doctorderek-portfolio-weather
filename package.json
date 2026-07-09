@@ -44,6 +44,7 @@
     "autoprefixer": "^10",
     "babel-jest": "^27",
     "eslint": "^9",
+    "eslint-config-flat-gitignore": "^0.2.0",
     "eslint-config-next": "^16",
     "eslint-config-prettier": "^10",
     "eslint-plugin-only-warn": "^1",
@@ -63,7 +64,7 @@
     "react-test-renderer": "^19",
     "stylelint-config-recommended": "^5",
     "tailwindcss": "^2",
-    "typescript": "^7"
+    "typescript": "^6"
   },
   "license": "MIT"
 }
