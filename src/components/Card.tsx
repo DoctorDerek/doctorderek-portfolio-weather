@@ -11,12 +11,12 @@ export default function Card({
 
   return (
     <div className="flex flex-col items-center justify-center">
-      {/* take advantage of flex-shrink to generate auto-width <Card> */}
-      <div className="mt-4 flex flex-col items-center justify-center rounded-lg bg-white p-3 text-gray-400 shadow-md drop-shadow-md dark:bg-black dark:text-gray-300 sm:mt-10">
+      {/* take advantage of shrink to generate auto-width <Card> */}
+      <div className="mt-4 flex flex-col items-center justify-center rounded-lg bg-white p-3 text-gray-400 shadow-md drop-shadow-md sm:mt-10 dark:bg-black dark:text-gray-300">
         <h2
           className={classNames(
             useSmallFont ? "text-base" : "text-xl",
-            "font-bold uppercase text-gray-600 dark:text-white",
+            "font-bold text-gray-600 uppercase dark:text-white",
           )}
         >
           {heading}

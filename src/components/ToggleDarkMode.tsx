@@ -20,7 +20,7 @@ export default function ToggleDarkMode() {
         inProp ? "enabled" : "disabled",
       )}
       type="button"
-      className="absolute right-0 top-10 z-20 h-10 bg-transparent text-gray-900"
+      className="absolute top-10 right-0 z-20 h-10 bg-transparent text-gray-900"
       onClick={() => {
         setTheme(resolvedTheme === "dark" ? "light" : "dark")
         setInProp(inProp ? false : true)
