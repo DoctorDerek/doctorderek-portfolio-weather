@@ -2,9 +2,9 @@
   "name": "weather-app-demo",
   "version": "2.0.1",
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "start": "next start",
-    "build": "next build --turbo",
+    "build": "next build",
     "test": "jest test --collectCoverage",
     "test:watch": "jest test --watch",
     "test:watchAll": "jest test --watchAll",
