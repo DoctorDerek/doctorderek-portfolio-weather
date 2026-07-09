@@ -14,6 +14,7 @@ export default async function handler(
     return res.status(400).json({ cod: 400, message: "City is required" })
   }
 
+  // Only use the private variable, no fallback
   const API_KEY = process.env.OPEN_WEATHER_MAP_API_KEY
 
   if (!API_KEY) {
