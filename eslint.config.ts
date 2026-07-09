@@ -1,46 +1,23 @@
-import eslint from "@eslint/js"
+/**
+ * ONE-TIME EXCEPTION TO NO CODE COMMENT RULE:
+ * typescript-eslint (v8.63.0) is broken with TypeScript 7 (v7.0.2)
+ * until TS 7 releases an API (planned for v7.1.0+)
+ * TODO Upgrade to TS 7 when the version is >7.1.0 and typescript-eslint is working with TS7
+ * */
 import gitignore from "eslint-config-flat-gitignore"
-import prettierConfig from "eslint-config-prettier"
-import jsxA11yPlugin from "eslint-plugin-jsx-a11y"
-import reactPlugin from "eslint-plugin-react"
-import reactHooksPlugin from "eslint-plugin-react-hooks"
-import globals from "globals"
-import tseslint from "typescript-eslint"
-import "eslint-plugin-only-warn"
+import nextConfig from "eslint-config-next"
+import eslintConfigPrettier from "eslint-config-prettier/flat"
+import onlyWarn from "eslint-plugin-only-warn"
 
-export default tseslint.config(
+const eslintConfig = [
   gitignore(),
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
+  ...nextConfig,
+  eslintConfigPrettier,
   {
-    files: ["**/*.{js,jsx,mjs,cjs,ts,tsx}"],
     plugins: {
-      react: reactPlugin,
-      "react-hooks": reactHooksPlugin,
-      "jsx-a11y": jsxA11yPlugin,
-    },
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: { jsx: true },
-      },
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-      },
-    },
-    rules: {
-      ...reactPlugin.configs.recommended.rules,
-      ...reactHooksPlugin.configs.recommended.rules,
-      ...jsxA11yPlugin.configs.recommended.rules,
-      "react/react-in-jsx-scope": "off",
-      "react/prop-types": "off",
-      "react/no-unescaped-entities": "off",
-    },
-    settings: {
-      react: {
-        version: "detect",
-      },
+      "only-warn": onlyWarn,
     },
   },
-  prettierConfig,
-)
+]
+
+export default eslintConfig
