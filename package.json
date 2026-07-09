@@ -66,5 +66,10 @@
     "tailwindcss": "^4",
     "typescript": "^6"
   },
+  "postcss": {
+    "plugins": {
+      "@tailwindcss/postcss": {}
+    }
+  },
   "license": "MIT"
 }
