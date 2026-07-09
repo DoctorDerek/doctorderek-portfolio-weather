@@ -1,41 +1,30 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": { "@/*": ["./*"] },
+    "plugins": [{ "name": "next" }],
+    "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
-    "esModuleInterop": true,
+    "incremental": true,
     "module": "esnext",
+    "esModuleInterop": true,
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
-    "downlevelIteration": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/public/*": ["public/*"],
-      "@/src/*": ["src/*"]
-    },
-    "incremental": true,
-    "ignoreDeprecations": "6.0"
+    "jsx": "react-jsx"
   },
-  "exclude": [
-    "node_modules",
-    "src/**/*.test.tsx",
-    "src/**/*.test.ts",
-    "src/utils/setup-tests.tsx",
-    "src/__mocks__/**/*",
-    "src/__tests__/**/*"
-  ],
   "include": [
     "next-env.d.ts",
-    "types.d.ts",
+    "**/*.mts",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.js",
-    "**/*.jsx"
-  ]
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
 }
