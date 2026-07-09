@@ -1,6 +1,7 @@
 {
   "name": "weather-app-demo",
   "version": "2.0.1",
+  "packageManager": "pnpm@11.9.0",
   "scripts": {
     "dev": "next dev",
     "start": "next start",
