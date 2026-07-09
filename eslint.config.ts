@@ -4,7 +4,7 @@
  * until TS 7 releases an API (planned for v7.1.0+)
  * TODO Upgrade to TS 7 when the version is >7.1.0 and typescript-eslint is working with TS7
  * */
-import type { Linter } from "eslint"
+import type { Linter, ESLint } from "eslint"
 import gitignore from "eslint-config-flat-gitignore"
 import nextConfig from "eslint-config-next"
 import eslintConfigPrettier from "eslint-config-prettier/flat"
@@ -16,7 +16,7 @@ const eslintConfig: Linter.Config[] = [
   eslintConfigPrettier,
   {
     plugins: {
-      "only-warn": onlyWarn as any,
+      "only-warn": onlyWarn as unknown as ESLint.Plugin,
     },
   },
 ]
