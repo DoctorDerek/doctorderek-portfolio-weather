@@ -14,10 +14,7 @@ export default async function handler(
     return res.status(400).json({ cod: 400, message: "City is required" })
   }
 
-  // Fallback to NEXT_PUBLIC_ during transition, but ideally only use the private variable
-  const API_KEY =
-    process.env.OPEN_WEATHER_MAP_API_KEY ||
-    process.env.NEXT_PUBLIC_OPEN_WEATHER_MAP_API_KEY
+  const API_KEY = process.env.OPEN_WEATHER_MAP_API_KEY
 
   if (!API_KEY) {
     return res
