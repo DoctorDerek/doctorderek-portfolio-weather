@@ -5,12 +5,14 @@ import { CSSTransition } from "react-transition-group"
 const classNames = (...args: string[]) => args.filter(Boolean).join(" ")
 
 export default function ToggleDarkMode() {
-  const [inProp, setInProp] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { resolvedTheme, setTheme } = useTheme()
 
   useEffect(() => {
-    if (resolvedTheme === "dark") setInProp(true)
-  }, [resolvedTheme])
+    setMounted(true)
+  }, [])
+
+  const inProp = mounted && resolvedTheme === "dark"
 
   return (
     <CSSTransition
@@ -23,7 +25,6 @@ export default function ToggleDarkMode() {
       className="absolute top-10 right-0 z-20 h-10 bg-transparent text-gray-900"
       onClick={() => {
         setTheme(resolvedTheme === "dark" ? "light" : "dark")
-        setInProp(inProp ? false : true)
       }}
       in={inProp}
       classNames="switch"

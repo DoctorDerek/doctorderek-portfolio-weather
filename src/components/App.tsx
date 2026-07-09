@@ -13,9 +13,14 @@ export default function App() {
 
   const defaultCity = qParam || cityParam
   const [city, setCity] = useState<string | null>(defaultCity)
-  useEffect(() => {
+  const [prevDefaultCity, setPrevDefaultCity] = useState<string | null>(
+    defaultCity,
+  )
+
+  if (defaultCity !== prevDefaultCity) {
+    setPrevDefaultCity(defaultCity)
     setCity(defaultCity)
-  }, [defaultCity])
+  }
 
   return (
     <>
