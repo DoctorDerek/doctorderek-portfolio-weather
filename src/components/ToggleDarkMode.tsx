@@ -11,7 +11,10 @@ export default function ToggleDarkMode() {
   const { resolvedTheme, setTheme } = useTheme()
 
   useEffect(() => {
-    setMounted(true)
+    const timer = setTimeout(() => {
+      setMounted(true)
+    }, 0)
+    return () => clearTimeout(timer)
   }, [])
 
   const inProp = mounted && resolvedTheme === "dark"
