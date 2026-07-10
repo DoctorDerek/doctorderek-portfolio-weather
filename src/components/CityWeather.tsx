@@ -28,40 +28,35 @@ export default function CityWeather({ city }: { city?: string }) {
 
   if (!city) return null
 
-  const Loading = () => <Card heading="...loading" aria-live="polite" />
-  if (!weatherResult) return <Loading />
+  if (!weatherResult) return <Card heading="...loading" aria-live="polite" />
 
-  const Error = () => (
-    <Card heading={`Error ${weatherResult?.cod}`}>
-      <div>{upperCaseFirstLetterOfEachWord(weatherResult?.message ?? "")}</div>
-    </Card>
-  )
-  if (weatherResult.cod !== 200) return <Error />
-  if (!Array.isArray(weatherResult?.weather)) return <Error />
+  if (weatherResult.cod !== 200 || !Array.isArray(weatherResult?.weather)) {
+    return (
+      <Card heading={`Error ${weatherResult?.cod}`}>
+        <div>
+          {upperCaseFirstLetterOfEachWord(weatherResult?.message ?? "")}
+        </div>
+      </Card>
+    )
+  }
 
   const { icon, description } = weatherResult.weather[0]
   const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`
 
   const temperature = KtoF(weatherResult.main?.temp)
 
-  function WeatherIcon() {
-    return (
+  return (
+    <Card heading={city}>
       <div className="grid h-20 w-20">
         <div className="relative">
           <ImageFixed
             src={iconUrl}
             alt={description}
-            layout="fill"
+            fill
             className="object-cover"
           />
         </div>
       </div>
-    )
-  }
-
-  return (
-    <Card heading={city}>
-      <WeatherIcon />
       <div>{upperCaseFirstLetterOfEachWord(description)}</div>
       <Temperature degreesF={temperature} />
     </Card>
