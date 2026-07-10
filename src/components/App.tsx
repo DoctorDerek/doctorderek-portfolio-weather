@@ -1,26 +1,19 @@
-import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+"use client"
+
+import { useRouter } from "next/navigation"
 import BackgroundImage from "@/src/components/BackgroundImage"
 import CityWeather from "@/src/components/CityWeather"
 import ToggleDarkMode from "@/src/components/ToggleDarkMode"
+import { CurrentWeatherData } from "@/src/types/weather"
 
-export default function App() {
+export default function App({
+  initialCity,
+  weatherResult,
+}: {
+  initialCity: string | null
+  weatherResult: CurrentWeatherData | null
+}) {
   const router = useRouter()
-  const query = router?.query ? router?.query : {}
-  const qParam = query?.q ? String(query?.q) : null
-
-  const cityParam = query?.city ? String(query?.city) : null
-
-  const defaultCity = qParam || cityParam
-  const [city, setCity] = useState<string | null>(defaultCity)
-  const [prevDefaultCity, setPrevDefaultCity] = useState<string | null>(
-    defaultCity,
-  )
-
-  if (defaultCity !== prevDefaultCity) {
-    setPrevDefaultCity(defaultCity)
-    setCity(defaultCity)
-  }
 
   return (
     <>
@@ -32,7 +25,8 @@ export default function App() {
           onSubmit={(e) => {
             e.preventDefault()
             const formdata = new FormData(e.currentTarget)
-            setCity(String(formdata.get("city")))
+            const inputCity = String(formdata.get("city"))
+            router.push(`/?city=${encodeURIComponent(inputCity)}`)
           }}
         >
           <label htmlFor="city">
@@ -48,7 +42,7 @@ export default function App() {
               type="text"
               name="city"
               id="city"
-              defaultValue={city || ""}
+              defaultValue={initialCity || ""}
             />
             <button
               className="h-10 rounded-r-lg bg-[#4683c8] p-2 text-xs font-bold text-white uppercase"
@@ -59,7 +53,9 @@ export default function App() {
           </div>
         </form>
 
-        {city && <CityWeather city={city} />}
+        {initialCity && (
+          <CityWeather city={initialCity} weatherResult={weatherResult} />
+        )}
       </div>
       <BackgroundImage />
     </>
