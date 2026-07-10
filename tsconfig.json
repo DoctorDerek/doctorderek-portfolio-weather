@@ -3,8 +3,7 @@
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "@/public/*": ["public/*"],
-      "@/src/*": ["src/*"]
+      "@/*": ["./*"]
     },
     "plugins": [{ "name": "next" }],
     "target": "esnext",
