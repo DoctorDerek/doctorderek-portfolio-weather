@@ -9,12 +9,16 @@ const roboto = Roboto({
   style: ["normal"],
   subsets: ["latin"],
   display: "swap",
+  variable: "--font-roboto",
 })
+
+export const viewport = {
+  themeColor: "#FFFFFF",
+}
 
 export const metadata: Metadata = {
   title: "Weather App Demo",
   description: "A minimal, offline-first ready weather application.",
-  themeColor: "#FFFFFF",
   icons: {
     icon: [
       {
