@@ -2,7 +2,7 @@ import App from "@/src/components/App"
 import { CurrentWeatherData } from "@/src/types/weather"
 import { getErrorMessage } from "@/src/utils/error"
 
-type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
+type SearchParams = Promise<{ city?: string | string[]; q?: string | string[] }>
 
 export default async function Page(props: { searchParams: SearchParams }) {
   const searchParams = await props.searchParams
