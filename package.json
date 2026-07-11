@@ -37,7 +37,7 @@
     "@vitejs/plugin-react": "^6",
     "@vitest/coverage-v8": "^4",
     "eslint": "^9",
-    "eslint-config-flat-gitignore": "^0.2.0",
+    "eslint-config-flat-gitignore": "^2",
     "eslint-config-next": "^16",
     "eslint-config-prettier": "^10",
     "eslint-plugin-only-warn": "^1",
