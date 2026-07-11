@@ -6,6 +6,11 @@ afterEach(() => {
   cleanup()
 })
 
+/**
+ * ONE-TIME EXCEPTION TO NO CODE COMMENT RULE:
+ * Required mock for Happy-DOM/JSDOM to prevent crashes when components
+ * (e.g., using next-themes, framer-motion, MUI) evaluate media queries.
+ */
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({
