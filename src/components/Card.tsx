@@ -11,7 +11,6 @@ export default function Card({
 
   return (
     <div className="flex flex-col items-center justify-center">
-      {/* take advantage of shrink to generate auto-width <Card> */}
       <div className="mt-4 flex flex-col items-center justify-center rounded-lg bg-white p-3 text-gray-400 shadow-md drop-shadow-md sm:mt-10 dark:bg-black dark:text-gray-300">
         <h2
           className={classNames(
