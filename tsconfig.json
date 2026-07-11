@@ -28,12 +28,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "src/**/*.test.tsx",
-    "src/**/*.test.ts",
-    "src/utils/setup-tests.tsx",
-    "src/__mocks__/**/*",
-    "src/__tests__/**/*"
-  ]
+  "exclude": ["node_modules"]
 }
