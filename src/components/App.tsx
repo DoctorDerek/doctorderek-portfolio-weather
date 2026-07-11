@@ -19,7 +19,6 @@ export default function App({
     <>
       <ToggleDarkMode />
       <div className="relative z-10 flex h-[90vh] flex-col justify-end py-10 sm:justify-start">
-        {/** place the search bar at bottom on mobile for improved UX */}
         <form
           className="flex flex-wrap items-center justify-center"
           onSubmit={(e) => {
@@ -35,7 +34,6 @@ export default function App({
             </h1>
           </label>
           <div className="flex flex-wrap items-center justify-center">
-            {/* wrapper div to avoid flex-wrap on mobile */}
             <input
               data-testid="weather-input"
               className="ml-2 h-10 w-40 rounded-l-lg border border-solid border-gray-300 p-2"
