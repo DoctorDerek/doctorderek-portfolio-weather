@@ -2,7 +2,6 @@
 
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
-import { CSSTransition } from "react-transition-group"
 
 const classNames = (...args: string[]) => args.filter(Boolean).join(" ")
 
@@ -17,25 +16,30 @@ export default function ToggleDarkMode() {
     return () => clearTimeout(timer)
   }, [])
 
-  const inProp = mounted && resolvedTheme === "dark"
+  if (!mounted) {
+    return null
+  }
+
+  const isDarkTheme = resolvedTheme === "dark"
 
   return (
-    <CSSTransition
-      aria-label={classNames(
-        "Toggle Dark Mode",
-        "-",
-        inProp ? "enabled" : "disabled",
-      )}
+    <button
       type="button"
-      className="absolute top-10 right-0 z-20 h-10 bg-transparent text-gray-900"
+      aria-label={
+        isDarkTheme ? "Switch to light theme" : "Switch to dark theme"
+      }
+      className={classNames(
+        "absolute top-10 right-0 z-20 h-10 bg-transparent text-gray-900",
+        "cursor-pointer rounded-[35px] border-0 p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+        isDarkTheme ? "theme-toggle--dark" : "theme-toggle--light",
+      )}
       onClick={() => {
-        setTheme(resolvedTheme === "dark" ? "light" : "dark")
+        setTheme(isDarkTheme ? "light" : "dark")
       }}
-      in={inProp}
-      classNames="switch"
-      timeout={0}
     >
       <svg
+        aria-hidden="true"
+        focusable="false"
         width="170"
         height="70"
         viewBox="0 0 170 70"
@@ -238,6 +242,6 @@ export default function ToggleDarkMode() {
           </radialGradient>
         </defs>
       </svg>
-    </CSSTransition>
+    </button>
   )
 }
