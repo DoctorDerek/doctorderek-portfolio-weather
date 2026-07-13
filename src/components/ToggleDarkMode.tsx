@@ -16,9 +16,7 @@ export default function ToggleDarkMode() {
     return () => clearTimeout(timer)
   }, [])
 
-  if (!mounted) {
-    return null
-  }
+  if (!mounted) return null
 
   const isDarkTheme = resolvedTheme === "dark"
 
