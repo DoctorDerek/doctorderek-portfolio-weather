@@ -70,8 +70,8 @@ repomix-output.*
 repomix-temp.*
 
 # IP sovereignty & private files
-constitution.txt
-gdd.txt
+constitution.*
+gdd.*
 reference/
 git_files_list.txt
 vendor
