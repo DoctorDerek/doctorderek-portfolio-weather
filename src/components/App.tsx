@@ -1,10 +1,13 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { Toaster } from "react-hot-toast"
 import BackgroundImage from "@/src/components/BackgroundImage"
 import CityWeather from "@/src/components/CityWeather"
 import ToggleDarkMode from "@/src/components/ToggleDarkMode"
 import { CurrentWeatherData } from "@/src/types/weather"
+
+const WEATHER_ERROR_TOAST_DURATION_MILLISECONDS = 5000
 
 export default function App({
   initialCity,
@@ -17,6 +20,10 @@ export default function App({
 
   return (
     <>
+      <Toaster
+        position="top-left"
+        toastOptions={{ duration: WEATHER_ERROR_TOAST_DURATION_MILLISECONDS }}
+      />
       <ToggleDarkMode />
       <div className="relative z-10 flex h-[90vh] flex-col justify-end py-10 sm:justify-start">
         <form

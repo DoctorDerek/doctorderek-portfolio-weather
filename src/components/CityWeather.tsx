@@ -1,4 +1,8 @@
+"use client"
+
 import ImageFixed from "next/image"
+import { useEffect } from "react"
+import toast from "react-hot-toast"
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
 import { CurrentWeatherData } from "@/src/types/weather"
@@ -12,17 +16,29 @@ export default function CityWeather({
   city: string
   weatherResult: CurrentWeatherData | null
 }) {
+  const weatherErrorMessage =
+    weatherResult &&
+    (weatherResult.cod !== 200 || !Array.isArray(weatherResult.weather))
+      ? `Error ${weatherResult.cod}: ${upperCaseFirstLetterOfEachWord(
+          weatherResult.message ?? "",
+        )}`
+      : null
+
+  useEffect(() => {
+    if (!weatherErrorMessage) return
+
+    toast.error(weatherErrorMessage, {
+      id: `weather-error-${city}-${weatherErrorMessage}`,
+      ariaProps: {
+        role: "alert",
+        "aria-live": "assertive",
+      },
+    })
+  }, [city, weatherErrorMessage])
+
   if (!weatherResult) return <Card heading="...loading" aria-live="polite" />
 
-  if (weatherResult.cod !== 200 || !Array.isArray(weatherResult?.weather)) {
-    return (
-      <Card heading={`Error ${weatherResult?.cod}`}>
-        <div>
-          {upperCaseFirstLetterOfEachWord(weatherResult?.message ?? "")}
-        </div>
-      </Card>
-    )
-  }
+  if (weatherErrorMessage) return null
 
   const { icon, description } = weatherResult.weather[0]
   const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`
