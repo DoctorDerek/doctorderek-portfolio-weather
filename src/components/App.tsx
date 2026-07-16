@@ -5,7 +5,7 @@ import { Toaster } from "react-hot-toast"
 import BackgroundImage from "@/src/components/BackgroundImage"
 import CityWeather from "@/src/components/CityWeather"
 import ToggleDarkMode from "@/src/components/ToggleDarkMode"
-import { CurrentWeatherData } from "@/src/types/weather"
+import type { WeatherResult } from "@/src/types/weather"
 
 const WEATHER_ERROR_TOAST_DURATION_MILLISECONDS = 5000
 
@@ -14,7 +14,7 @@ export default function App({
   weatherResult,
 }: {
   initialCity: string | null
-  weatherResult: CurrentWeatherData | null
+  weatherResult: WeatherResult | null
 }) {
   const router = useRouter()
 

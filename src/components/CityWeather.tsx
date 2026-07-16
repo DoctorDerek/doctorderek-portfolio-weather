@@ -5,7 +5,7 @@ import { useEffect } from "react"
 import toast from "react-hot-toast"
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
-import { CurrentWeatherData } from "@/src/types/weather"
+import type { WeatherResult } from "@/src/types/weather"
 import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
 import { KtoF } from "@/src/utils/weather"
 
@@ -14,13 +14,12 @@ export default function CityWeather({
   weatherResult,
 }: {
   city: string
-  weatherResult: CurrentWeatherData | null
+  weatherResult: WeatherResult | null
 }) {
   const weatherErrorMessage =
-    weatherResult &&
-    (weatherResult.cod !== 200 || !Array.isArray(weatherResult.weather))
-      ? `Error ${weatherResult.cod}: ${upperCaseFirstLetterOfEachWord(
-          weatherResult.message ?? "",
+    weatherResult?.status === "error"
+      ? `Error ${weatherResult.code}: ${upperCaseFirstLetterOfEachWord(
+          weatherResult.message,
         )}`
       : null
 
@@ -38,12 +37,12 @@ export default function CityWeather({
 
   if (!weatherResult) return <Card heading="...loading" aria-live="polite" />
 
-  if (weatherErrorMessage) return null
+  if (weatherResult.status === "error") return null
 
-  const { icon, description } = weatherResult.weather[0]
+  const { icon, description, temperatureKelvin } = weatherResult
   const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`
 
-  const temperature = KtoF(weatherResult.main?.temp)
+  const temperature = KtoF(temperatureKelvin)
 
   return (
     <Card heading={city}>
