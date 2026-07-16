@@ -1,6 +1,8 @@
 @import "./dark-mode-toggle.css" layer(base);
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /*
 Accessible focus effects
 https://uxdesign.cc/create-better-accessible-focus-effects-75a3de27b8ba
