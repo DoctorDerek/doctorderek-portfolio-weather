@@ -35,7 +35,7 @@ export default function CityWeather({
     })
   }, [city, weatherErrorMessage])
 
-  if (!weatherResult) return <Card heading="...loading" aria-live="polite" />
+  if (!weatherResult) return <Card heading="...loading" ariaLive="polite" />
 
   if (weatherResult.status === "error") return null
 
