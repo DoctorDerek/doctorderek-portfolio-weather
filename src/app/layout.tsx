@@ -17,8 +17,9 @@ export const viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "Weather App Demo",
-  description: "A minimal, offline-first ready weather application.",
+  title: "Weather Portfolio | Dr. Derek Austin",
+  description:
+    "An accessible weather search built with Next.js, React, TypeScript, and a server-only OpenWeatherMap integration.",
   icons: {
     icon: [
       {
