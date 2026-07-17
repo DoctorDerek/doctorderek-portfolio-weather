@@ -63,7 +63,6 @@
     "postcss": "^8",
     "prettier": "^3",
     "prettier-plugin-tailwindcss": "^0.8.0",
-    "stylelint-config-recommended": "^5",
     "tailwindcss": "^4",
     "typescript": "^6",
     "vitest": "^4"
