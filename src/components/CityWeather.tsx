@@ -52,6 +52,7 @@ export default function CityWeather({
             src={iconUrl}
             alt={description}
             fill
+            sizes="80px"
             className="object-cover"
           />
         </div>
