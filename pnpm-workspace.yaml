@@ -3,6 +3,7 @@ packages:
 
 overrides:
   postcss: ">=8.5.10 <9"
+  "vitest>jsdom": "-"
 
 allowBuilds:
   sharp: true
