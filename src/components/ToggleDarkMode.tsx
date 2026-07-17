@@ -27,8 +27,8 @@ export default function ToggleDarkMode() {
         isDarkTheme ? "Switch to light theme" : "Switch to dark theme"
       }
       className={classNames(
-        "absolute top-10 right-0 z-20 h-10 bg-transparent text-gray-900",
-        "cursor-pointer rounded-[35px] border-0 p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+        "absolute top-4 right-4 z-20 inline-flex bg-transparent text-gray-900",
+        "cursor-pointer rounded-[35px] border-0 p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
         isDarkTheme ? "theme-toggle--dark" : "theme-toggle--light",
       )}
       onClick={() => {
