@@ -1,6 +1,20 @@
 {
-  "name": "weather-app-demo",
+  "name": "doctorderek-portfolio-weather",
   "version": "2.0.1",
+  "private": true,
+  "type": "module",
+  "description": "An accessible weather search portfolio built with Next.js, React, TypeScript, and a server-only OpenWeatherMap integration.",
+  "author": {
+    "name": "Dr. Derek Austin",
+    "email": "derekraustin@gmail.com",
+    "url": "https://doctorderek.com/"
+  },
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DoctorDerek/doctorderek-portfolio-weather.git"
+  },
+  "homepage": "https://portfolio-weather.doctorderek.com/",
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "dev": "next dev",
@@ -58,6 +72,5 @@
     "plugins": {
       "@tailwindcss/postcss": {}
     }
-  },
-  "license": "MIT"
+  }
 }
