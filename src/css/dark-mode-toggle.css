@@ -2,10 +2,9 @@
 /* Source: https://codesandbox.io/s/dark-mode-toggle-si6k2?file=/src/DarkModeToggle.js */
 
 .switch {
-  cursor: pointer;
-  width: 180px;
-  height: 74px;
-  margin: 80px;
+  display: block;
+  width: 170px;
+  height: 70px;
 }
 
 .button {
