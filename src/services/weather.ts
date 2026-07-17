@@ -1,9 +1,8 @@
 import "server-only"
+import { OPEN_WEATHER_MAP_CURRENT_WEATHER_URL } from "@/src/services/weatherConfig"
 import type { WeatherResult } from "@/src/types/weather"
 import { getErrorMessage } from "@/src/utils/error"
 
-const OPEN_WEATHER_MAP_CURRENT_WEATHER_URL =
-  "https://api.openweathermap.org/data/2.5/weather"
 const OPEN_WEATHER_MAP_REQUEST_FAILED_MESSAGE = "Weather service request failed"
 const OPEN_WEATHER_MAP_INVALID_RESPONSE_MESSAGE =
   "Weather service returned invalid data"
