@@ -1,20 +1,39 @@
-[![Vercel](https://therealsujitk-vercel-badge.vercel.app/?app=weather-app-demo-doctorderek)](https://weather-app-demo-doctorderek.vercel.app/) [![Codecov](https://codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather/graph/badge.svg)](https://app.codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather) [![Build Status](https://app.travis-ci.com/DoctorDerek/weather-app-demo.svg?branch=main)](https://app.travis-ci.com/DoctorDerek/weather-app-demo)
+# Weather Portfolio
 
-# 🏖️ Weather App Demo - Next.js 11 + React 17 + Tailwind CSS + 100% Test Coverage
+A responsive city-weather search built with Next.js 16, React 19, TypeScript 6, and Tailwind CSS 4. OpenWeatherMap requests run exclusively on the server so the API key is never sent to the browser.
 
-# ✅ Code Repaired to Work and Match Design by Dr. Derek Austin
+[Open the live application](https://portfolio-weather.doctorderek.com/)
 
-# 👀 View Production Build at https://weather-app-demo-doctorderek.vercel.app
+## Highlights
 
-I repaired [this weather app](https://codesandbox.io/s/blazing-butterfly-6qudf) to actually work and match the design document.
+- Searches current weather conditions by city through a server-only OpenWeatherMap integration.
+- Validates upstream success payloads at runtime before rendering typed application data.
+- Presents API failures in accessible, auto-dismissing toast notifications.
+- Persists light and dark themes through an animated, keyboard-accessible control.
+- Adapts the search and weather presentation across mobile and desktop viewports.
 
-Additionally, I added 7 other major features, including best practices and extensive test coverage (100% of lines).
+## Architecture
 
-Below you will find a complete feature set, discussion section, and technical journal.
+The App Router page reads the city query parameter and performs the weather request through a server-only service. That service returns a discriminated `WeatherResult` rather than exposing the upstream response shape to the UI. Client components own navigation, theme interaction, and transient error feedback.
 
-## Local Development
+The primary stack is:
 
-Use [fnm](https://github.com/Schniz/fnm) for Node version management and [pnpm](https://pnpm.io/) as the package manager:
+- Next.js 16 App Router and React 19
+- TypeScript 6 with strict type checking
+- Tailwind CSS 4
+- `next-themes` and `react-hot-toast`
+- Vitest, Testing Library, Playwright, and Codecov infrastructure
+- Node.js 24 and pnpm 11
+
+## Local development
+
+Create `.env.local` from `.env.example`, then provide an OpenWeatherMap API key:
+
+```dotenv
+OPEN_WEATHER_MAP_API_KEY=your_key_here
+```
+
+Install and run the project with the repository’s declared Node and pnpm versions:
 
 ```bash
 fnm use
@@ -23,82 +42,29 @@ pnpm install
 pnpm dev
 ```
 
-## Required Features
+The development server is available at [http://localhost:3000](http://localhost:3000).
 
-1. ✅ Fix the bug where the app crashes when trying to request the weather
+## Quality checks
 
-2. ✅ Refactor <CityWeather> to a function component using React Hooks
+```bash
+pnpm exec tsc --noEmit
+pnpm lint
+pnpm exec vitest run --coverage --passWithNoTests
+pnpm exec playwright test --pass-with-no-tests
+pnpm build
+pnpm format
+```
 
-3. ✅ Match the supplied design brief
+GitHub Actions runs ESLint and Vitest coverage on pull requests, reports coverage through Codecov, and runs Playwright against successful Vercel Preview deployments. The automated application test suite has not been implemented yet, so this repository does not claim a coverage percentage.
 
-4. ✅ Improve web accessibility
+## Provenance and attribution
 
-   - Ensure that clicking on the label "Weather Search" puts focus into the text-input.
-     - _solution:_ `<label htmlFor="city">Weather Search <input type="text" id="city" /></label>`
-   - Make sure any loading states are correctly announced to a screen reader
-     - _solution:_ `const Loading = () => (<div aria-live="polite">loading...</div>)`
+This project began as a weather-app repair and refactor exercise based on an [assessment scaffold](https://codesandbox.io/s/blazing-butterfly-6qudf) and supplied design brief. The current application has since been substantially rebuilt and modernized.
 
-5. ✅ Make the tests better
+- The animated theme-toggle illustration is by [@bartkozal](https://codesandbox.io/s/dark-mode-toggle-si6k2?file=/src/DarkModeToggle.js) and is used with permission.
+- The background photograph is by [John Fowler on Unsplash](https://unsplash.com/photos/RsRTIofe0HE).
+- The favicon uses Twitter Twemoji artwork under CC BY 4.0; full attribution is in [`public/favicon-io/about.txt`](public/favicon-io/about.txt).
 
-## Additional Features
+## License
 
-1. ✅ Deployed production build of Next.js to Vercel with CI/CD
-2. ✅ Upgraded Next.js to `@latest` (`v11.1.2`) and all other dependencies
-3. ✅ Established engineering best practices:
-   - Prettier, ESLint, Husky (Git Hooks), `tsconfig.json`, TypeScript Import Sorter, `.gitattributes`
-4. ✅ Crafted unit tests for new code features (TDD / Test Driven Development)
-   - Jest + React Testing Library with React Test Renderer
-5. ✅ Wrote unit testing for existing code (16% ➡ 100% test coverage)
-6. ✅ Developed mobile-first, responsive UX design with Tailwind CSS
-7. ✅ Implemented Tailwind CSS dark mode for app with animated SVG toggle
-
-## Discussion Section
-
-1. ✅ Talk about your changes when fixing the "App crashes on submit" bug
-
-   - The bug was caused by the classic JavaScript problem where trying to access properties of `null` or `undefined` throws an error.
-
-   - Avoiding that type of error, especially in production, is one of the main advantages of using TypeScript for static code analysis.
-
-   - In this case, the `weatherResult` was not properly typed, and there was no error handling for `404` errors (`"city not found"`).
-
-   - I prefer building robust components with a variety of guard clauses, so I made the city prop optional in `<CityWeather>`.
-
-   - I also identified errors with ESLint, such as `formdata.get("city").toString()` being unsafe vs. `String(formData.get("city"))`.
-
-2. ✅ Talk about your changes when refactoring the `<CityWeather>` component
-
-   - Acting like this was a "real" work environment with an "urgent" bugfix, I fixed the bug before refactoring to a function component.
-
-   - However, given that this was really a new feature, I would have preferred to refactor and make the code clearer before implementation.
-
-   - I also refactored the structure of the app significantly, including absolute paths (`@/src/**`), `eslint-plugin-tailwindcss`, and more.
-
-   - Even though I moved the API_KEY to `.env.local`, it is still exposed in `.env.test` and in query parameters via the use of a GET request.
-
-   - Ideally, the API_KEY secret would be protected by using a dummy variable in `.env.test` and using POST instead of GET to hit the API.
-
-## Test Coverage Report - Jest & React Testing Library
-
-### `npm run test`
-
-Launches the test runner and generates code coverage report.
-
-### `npm test:watch`
-
-Launches the test runner in the interactive watch mode.
-
-## Technical Journal
-
-- `1.0.0` Existing codebase: Next.js 10 (TypeScript)
-- `1.0.1` First commit by Dr. Derek Austin: `chore: delete yarn.lock`
-- `1.1.0` Upgraded all dependencies and established best practices like Husky
-- `1.2.0` Bugfix / Developed first working development build in Next.js
-- `1.3.0` Refactored `<CityWeather>` to function component with `useEffect`
-- `1.4.0` Fixed tests, added loading message, and deployed to Vercel with CI/CD
-- `1.4.1` Reached 100% test coverage by adding `next-page-tester` to test `/`
-- `1.5.0` Implemented design document and developed UX for mobile experience
-- `1.6.0` Improved web accessibility using <label> and aria-live="polite"
-- `1.7.0` Created dark mode for app using Tailwind CSS plus animated SVG toggle
-- `2.0.0` Reached 100% test coverage of lines by testing <ToggleDarkMode>
-- `2.0.1` Hotfix to remove vertical scroll bars on mobile caused by `h-screen`
+Copyright © 2026 Dr. Derek Austin. All rights reserved. Third-party assets retain their respective licenses and permissions. See [`LICENSE.txt`](LICENSE.txt) for the repository terms.
