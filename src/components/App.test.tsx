@@ -36,4 +36,25 @@ describe("App", () => {
     expect(routerPush).toHaveBeenCalledOnce()
     expect(routerPush).toHaveBeenCalledWith("/?city=Mexico%20City")
   })
+
+  it("announces API errors without presenting stale weather details", async () => {
+    render(
+      <App
+        initialCity="Atlantis"
+        weatherResult={{
+          status: "error",
+          code: 404,
+          message: "city not found",
+        }}
+      />,
+    )
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Error 404: City Not Found",
+    )
+    expect(
+      screen.queryByRole("heading", { name: "Atlantis" }),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText("Temperature:")).not.toBeInTheDocument()
+  })
 })
