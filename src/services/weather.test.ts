@@ -76,4 +76,55 @@ describe("getCurrentWeather", () => {
       message: "Weather service request failed",
     })
   })
+
+  it("rejects successful responses that violate the weather contract", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_CURRENT_WEATHER_URL, () =>
+        HttpResponse.json({ main: { temp: "warm" }, weather: [] }),
+      ),
+    )
+
+    await expect(
+      getCurrentWeather(OPEN_WEATHER_MAP_TEST_CITY),
+    ).resolves.toEqual({
+      status: "error",
+      code: 502,
+      message: "Weather service returned invalid data",
+    })
+  })
+
+  it("rejects successful responses that are not JSON", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_CURRENT_WEATHER_URL, () =>
+        HttpResponse.text("not-json"),
+      ),
+    )
+
+    await expect(
+      getCurrentWeather(OPEN_WEATHER_MAP_TEST_CITY),
+    ).resolves.toEqual({
+      status: "error",
+      code: 502,
+      message: "Weather service returned invalid data",
+    })
+  })
+
+  it("returns a typed error when the weather request fails", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_CURRENT_WEATHER_URL, () =>
+        HttpResponse.error(),
+      ),
+    )
+
+    await expect(
+      getCurrentWeather(OPEN_WEATHER_MAP_TEST_CITY),
+    ).resolves.toEqual({
+      status: "error",
+      code: 500,
+      message: "Failed to fetch",
+    })
+  })
 })
