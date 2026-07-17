@@ -29,7 +29,7 @@ pnpm dev
 
 2. ✅ Refactor <CityWeather> to a function component using React Hooks
 
-3. ✅ Match the design https://weather-app-demo-doctorderek.vercel.app/design.png
+3. ✅ Match the supplied design brief
 
 4. ✅ Improve web accessibility
 
