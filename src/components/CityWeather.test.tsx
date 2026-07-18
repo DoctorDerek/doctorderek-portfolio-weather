@@ -36,7 +36,7 @@ describe("CityWeather", () => {
     ).toBeInTheDocument()
   })
 
-  it("presents normalized weather details and Fahrenheit temperature", () => {
+  it("presents normalized weather details in Fahrenheit and Celsius", () => {
     render(
       <CityWeather
         city={TEST_CITY}
@@ -47,6 +47,7 @@ describe("CityWeather", () => {
     expect(screen.getByRole("heading", { name: TEST_CITY })).toBeVisible()
     expect(screen.getByText("Clear Sky")).toBeVisible()
     expect(screen.getByText("81 °F")).toBeVisible()
+    expect(screen.getByText("27 °C")).toBeVisible()
     expect(screen.getByRole("img", { name: "clear sky" })).toBeVisible()
   })
 })
