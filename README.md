@@ -1,5 +1,7 @@
 # Weather Portfolio
 
+[![Codecov](https://codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather/graph/badge.svg)](https://app.codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather)
+
 A responsive city-weather search built with Next.js 16, React 19, TypeScript 6, and Tailwind CSS 4. OpenWeatherMap requests run exclusively on the server so the API key is never sent to the browser.
 
 [Open the live application](https://portfolio-weather.doctorderek.com/)
