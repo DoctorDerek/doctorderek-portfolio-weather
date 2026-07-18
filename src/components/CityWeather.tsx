@@ -7,7 +7,10 @@ import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
 import type { WeatherResult } from "@/src/types/weather"
 import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
-import { convertKelvinToFahrenheit } from "@/src/utils/weather"
+import {
+  convertKelvinToCelsius,
+  convertKelvinToFahrenheit,
+} from "@/src/utils/weather"
 
 export default function CityWeather({
   city,
@@ -42,6 +45,7 @@ export default function CityWeather({
   const { icon, description, temperatureKelvin } = weatherResult
   const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`
 
+  const temperatureCelsius = convertKelvinToCelsius(temperatureKelvin)
   const temperatureFahrenheit = convertKelvinToFahrenheit(temperatureKelvin)
 
   return (
@@ -58,7 +62,10 @@ export default function CityWeather({
         </div>
       </div>
       <div>{upperCaseFirstLetterOfEachWord(description)}</div>
-      <Temperature degreesF={temperatureFahrenheit} />
+      <Temperature
+        temperatureCelsius={temperatureCelsius}
+        temperatureFahrenheit={temperatureFahrenheit}
+      />
     </Card>
   )
 }

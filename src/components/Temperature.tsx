@@ -1,13 +1,17 @@
 export default function Temperature({
-  degreesF,
+  temperatureCelsius,
+  temperatureFahrenheit,
 }: {
-  degreesF: string | number
+  temperatureCelsius: number
+  temperatureFahrenheit: number
 }) {
   return (
     <div className="text-xs">
       Temperature:
-      <span className="ml-2 text-3xl font-semibold tracking-tighter text-black dark:text-white">
-        {degreesF} °F
+      <span className="ml-2 text-2xl font-semibold tracking-tighter whitespace-nowrap text-black sm:text-3xl dark:text-white">
+        <span>{temperatureFahrenheit} °F</span>
+        <span aria-hidden="true"> / </span>
+        <span>{temperatureCelsius} °C</span>
       </span>
     </div>
   )
