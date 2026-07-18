@@ -1,3 +1,3 @@
-export function KtoF(tempKelvin: number) {
-  return Math.round(((tempKelvin - 273.15) * 9) / 5 + 32)
+export function convertKelvinToFahrenheit(temperatureKelvin: number) {
+  return Math.round(((temperatureKelvin - 273.15) * 9) / 5 + 32)
 }
