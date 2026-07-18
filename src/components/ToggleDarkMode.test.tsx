@@ -50,4 +50,12 @@ describe("ToggleDarkMode", () => {
     expect(themeState.setTheme).toHaveBeenCalledOnce()
     expect(themeState.setTheme).toHaveBeenCalledWith("light")
   })
+
+  it("preserves the fixed top-right placement", async () => {
+    render(<ToggleDarkMode />)
+
+    expect(
+      await screen.findByRole("button", { name: "Switch to dark theme" }),
+    ).toHaveClass("top-4", "right-4")
+  })
 })
