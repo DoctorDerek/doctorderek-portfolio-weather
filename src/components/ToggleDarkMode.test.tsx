@@ -33,4 +33,21 @@ describe("ToggleDarkMode", () => {
     expect(themeState.setTheme).toHaveBeenCalledOnce()
     expect(themeState.setTheme).toHaveBeenCalledWith("dark")
   })
+
+  it("requests light mode through the accessible dark-theme control", async () => {
+    const user = userEvent.setup()
+    themeState.resolvedTheme = "dark"
+    render(<ToggleDarkMode />)
+
+    const themeToggle = await screen.findByRole("button", {
+      name: "Switch to light theme",
+    })
+
+    expect(themeToggle).toHaveClass("theme-toggle--dark")
+
+    await user.click(themeToggle)
+
+    expect(themeState.setTheme).toHaveBeenCalledOnce()
+    expect(themeState.setTheme).toHaveBeenCalledWith("light")
+  })
 })
