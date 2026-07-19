@@ -1,6 +1,6 @@
 "use client"
 
-import { MotionConfig } from "motion/react"
+import { motion, MotionConfig } from "motion/react"
 import { useRouter } from "next/navigation"
 import { Toaster } from "react-hot-toast"
 import BackgroundImage from "@/src/components/BackgroundImage"
@@ -50,12 +50,14 @@ export default function App({
               id="city"
               defaultValue={initialCity || ""}
             />
-            <button
+            <motion.button
               className="h-10 rounded-r-lg bg-[#4683c8] p-2 text-xs font-bold text-white uppercase"
               type="submit"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
               Submit
-            </button>
+            </motion.button>
           </div>
         </form>
 
