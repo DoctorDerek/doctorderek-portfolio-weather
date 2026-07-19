@@ -12,6 +12,12 @@ const SUCCESSFUL_WEATHER_RESULT = {
   icon: "01d",
 } satisfies WeatherResult
 
+const ERROR_WEATHER_RESULT = {
+  status: "error",
+  code: 404,
+  message: "city not found",
+} satisfies WeatherResult
+
 vi.mock("@/src/services/weather", () => ({
   default: getCurrentWeatherMock,
 }))
@@ -105,6 +111,30 @@ describe("Page", () => {
     expect(screen.getByTestId("application-boundary")).toHaveAttribute(
       "data-city",
       "Mexico City",
+    )
+  })
+
+  it("prefers city over the legacy query and forwards errors unchanged", async () => {
+    getCurrentWeatherMock.mockResolvedValue(ERROR_WEATHER_RESULT)
+
+    render(
+      await Page({
+        searchParams: Promise.resolve({
+          city: "Atlantis",
+          q: "London",
+        }),
+      }),
+    )
+
+    expect(getCurrentWeatherMock).toHaveBeenCalledOnce()
+    expect(getCurrentWeatherMock).toHaveBeenCalledWith("Atlantis")
+    expect(screen.getByTestId("application-boundary")).toHaveAttribute(
+      "data-city",
+      "Atlantis",
+    )
+    expect(screen.getByTestId("application-boundary")).toHaveAttribute(
+      "data-weather-result",
+      JSON.stringify(ERROR_WEATHER_RESULT),
     )
   })
 })
