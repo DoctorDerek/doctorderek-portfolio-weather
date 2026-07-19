@@ -1,3 +1,5 @@
+import { motion } from "motion/react"
+
 const classNames = (...args: string[]) => args.filter(Boolean).join(" ")
 
 export default function Card({
@@ -16,7 +18,12 @@ export default function Card({
       className="flex flex-col items-center justify-center"
       aria-live={ariaLive}
     >
-      <div className="mt-4 flex flex-col items-center justify-center rounded-lg bg-white p-3 text-gray-400 shadow-md drop-shadow-md sm:mt-10 dark:bg-black dark:text-gray-300">
+      <motion.div
+        initial={{ y: 8 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="mt-4 flex flex-col items-center justify-center rounded-lg bg-white p-3 text-gray-400 shadow-md drop-shadow-md sm:mt-10 dark:bg-black dark:text-gray-300"
+      >
         <h2
           className={classNames(
             useSmallFont ? "text-base" : "text-xl",
@@ -26,7 +33,7 @@ export default function Card({
           {heading}
         </h2>
         {children && children}
-      </div>
+      </motion.div>
     </div>
   )
 }

@@ -38,7 +38,14 @@ export default function CityWeather({
     })
   }, [city, weatherErrorMessage])
 
-  if (!weatherResult) return <Card heading="...loading" ariaLive="polite" />
+  if (!weatherResult)
+    return (
+      <Card
+        key={`weather-loading-${city}`}
+        heading="...loading"
+        ariaLive="polite"
+      />
+    )
 
   if (weatherResult.status === "error") return null
 
@@ -49,7 +56,7 @@ export default function CityWeather({
   const temperatureFahrenheit = convertKelvinToFahrenheit(temperatureKelvin)
 
   return (
-    <Card heading={city}>
+    <Card key={`weather-result-${city}`} heading={city}>
       <div className="grid h-20 w-20">
         <div className="relative">
           <ImageFixed
