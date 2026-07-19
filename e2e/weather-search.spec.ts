@@ -3,6 +3,26 @@ import { expect, test } from "@playwright/test"
 const LIVE_WEATHER_TEST_CITY = "Mexico City"
 const INVALID_LIVE_WEATHER_TEST_CITY = "NoSuchCityQream987654321"
 
+test("provides restrained pointer feedback without changing submission semantics", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" })
+  await page.goto("/")
+
+  const submitButton = page.getByRole("button", { name: "Submit" })
+
+  await expect(submitButton).toHaveAttribute("type", "submit")
+  await expect(submitButton).toHaveCSS("transform", "none")
+
+  await submitButton.hover()
+
+  await expect
+    .poll(() =>
+      submitButton.evaluate((button) => getComputedStyle(button).transform),
+    )
+    .not.toBe("none")
+})
+
 test("searches live weather through encoded city navigation", async ({
   page,
 }) => {
