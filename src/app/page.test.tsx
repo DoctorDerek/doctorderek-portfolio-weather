@@ -88,4 +88,23 @@ describe("Page", () => {
       "London",
     )
   })
+
+  it("normalizes array-valued city queries to their first value", async () => {
+    getCurrentWeatherMock.mockResolvedValue(SUCCESSFUL_WEATHER_RESULT)
+
+    render(
+      await Page({
+        searchParams: Promise.resolve({
+          city: ["Mexico City", "London"],
+        }),
+      }),
+    )
+
+    expect(getCurrentWeatherMock).toHaveBeenCalledOnce()
+    expect(getCurrentWeatherMock).toHaveBeenCalledWith("Mexico City")
+    expect(screen.getByTestId("application-boundary")).toHaveAttribute(
+      "data-city",
+      "Mexico City",
+    )
+  })
 })
