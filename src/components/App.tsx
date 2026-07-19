@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, MotionConfig } from "motion/react"
+import { motion, MotionConfig, useReducedMotion } from "motion/react"
 import { useRouter } from "next/navigation"
 import { Toaster } from "react-hot-toast"
 import BackgroundImage from "@/src/components/BackgroundImage"
@@ -18,6 +18,7 @@ export default function App({
   weatherResult: WeatherResult | null
 }) {
   const router = useRouter()
+  const shouldReduceMotion = useReducedMotion()
 
   return (
     <MotionConfig reducedMotion="user">
@@ -53,8 +54,8 @@ export default function App({
             <motion.button
               className="h-10 rounded-r-lg bg-[#4683c8] p-2 text-xs font-bold text-white uppercase"
               type="submit"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
             >
               Submit
             </motion.button>
