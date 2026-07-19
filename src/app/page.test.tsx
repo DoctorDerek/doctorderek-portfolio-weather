@@ -71,4 +71,21 @@ describe("Page", () => {
       JSON.stringify(SUCCESSFUL_WEATHER_RESULT),
     )
   })
+
+  it("uses the legacy query parameter when city is absent", async () => {
+    getCurrentWeatherMock.mockResolvedValue(SUCCESSFUL_WEATHER_RESULT)
+
+    render(
+      await Page({
+        searchParams: Promise.resolve({ q: "London" }),
+      }),
+    )
+
+    expect(getCurrentWeatherMock).toHaveBeenCalledOnce()
+    expect(getCurrentWeatherMock).toHaveBeenCalledWith("London")
+    expect(screen.getByTestId("application-boundary")).toHaveAttribute(
+      "data-city",
+      "London",
+    )
+  })
 })
