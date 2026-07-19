@@ -209,3 +209,9 @@
 .theme-toggle--dark .star12 {
   transform: scale(1);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .switch * {
+    transition-duration: 0s;
+  }
+}
