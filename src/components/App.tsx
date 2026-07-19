@@ -1,5 +1,6 @@
 "use client"
 
+import { MotionConfig } from "motion/react"
 import { useRouter } from "next/navigation"
 import { Toaster } from "react-hot-toast"
 import BackgroundImage from "@/src/components/BackgroundImage"
@@ -19,7 +20,7 @@ export default function App({
   const router = useRouter()
 
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <Toaster
         position="top-left"
         toastOptions={{ duration: WEATHER_ERROR_TOAST_DURATION_MILLISECONDS }}
@@ -63,6 +64,6 @@ export default function App({
         )}
       </div>
       <BackgroundImage />
-    </>
+    </MotionConfig>
   )
 }
