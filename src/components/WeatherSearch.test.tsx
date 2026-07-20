@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import WeatherSearch from "@/src/components/WeatherSearch"
 
 const routerPush = vi.hoisted(() => vi.fn())
+const searchParameters = vi.hoisted(() => ({ value: "" }))
 const reducedMotionPreference = vi.hoisted(() => ({ value: false }))
 const motionGestureConfiguration = vi.hoisted(() => vi.fn())
 
@@ -37,6 +38,7 @@ vi.mock("motion/react", async (importOriginal) => {
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: routerPush }),
+  useSearchParams: () => new URLSearchParams(searchParameters.value),
 }))
 
 function renderWeatherSearch(
@@ -53,6 +55,7 @@ function renderWeatherSearch(
 describe("WeatherSearch", () => {
   beforeEach(() => {
     routerPush.mockClear()
+    searchParameters.value = ""
     reducedMotionPreference.value = false
     motionGestureConfiguration.mockClear()
   })

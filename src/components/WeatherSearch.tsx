@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useReducedMotion } from "motion/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useState } from "react"
 import CityWeather from "@/src/components/CityWeather"
 import LocationWeatherButton from "@/src/components/LocationWeatherButton"
@@ -22,13 +22,29 @@ export default function WeatherSearch({
   weatherResult: WeatherResult | null
 }) {
   const router = useRouter()
+  const searchParameters = useSearchParams()
   const shouldReduceMotion = useReducedMotion()
   const [locationWeatherState, setLocationWeatherState] =
     useState<LocationWeatherState>({ status: "inactive" })
 
+  const selectedCity =
+    searchParameters.get("city") || searchParameters.get("q")
+  const shouldDisplayLocationWeather =
+    locationWeatherState.status !== "inactive" && !selectedCity
+  const displayedCity =
+    selectedCity ||
+    (locationWeatherState.status === "inactive" ? initialCity : null)
+  const cityInputValue = shouldDisplayLocationWeather
+    ? ""
+    : selectedCity || initialCity || ""
+
   const handleLocationWeatherLoading = useCallback(() => {
+    if (selectedCity) {
+      window.history.pushState(null, "", "/")
+    }
+
     setLocationWeatherState({ status: "loading" })
-  }, [])
+  }, [selectedCity])
 
   const handleLocationWeatherResult = useCallback(
     (locationWeatherResult: WeatherResult) => {
@@ -63,7 +79,8 @@ export default function WeatherSearch({
             type="text"
             name="city"
             id="city"
-            defaultValue={initialCity || ""}
+            key={cityInputValue}
+            defaultValue={cityInputValue}
           />
           <motion.button
             className="h-10 rounded-r-lg bg-[#4683c8] p-2 text-xs font-bold text-white uppercase"
@@ -82,7 +99,7 @@ export default function WeatherSearch({
         shouldReduceMotion={shouldReduceMotion ?? false}
       />
 
-      {locationWeatherState.status !== "inactive" ? (
+      {shouldDisplayLocationWeather ? (
         <CityWeather
           city={CURRENT_LOCATION_LABEL}
           weatherResult={
@@ -91,8 +108,13 @@ export default function WeatherSearch({
               : null
           }
         />
-      ) : initialCity ? (
-        <CityWeather city={initialCity} weatherResult={weatherResult} />
+      ) : displayedCity ? (
+        <CityWeather
+          city={displayedCity}
+          weatherResult={
+            displayedCity === initialCity ? weatherResult : null
+          }
+        />
       ) : null}
     </div>
   )
