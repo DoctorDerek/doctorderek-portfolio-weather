@@ -1,5 +1,7 @@
 # Weather Portfolio
 
+[![Codecov](https://codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather/graph/badge.svg)](https://app.codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather)
+
 A responsive city-weather search built with Next.js 16, React 19, TypeScript 6, and Tailwind CSS 4. OpenWeatherMap requests run exclusively on the server so the API key is never sent to the browser.
 
 [Open the live application](https://portfolio-weather.doctorderek.com/)
@@ -55,7 +57,7 @@ pnpm build
 pnpm format
 ```
 
-GitHub Actions runs ESLint and Vitest coverage on pull requests, reports coverage through Codecov, and runs Playwright against successful Vercel Preview deployments. The automated application test suite has not been implemented yet, so this repository does not claim a coverage percentage.
+GitHub Actions runs ESLint and Vitest coverage on pull requests, reports coverage through Codecov, and runs Playwright against successful Vercel Preview deployments. The Vitest integration suite covers the server-only weather service, accessible search navigation, weather presentation states, and API error feedback. Coverage remains a measured progress signal rather than a merge-blocking threshold.
 
 ## Provenance and attribution
 

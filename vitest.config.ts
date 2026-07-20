@@ -7,9 +7,16 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./"),
+      "server-only": path.resolve(__dirname, "./src/test/serverOnly.ts"),
     },
   },
   test: {
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html", "lcov"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/test/**", "src/types/**"],
+    },
     environment: "happy-dom",
     include: ["**/*.test.tsx", "**/*.test.ts"],
     setupFiles: ["./vitest.setup.ts"],

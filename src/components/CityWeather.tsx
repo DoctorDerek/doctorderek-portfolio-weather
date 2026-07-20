@@ -7,7 +7,10 @@ import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
 import type { WeatherResult } from "@/src/types/weather"
 import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
-import { KtoF } from "@/src/utils/weather"
+import {
+  convertKelvinToCelsius,
+  convertKelvinToFahrenheit,
+} from "@/src/utils/weather"
 
 export default function CityWeather({
   city,
@@ -35,29 +38,41 @@ export default function CityWeather({
     })
   }, [city, weatherErrorMessage])
 
-  if (!weatherResult) return <Card heading="...loading" aria-live="polite" />
+  if (!weatherResult)
+    return (
+      <Card
+        key={`weather-loading-${city}`}
+        heading="...loading"
+        ariaLive="polite"
+      />
+    )
 
   if (weatherResult.status === "error") return null
 
   const { icon, description, temperatureKelvin } = weatherResult
   const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`
 
-  const temperature = KtoF(temperatureKelvin)
+  const temperatureCelsius = convertKelvinToCelsius(temperatureKelvin)
+  const temperatureFahrenheit = convertKelvinToFahrenheit(temperatureKelvin)
 
   return (
-    <Card heading={city}>
+    <Card key={`weather-result-${city}`} heading={city}>
       <div className="grid h-20 w-20">
         <div className="relative">
           <ImageFixed
             src={iconUrl}
             alt={description}
             fill
+            sizes="80px"
             className="object-cover"
           />
         </div>
       </div>
       <div>{upperCaseFirstLetterOfEachWord(description)}</div>
-      <Temperature degreesF={temperature} />
+      <Temperature
+        temperatureCelsius={temperatureCelsius}
+        temperatureFahrenheit={temperatureFahrenheit}
+      />
     </Card>
   )
 }

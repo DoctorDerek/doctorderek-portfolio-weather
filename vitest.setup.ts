@@ -1,9 +1,19 @@
 import { cleanup } from "@testing-library/react"
-import { afterEach, vi } from "vitest"
+import { afterAll, afterEach, beforeAll, vi } from "vitest"
+import mswServer from "@/src/test/mswServer"
 import "@testing-library/jest-dom/vitest"
+
+beforeAll(() => {
+  mswServer.listen({ onUnhandledRequest: "error" })
+})
 
 afterEach(() => {
   cleanup()
+  mswServer.resetHandlers()
+})
+
+afterAll(() => {
+  mswServer.close()
 })
 
 /**
