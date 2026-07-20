@@ -1,12 +1,14 @@
-import { render, screen } from "@testing-library/react"
+import { act, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import type { ButtonHTMLAttributes } from "react"
+import type { ButtonHTMLAttributes, HTMLAttributes } from "react"
 import { Toaster } from "react-hot-toast"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import WeatherSearch from "@/src/components/WeatherSearch"
+import type { WeatherResult } from "@/src/types/weather"
 
 const routerPush = vi.hoisted(() => vi.fn())
 const searchParameters = vi.hoisted(() => ({ value: "" }))
+const locationWeatherButtonProperties = vi.hoisted(() => vi.fn())
 const reducedMotionPreference = vi.hoisted(() => ({ value: false }))
 const motionGestureConfiguration = vi.hoisted(() => vi.fn())
 
@@ -31,6 +33,17 @@ vi.mock("motion/react", async (importOriginal) => {
         motionGestureConfiguration({ whileHover, whileTap })
         return <button {...buttonProperties}>{children}</button>
       },
+      div: ({
+        children,
+        initial: _initial,
+        animate: _animate,
+        transition: _transition,
+        ...divProperties
+      }: HTMLAttributes<HTMLDivElement> & {
+        initial?: { y: number }
+        animate?: { y: number }
+        transition?: { duration: number }
+      }) => <div {...divProperties}>{children}</div>,
     },
     useReducedMotion: () => reducedMotionPreference.value,
   }
@@ -39,6 +52,17 @@ vi.mock("motion/react", async (importOriginal) => {
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: routerPush }),
   useSearchParams: () => new URLSearchParams(searchParameters.value),
+}))
+
+vi.mock("@/src/components/LocationWeatherButton", () => ({
+  default: (properties: {
+    onLocationWeatherLoading: () => void
+    onLocationWeatherResult: (weatherResult: WeatherResult) => void
+    shouldReduceMotion: boolean
+  }) => {
+    locationWeatherButtonProperties(properties)
+    return <button type="button">Use my location</button>
+  },
 }))
 
 function renderWeatherSearch(
@@ -58,6 +82,8 @@ describe("WeatherSearch", () => {
     searchParameters.value = ""
     reducedMotionPreference.value = false
     motionGestureConfiguration.mockClear()
+    locationWeatherButtonProperties.mockClear()
+    window.history.replaceState(null, "", "/")
   })
 
   it("provides restrained gesture feedback for motion-tolerant users", () => {
@@ -111,5 +137,116 @@ describe("WeatherSearch", () => {
       screen.queryByRole("heading", { name: "Atlantis" }),
     ).not.toBeInTheDocument()
     expect(screen.queryByText("Temperature:")).not.toBeInTheDocument()
+  })
+
+  it("shows ephemeral location weather without placing coordinates in history", () => {
+    searchParameters.value = "city=Mexico%20City"
+    window.history.replaceState(null, "", "/?city=Mexico%20City")
+    const { rerender } = renderWeatherSearch({
+      initialCity: "Mexico City",
+      weatherResult: {
+        status: "success",
+        temperatureKelvin: 300.15,
+        description: "clear sky",
+        icon: "01d",
+        locationName: "Mexico City",
+      },
+    })
+    const locationButtonProperties =
+      locationWeatherButtonProperties.mock.lastCall?.[0]
+
+    act(() => {
+      locationButtonProperties.onLocationWeatherLoading()
+    })
+    searchParameters.value = ""
+    rerender(
+      <>
+        <Toaster />
+        <WeatherSearch
+          initialCity="Mexico City"
+          weatherResult={{
+            status: "success",
+            temperatureKelvin: 300.15,
+            description: "clear sky",
+            icon: "01d",
+            locationName: "Mexico City",
+          }}
+        />
+      </>,
+    )
+    act(() => {
+      locationButtonProperties.onLocationWeatherResult({
+        status: "success",
+        temperatureKelvin: 299.15,
+        description: "few clouds",
+        icon: "02d",
+        locationName: "Cuauhtémoc",
+      })
+    })
+
+    expect(window.location.pathname).toBe("/")
+    expect(window.location.search).toBe("")
+    expect(screen.getByRole("heading", { name: "Cuauhtémoc" })).toBeVisible()
+    expect(screen.getByText("Few Clouds")).toBeVisible()
+    expect(screen.getByRole("textbox", { name: "Weather Search:" })).toHaveValue(
+      "",
+    )
+  })
+
+  it("restores city weather when browser history returns to a city query", () => {
+    searchParameters.value = "city=Mexico%20City"
+    const { rerender } = renderWeatherSearch({
+      initialCity: "Mexico City",
+      weatherResult: {
+        status: "success",
+        temperatureKelvin: 300.15,
+        description: "clear sky",
+        icon: "01d",
+        locationName: "Mexico City",
+      },
+    })
+    const locationButtonProperties =
+      locationWeatherButtonProperties.mock.lastCall?.[0]
+
+    act(() => {
+      locationButtonProperties.onLocationWeatherLoading()
+    })
+    searchParameters.value = ""
+    rerender(
+      <>
+        <Toaster />
+        <WeatherSearch
+          initialCity="Mexico City"
+          weatherResult={{
+            status: "success",
+            temperatureKelvin: 300.15,
+            description: "clear sky",
+            icon: "01d",
+            locationName: "Mexico City",
+          }}
+        />
+      </>,
+    )
+    searchParameters.value = "city=Mexico%20City"
+    rerender(
+      <>
+        <Toaster />
+        <WeatherSearch
+          initialCity="Mexico City"
+          weatherResult={{
+            status: "success",
+            temperatureKelvin: 300.15,
+            description: "clear sky",
+            icon: "01d",
+            locationName: "Mexico City",
+          }}
+        />
+      </>,
+    )
+
+    expect(
+      screen.getByRole("heading", { name: "Mexico City" }),
+    ).toBeVisible()
+    expect(screen.getByText("Clear Sky")).toBeVisible()
   })
 })
