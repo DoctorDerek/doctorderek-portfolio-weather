@@ -6,6 +6,7 @@ on:
 permissions:
   pull-requests: write
   contents: read
+  id-token: write
 
 jobs:
   e2e:
@@ -44,6 +45,16 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps
 
+      - name: Get GitHub OIDC Token
+        id: github-oidc-token
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        with:
+          retries: 3
+          script: |
+            const token = await core.getIDToken()
+            core.setSecret(token)
+            core.setOutput("token", token)
+
       - name: Run Playwright Tests and Capture Summary
         id: playwright
         if: always()
@@ -57,6 +68,7 @@ jobs:
           echo "PLAYWRIGHT_OUTPUT_FILE=$RUNNER_TEMP/playwright-output.txt" >> "$GITHUB_ENV"
         env:
           PLAYWRIGHT_TEST_BASE_URL: ${{ github.event.deployment_status.target_url }}
+          PLAYWRIGHT_VERCEL_TRUSTED_OIDC_TOKEN: ${{ steps.github-oidc-token.outputs.token }}
 
       - name: Upload Playwright Report
         if: always()
