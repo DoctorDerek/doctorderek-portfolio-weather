@@ -86,7 +86,14 @@ jobs:
           LINT_EXIT_CODE=${PIPESTATUS[0]}
           set -e
 
+          if [ "$LINT_EXIT_CODE" -eq 0 ] || grep -Eq '[0-9]+ problems? \([0-9]+ errors?, [0-9]+ warnings?\)' "$RUNNER_TEMP/lint-output.txt"; then
+            LINT_RUNNER_STATUS=complete
+          else
+            LINT_RUNNER_STATUS=failed
+          fi
+
           echo "LINT_EXIT_CODE=$LINT_EXIT_CODE" >> "$GITHUB_ENV"
+          echo "LINT_RUNNER_STATUS=$LINT_RUNNER_STATUS" >> "$GITHUB_ENV"
           echo "LINT_OUTPUT_FILE=$RUNNER_TEMP/lint-output.txt" >> "$GITHUB_ENV"
 
       - name: Post Lint PR Comment
@@ -102,6 +109,7 @@ jobs:
               ? fs.readFileSync(outputPath, 'utf8').trim()
               : '';
             const exitCode = Number.parseInt(process.env.LINT_EXIT_CODE ?? '', 10);
+            const runnerStatus = process.env.LINT_RUNNER_STATUS;
             const header = '### 🧹 ESLint';
             const qualityPosition = '**Quality check 1 of 3**';
             const hasFindings = /\d+ problems? \(\d+ errors?, \d+ warnings?\)/.test(output);
@@ -110,7 +118,7 @@ jobs:
               : output;
             let body;
 
-            if (!Number.isInteger(exitCode) || exitCode >= 2) {
+            if (!Number.isInteger(exitCode) || runnerStatus !== 'complete') {
               body = `${header}\n\n${qualityPosition}\n\n❌ **ESLint could not run.**${displayedOutput ? `\n\n\`\`\`text\n${displayedOutput}\n\`\`\`` : ''}`;
             } else if (exitCode === 0 && !hasFindings) {
               body = `${header}\n\n${qualityPosition}\n\n✅ **Zero warnings.**`;
@@ -225,7 +233,7 @@ jobs:
         run: |
           FAILED=0
 
-          if ! [[ "$LINT_EXIT_CODE" =~ ^[0-9]+$ ]] || [ "$LINT_EXIT_CODE" -ge 2 ]; then
+          if ! [[ "$LINT_EXIT_CODE" =~ ^[0-9]+$ ]] || [ "$LINT_RUNNER_STATUS" != "complete" ]; then
             echo "ESLint could not run."
             FAILED=1
           fi
