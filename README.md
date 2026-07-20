@@ -1,7 +1,6 @@
 # Weather Portfolio
 
-[![Production](https://img.shields.io/website?url=https%3A%2F%2Fportfolio-weather.doctorderek.com%2F&up_message=live&down_message=offline&label=production&logo=vercel&logoColor=white)](https://portfolio-weather.doctorderek.com/)
-[![Codecov](https://codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather/graph/badge.svg)](https://app.codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather)
+[![Production](https://img.shields.io/website?url=https%3A%2F%2Fportfolio-weather.doctorderek.com%2F&up_message=live&down_message=offline&label=production&logo=vercel&logoColor=white)](https://portfolio-weather.doctorderek.com/) [![Codecov](https://codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather/graph/badge.svg)](https://app.codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather) [![Test and Lint](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/test-and-lint.yml/badge.svg)](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/test-and-lint.yml) [![Playwright](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/playwright.yml/badge.svg)](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/playwright.yml)
 
 A responsive current-weather search built with Next.js 16, React 19, TypeScript 6, and Tailwind CSS 4. Visitors can search by city or explicitly share a one-time browser location. OpenWeatherMap requests run exclusively on the server so the API key is never sent to the browser.
 
