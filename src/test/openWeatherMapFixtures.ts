@@ -1,5 +1,9 @@
 export const OPEN_WEATHER_MAP_TEST_API_KEY = "test-open-weather-map-api-key"
 export const OPEN_WEATHER_MAP_TEST_CITY = "Mexico City"
+export const OPEN_WEATHER_MAP_TEST_COORDINATES = {
+  latitude: 19.43,
+  longitude: -99.13,
+}
 
 export const OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE = {
   name: OPEN_WEATHER_MAP_TEST_CITY,
