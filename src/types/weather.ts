@@ -1,3 +1,8 @@
+export type WeatherCoordinates = {
+  latitude: number
+  longitude: number
+}
+
 export type WeatherResult =
   | {
       status: "success"
