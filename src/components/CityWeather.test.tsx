@@ -32,7 +32,7 @@ describe("CityWeather", () => {
 
     expect(
       screen
-        .getByRole("heading", { name: "...loading" })
+        .getByRole("heading", { name: "Loading weather…" })
         .closest('[aria-live="polite"]'),
     ).toBeInTheDocument()
   })

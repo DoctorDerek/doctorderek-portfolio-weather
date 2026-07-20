@@ -42,7 +42,7 @@ export default function CityWeather({
     return (
       <Card
         key={`weather-loading-${city}`}
-        heading="...loading"
+        heading="Loading weather…"
         ariaLive="polite"
       />
     )
