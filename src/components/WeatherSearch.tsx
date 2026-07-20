@@ -27,8 +27,7 @@ export default function WeatherSearch({
   const [locationWeatherState, setLocationWeatherState] =
     useState<LocationWeatherState>({ status: "inactive" })
 
-  const selectedCity =
-    searchParameters.get("city") || searchParameters.get("q")
+  const selectedCity = searchParameters.get("city") || searchParameters.get("q")
   const shouldDisplayLocationWeather =
     locationWeatherState.status !== "inactive" && !selectedCity
   const displayedCity =
@@ -111,9 +110,7 @@ export default function WeatherSearch({
       ) : displayedCity ? (
         <CityWeather
           city={displayedCity}
-          weatherResult={
-            displayedCity === initialCity ? weatherResult : null
-          }
+          weatherResult={displayedCity === initialCity ? weatherResult : null}
         />
       ) : null}
     </div>

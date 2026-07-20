@@ -1,4 +1,4 @@
-import { expect, type Locator, test } from "@playwright/test"
+import { expect, test, type Locator } from "@playwright/test"
 
 const LIVE_WEATHER_TEST_CITY = "Mexico City"
 const INVALID_LIVE_WEATHER_TEST_CITY = "NoSuchCityQream987654321"
@@ -69,9 +69,7 @@ test("loads live weather after explicit browser location consent", async ({
   await locationButton.click()
 
   await expect(page.getByText("Temperature:")).toBeVisible()
-  await expect(
-    locationButton,
-  ).toBeEnabled()
+  await expect(locationButton).toBeEnabled()
   expect(new URL(page.url()).search).toBe("")
 })
 

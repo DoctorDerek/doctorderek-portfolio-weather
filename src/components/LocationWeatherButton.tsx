@@ -2,8 +2,8 @@
 
 import { motion } from "motion/react"
 import { useCallback, useState } from "react"
-import toast from "react-hot-toast"
 import { useGeolocated } from "react-geolocated"
+import toast from "react-hot-toast"
 import { getCurrentLocationWeather } from "@/src/actions/getCurrentLocationWeather"
 import type { WeatherResult } from "@/src/types/weather"
 import { getErrorMessage } from "@/src/utils/error"

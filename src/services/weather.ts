@@ -9,8 +9,7 @@ const OPEN_WEATHER_MAP_INVALID_RESPONSE_MESSAGE =
 const CURRENT_LOCATION_FALLBACK_NAME = "Current location"
 
 type CurrentWeatherLocation =
-  | { city: string }
-  | { coordinates: WeatherCoordinates }
+  { city: string } | { coordinates: WeatherCoordinates }
 
 type OpenWeatherMapSuccessResponse = {
   name: string

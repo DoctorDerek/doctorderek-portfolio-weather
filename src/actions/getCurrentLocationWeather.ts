@@ -7,8 +7,7 @@ import {
   roundWeatherCoordinates,
 } from "@/src/utils/weatherCoordinates"
 
-const INVALID_WEATHER_COORDINATES_MESSAGE =
-  "Location coordinates are invalid"
+const INVALID_WEATHER_COORDINATES_MESSAGE = "Location coordinates are invalid"
 
 export async function getCurrentLocationWeather(
   coordinates: WeatherCoordinates,

@@ -1,8 +1,8 @@
 import { act, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ButtonHTMLAttributes } from "react"
-import toast, { Toaster } from "react-hot-toast"
 import type { GeolocatedConfig } from "react-geolocated"
+import toast, { Toaster } from "react-hot-toast"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import LocationWeatherButton from "@/src/components/LocationWeatherButton"
 import type { WeatherResult } from "@/src/types/weather"
@@ -131,9 +131,7 @@ describe("LocationWeatherButton", () => {
     const user = userEvent.setup()
     renderLocationWeatherButton()
 
-    await user.click(
-      screen.getByRole("button", { name: "Use my location" }),
-    )
+    await user.click(screen.getByRole("button", { name: "Use my location" }))
 
     expect(getPositionMock).toHaveBeenCalledOnce()
     expect(
@@ -146,9 +144,7 @@ describe("LocationWeatherButton", () => {
     geolocationAvailability.value = false
     renderLocationWeatherButton()
 
-    await user.click(
-      screen.getByRole("button", { name: "Use my location" }),
-    )
+    await user.click(screen.getByRole("button", { name: "Use my location" }))
 
     expect(getPositionMock).not.toHaveBeenCalled()
     expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -160,9 +156,7 @@ describe("LocationWeatherButton", () => {
     const user = userEvent.setup()
     renderLocationWeatherButton()
 
-    await user.click(
-      screen.getByRole("button", { name: "Use my location" }),
-    )
+    await user.click(screen.getByRole("button", { name: "Use my location" }))
     act(() => {
       getCurrentGeolocatedConfiguration().onError?.({
         code: 1,
@@ -182,9 +176,7 @@ describe("LocationWeatherButton", () => {
     const { onLocationWeatherLoading, onLocationWeatherResult } =
       renderLocationWeatherButton()
 
-    await user.click(
-      screen.getByRole("button", { name: "Use my location" }),
-    )
+    await user.click(screen.getByRole("button", { name: "Use my location" }))
     act(() => {
       getCurrentGeolocatedConfiguration().onSuccess?.(TEST_POSITION)
     })
@@ -214,9 +206,7 @@ describe("LocationWeatherButton", () => {
       new Error("Server action unavailable"),
     )
 
-    await user.click(
-      screen.getByRole("button", { name: "Use my location" }),
-    )
+    await user.click(screen.getByRole("button", { name: "Use my location" }))
     act(() => {
       getCurrentGeolocatedConfiguration().onSuccess?.(TEST_POSITION)
     })
