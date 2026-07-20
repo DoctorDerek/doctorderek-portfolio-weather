@@ -10,6 +10,7 @@ const SUCCESSFUL_WEATHER_RESULT = {
   temperatureKelvin: 300.15,
   description: "clear sky",
   icon: "01d",
+  locationName: "Mexico City",
 } satisfies WeatherResult
 
 const ERROR_WEATHER_RESULT = {

@@ -8,6 +8,7 @@ const OPEN_WEATHER_MAP_INVALID_RESPONSE_MESSAGE =
   "Weather service returned invalid data"
 
 type OpenWeatherMapSuccessResponse = {
+  name: string
   main: {
     temp: number
   }
@@ -28,6 +29,8 @@ function isOpenWeatherMapSuccessResponse(
 ): responsePayload is OpenWeatherMapSuccessResponse {
   if (
     !isNonNullObject(responsePayload) ||
+    !("name" in responsePayload) ||
+    typeof responsePayload.name !== "string" ||
     !("main" in responsePayload) ||
     !("weather" in responsePayload)
   ) {
@@ -133,6 +136,7 @@ export default async function getCurrentWeather(
       temperatureKelvin: openWeatherMapResponsePayload.main.temp,
       description: currentWeather.description,
       icon: currentWeather.icon,
+      locationName: openWeatherMapResponsePayload.name,
     }
   } catch (error) {
     return {

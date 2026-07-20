@@ -49,14 +49,14 @@ export default function CityWeather({
 
   if (weatherResult.status === "error") return null
 
-  const { icon, description, temperatureKelvin } = weatherResult
+  const { icon, description, locationName, temperatureKelvin } = weatherResult
   const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`
 
   const temperatureCelsius = convertKelvinToCelsius(temperatureKelvin)
   const temperatureFahrenheit = convertKelvinToFahrenheit(temperatureKelvin)
 
   return (
-    <Card key={`weather-result-${city}`} heading={city}>
+    <Card key={`weather-result-${city}`} heading={locationName}>
       <div className="grid h-20 w-20">
         <div className="relative">
           <ImageFixed

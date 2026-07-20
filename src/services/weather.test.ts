@@ -38,6 +38,7 @@ describe("getCurrentWeather", () => {
       description:
         OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].description,
       icon: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].icon,
+      locationName: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.name,
     })
   })
 

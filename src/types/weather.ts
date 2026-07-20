@@ -4,6 +4,7 @@ export type WeatherResult =
       temperatureKelvin: number
       description: string
       icon: string
+      locationName: string
     }
   | {
       status: "error"
