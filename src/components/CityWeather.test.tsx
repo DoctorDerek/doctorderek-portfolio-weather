@@ -11,6 +11,7 @@ const SUCCESSFUL_WEATHER_RESULT = {
   temperatureKelvin: 300.15,
   description: "clear sky",
   icon: "01d",
+  locationName: TEST_CITY,
 } satisfies WeatherResult
 
 vi.mock("next/image", async () => {
@@ -31,7 +32,7 @@ describe("CityWeather", () => {
 
     expect(
       screen
-        .getByRole("heading", { name: "...loading" })
+        .getByRole("heading", { name: "Loading weather…" })
         .closest('[aria-live="polite"]'),
     ).toBeInTheDocument()
   })

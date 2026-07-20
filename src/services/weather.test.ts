@@ -1,6 +1,8 @@
 import { http, HttpResponse } from "msw"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import getCurrentWeather from "@/src/services/weather"
+import getCurrentWeather, {
+  getCurrentWeatherByCoordinates,
+} from "@/src/services/weather"
 import { OPEN_WEATHER_MAP_CURRENT_WEATHER_URL } from "@/src/services/weatherConfig"
 import mswServer from "@/src/test/mswServer"
 import {
@@ -8,6 +10,7 @@ import {
   OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE,
   OPEN_WEATHER_MAP_TEST_API_KEY,
   OPEN_WEATHER_MAP_TEST_CITY,
+  OPEN_WEATHER_MAP_TEST_COORDINATES,
 } from "@/src/test/openWeatherMapFixtures"
 
 describe("getCurrentWeather", () => {
@@ -38,6 +41,41 @@ describe("getCurrentWeather", () => {
       description:
         OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].description,
       icon: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].icon,
+      locationName: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.name,
+    })
+  })
+
+  it("requests current weather through latitude and longitude", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+
+    await expect(
+      getCurrentWeatherByCoordinates(OPEN_WEATHER_MAP_TEST_COORDINATES),
+    ).resolves.toEqual({
+      status: "success",
+      temperatureKelvin: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.main.temp,
+      description:
+        OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].description,
+      icon: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].icon,
+      locationName: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.name,
+    })
+  })
+
+  it("uses a stable heading when coordinate weather has no place name", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_CURRENT_WEATHER_URL, () =>
+        HttpResponse.json({
+          ...OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE,
+          name: "",
+        }),
+      ),
+    )
+
+    await expect(
+      getCurrentWeatherByCoordinates(OPEN_WEATHER_MAP_TEST_COORDINATES),
+    ).resolves.toMatchObject({
+      status: "success",
+      locationName: "Current location",
     })
   })
 

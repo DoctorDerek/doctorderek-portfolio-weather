@@ -1,14 +1,15 @@
 # Weather Portfolio
 
-[![Codecov](https://codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather/graph/badge.svg)](https://app.codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather)
+[![Production](https://img.shields.io/website?url=https%3A%2F%2Fportfolio-weather.doctorderek.com%2F&up_message=live&down_message=offline&label=production&logo=vercel&logoColor=white)](https://portfolio-weather.doctorderek.com/) [![Codecov](https://codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather/graph/badge.svg)](https://app.codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather) [![Test and Lint](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/test-and-lint.yml/badge.svg)](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/test-and-lint.yml) [![Playwright](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/playwright.yml/badge.svg)](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/playwright.yml)
 
-A responsive city-weather search built with Next.js 16, React 19, TypeScript 6, and Tailwind CSS 4. OpenWeatherMap requests run exclusively on the server so the API key is never sent to the browser.
+A responsive current-weather search built with Next.js 16, React 19, TypeScript 6, and Tailwind CSS 4. Visitors can search by city or explicitly share a one-time browser location. OpenWeatherMap requests run exclusively on the server so the API key is never sent to the browser.
 
 [Open the live application](https://portfolio-weather.doctorderek.com/)
 
 ## Highlights
 
 - Searches current weather conditions by city through a server-only OpenWeatherMap integration.
+- Offers an optional, user-triggered browser location lookup without storing precise coordinates.
 - Validates upstream success payloads at runtime before rendering typed application data.
 - Presents API failures in accessible, auto-dismissing toast notifications.
 - Persists light and dark themes through an animated, keyboard-accessible control.
@@ -16,14 +17,14 @@ A responsive city-weather search built with Next.js 16, React 19, TypeScript 6, 
 
 ## Architecture
 
-The App Router page reads the city query parameter and performs the weather request through a server-only service. That service returns a discriminated `WeatherResult` rather than exposing the upstream response shape to the UI. Client components own navigation, theme interaction, and transient error feedback.
+The App Router page reads the shareable city query parameter and performs the weather request through a server-only service. An optional browser-location control requests a single low-power position only after explicit interaction, rounds its coordinates to two decimal places, and sends them to a validated Server Action without placing them in the URL or persistent browser state. Both lookup paths use the same OpenWeatherMap service and discriminated `WeatherResult` rather than exposing the upstream response shape to the UI. Client components own navigation, theme interaction, and transient error feedback.
 
 The primary stack is:
 
 - Next.js 16 App Router and React 19
 - TypeScript 6 with strict type checking
 - Tailwind CSS 4
-- `next-themes` and `react-hot-toast`
+- `next-themes`, `react-geolocated`, and `react-hot-toast`
 - Vitest, Testing Library, Playwright, and Codecov infrastructure
 - Node.js 24 and pnpm 11
 
@@ -57,7 +58,7 @@ pnpm build
 pnpm format
 ```
 
-GitHub Actions runs ESLint and Vitest coverage on pull requests, reports coverage through Codecov, and runs Playwright against successful Vercel Preview deployments. The Vitest integration suite covers the server-only weather service, accessible search navigation, weather presentation states, and API error feedback. Coverage remains a measured progress signal rather than a merge-blocking threshold.
+GitHub Actions runs ESLint and Vitest coverage on pull requests, reports coverage through Codecov, and runs Playwright against successful Vercel Preview deployments. The Vitest integration suite covers the server-only weather service, validated coordinate actions, explicit browser-permission states, accessible search navigation, weather presentation states, and API error feedback. Playwright exercises city and location searches against the deployed live API. Coverage remains a measured progress signal rather than a merge-blocking threshold.
 
 ## Provenance and attribution
 

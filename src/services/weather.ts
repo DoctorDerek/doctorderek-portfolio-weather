@@ -1,13 +1,18 @@
 import "server-only"
 import { OPEN_WEATHER_MAP_CURRENT_WEATHER_URL } from "@/src/services/weatherConfig"
-import type { WeatherResult } from "@/src/types/weather"
+import type { WeatherCoordinates, WeatherResult } from "@/src/types/weather"
 import { getErrorMessage } from "@/src/utils/error"
 
 const OPEN_WEATHER_MAP_REQUEST_FAILED_MESSAGE = "Weather service request failed"
 const OPEN_WEATHER_MAP_INVALID_RESPONSE_MESSAGE =
   "Weather service returned invalid data"
+const CURRENT_LOCATION_FALLBACK_NAME = "Current location"
+
+type CurrentWeatherLocation =
+  { city: string } | { coordinates: WeatherCoordinates }
 
 type OpenWeatherMapSuccessResponse = {
+  name: string
   main: {
     temp: number
   }
@@ -28,6 +33,8 @@ function isOpenWeatherMapSuccessResponse(
 ): responsePayload is OpenWeatherMapSuccessResponse {
   if (
     !isNonNullObject(responsePayload) ||
+    !("name" in responsePayload) ||
+    typeof responsePayload.name !== "string" ||
     !("main" in responsePayload) ||
     !("weather" in responsePayload)
   ) {
@@ -70,11 +77,24 @@ function getOpenWeatherMapErrorMessage(responsePayload: unknown) {
 }
 
 function createOpenWeatherMapRequestUrl(
-  city: string,
+  currentWeatherLocation: CurrentWeatherLocation,
   openWeatherMapApiKey: string,
 ) {
   const requestUrl = new URL(OPEN_WEATHER_MAP_CURRENT_WEATHER_URL)
-  requestUrl.searchParams.set("q", city)
+
+  if ("city" in currentWeatherLocation) {
+    requestUrl.searchParams.set("q", currentWeatherLocation.city)
+  } else {
+    requestUrl.searchParams.set(
+      "lat",
+      String(currentWeatherLocation.coordinates.latitude),
+    )
+    requestUrl.searchParams.set(
+      "lon",
+      String(currentWeatherLocation.coordinates.longitude),
+    )
+  }
+
   requestUrl.searchParams.set("appid", openWeatherMapApiKey)
   return requestUrl
 }
@@ -88,8 +108,9 @@ async function readOpenWeatherMapResponse(openWeatherMapResponse: Response) {
   }
 }
 
-export default async function getCurrentWeather(
-  city: string,
+async function requestCurrentWeather(
+  currentWeatherLocation: CurrentWeatherLocation,
+  fallbackLocationName: string,
 ): Promise<WeatherResult> {
   const openWeatherMapApiKey = process.env.OPEN_WEATHER_MAP_API_KEY
 
@@ -103,7 +124,10 @@ export default async function getCurrentWeather(
 
   try {
     const openWeatherMapResponse = await fetch(
-      createOpenWeatherMapRequestUrl(city, openWeatherMapApiKey),
+      createOpenWeatherMapRequestUrl(
+        currentWeatherLocation,
+        openWeatherMapApiKey,
+      ),
       { cache: "no-store" },
     )
     const openWeatherMapResponsePayload = await readOpenWeatherMapResponse(
@@ -133,6 +157,8 @@ export default async function getCurrentWeather(
       temperatureKelvin: openWeatherMapResponsePayload.main.temp,
       description: currentWeather.description,
       icon: currentWeather.icon,
+      locationName:
+        openWeatherMapResponsePayload.name.trim() || fallbackLocationName,
     }
   } catch (error) {
     return {
@@ -141,4 +167,14 @@ export default async function getCurrentWeather(
       message: getErrorMessage(error),
     }
   }
+}
+
+export default function getCurrentWeather(city: string) {
+  return requestCurrentWeather({ city }, city)
+}
+
+export function getCurrentWeatherByCoordinates(
+  coordinates: WeatherCoordinates,
+) {
+  return requestCurrentWeather({ coordinates }, CURRENT_LOCATION_FALLBACK_NAME)
 }
