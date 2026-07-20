@@ -1,17 +1,36 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import type { ReactNode } from "react"
+import type { ButtonHTMLAttributes, ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import App from "@/src/components/App"
 
 const routerPush = vi.hoisted(() => vi.fn())
 const reducedMotionPolicy = vi.hoisted(() => vi.fn())
+const reducedMotionPreference = vi.hoisted(() => ({ value: false }))
+const motionGestureConfiguration = vi.hoisted(() => vi.fn())
+
+type MotionButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  whileHover?: { scale: number }
+  whileTap?: { scale: number }
+}
 
 vi.mock("motion/react", async (importOriginal) => {
   const motion = await importOriginal<typeof import("motion/react")>()
 
   return {
     ...motion,
+    motion: {
+      ...motion.motion,
+      button: ({
+        children,
+        whileHover,
+        whileTap,
+        ...buttonProps
+      }: MotionButtonProps) => {
+        motionGestureConfiguration({ whileHover, whileTap })
+        return <button {...buttonProps}>{children}</button>
+      },
+    },
     MotionConfig: ({
       children,
       reducedMotion,
@@ -22,6 +41,7 @@ vi.mock("motion/react", async (importOriginal) => {
       reducedMotionPolicy(reducedMotion)
       return children
     },
+    useReducedMotion: () => reducedMotionPreference.value,
   }
 })
 
@@ -41,12 +61,33 @@ describe("App", () => {
   beforeEach(() => {
     routerPush.mockClear()
     reducedMotionPolicy.mockClear()
+    reducedMotionPreference.value = false
+    motionGestureConfiguration.mockClear()
   })
 
   it("respects the user’s reduced-motion preference", () => {
     render(<App initialCity={null} weatherResult={null} />)
 
     expect(reducedMotionPolicy).toHaveBeenCalledWith("user")
+  })
+
+  it("provides restrained gesture feedback for motion-tolerant users", () => {
+    render(<App initialCity={null} weatherResult={null} />)
+
+    expect(motionGestureConfiguration).toHaveBeenLastCalledWith({
+      whileHover: { scale: 1.03 },
+      whileTap: { scale: 0.97 },
+    })
+  })
+
+  it("removes gesture transforms for reduced-motion users", () => {
+    reducedMotionPreference.value = true
+    render(<App initialCity={null} weatherResult={null} />)
+
+    expect(motionGestureConfiguration).toHaveBeenLastCalledWith({
+      whileHover: undefined,
+      whileTap: undefined,
+    })
   })
 
   it("submits an accessible weather search through encoded client navigation", async () => {
