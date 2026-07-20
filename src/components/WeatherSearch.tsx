@@ -2,8 +2,17 @@
 
 import { motion, useReducedMotion } from "motion/react"
 import { useRouter } from "next/navigation"
+import { useCallback, useState } from "react"
 import CityWeather from "@/src/components/CityWeather"
+import LocationWeatherButton from "@/src/components/LocationWeatherButton"
 import type { WeatherResult } from "@/src/types/weather"
+
+type LocationWeatherState =
+  | { status: "inactive" }
+  | { status: "loading" }
+  | { status: "complete"; weatherResult: WeatherResult }
+
+const CURRENT_LOCATION_LABEL = "Current location"
 
 export default function WeatherSearch({
   initialCity,
@@ -14,6 +23,22 @@ export default function WeatherSearch({
 }) {
   const router = useRouter()
   const shouldReduceMotion = useReducedMotion()
+  const [locationWeatherState, setLocationWeatherState] =
+    useState<LocationWeatherState>({ status: "inactive" })
+
+  const handleLocationWeatherLoading = useCallback(() => {
+    setLocationWeatherState({ status: "loading" })
+  }, [])
+
+  const handleLocationWeatherResult = useCallback(
+    (locationWeatherResult: WeatherResult) => {
+      setLocationWeatherState({
+        status: "complete",
+        weatherResult: locationWeatherResult,
+      })
+    },
+    [],
+  )
 
   return (
     <div className="relative z-10 flex h-[90vh] flex-col justify-end py-10 sm:justify-start">
@@ -51,9 +76,24 @@ export default function WeatherSearch({
         </div>
       </form>
 
-      {initialCity && (
+      <LocationWeatherButton
+        onLocationWeatherLoading={handleLocationWeatherLoading}
+        onLocationWeatherResult={handleLocationWeatherResult}
+        shouldReduceMotion={shouldReduceMotion ?? false}
+      />
+
+      {locationWeatherState.status !== "inactive" ? (
+        <CityWeather
+          city={CURRENT_LOCATION_LABEL}
+          weatherResult={
+            locationWeatherState.status === "complete"
+              ? locationWeatherState.weatherResult
+              : null
+          }
+        />
+      ) : initialCity ? (
         <CityWeather city={initialCity} weatherResult={weatherResult} />
-      )}
+      ) : null}
     </div>
   )
 }
