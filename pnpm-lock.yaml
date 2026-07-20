@@ -27,6 +27,9 @@ importers:
       react-dom:
         specifier: ^19
         version: 19.2.7(react@19.2.7)
+      react-geolocated:
+        specifier: ^4
+        version: 4.5.1(react@19.2.7)
       react-hot-toast:
         specifier: ^2
         version: 2.6.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -2426,6 +2429,11 @@ packages:
     resolution: {integrity: sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ==}
     peerDependencies:
       react: ^19.2.7
+
+  react-geolocated@4.5.1:
+    resolution: {integrity: sha512-ZzeqinRx+7PWBVQF+Ww6+GgiYQvYj/Z34KtI1HAU2KcsZcFgm3jmHG1dmM/JAYFeutxvLhETK/9raoOm1JB6Qw==}
+    peerDependencies:
+      react: '>= 16.8.0 < 20.0.0'
 
   react-hot-toast@2.6.0:
     resolution: {integrity: sha512-bH+2EBMZ4sdyou/DPrfgIouFpcRLCJ+HoCA32UoAYHn6T3Ur5yfcDCeSr5mwldl6pFOsiocmrXMuoCJ1vV8bWg==}
@@ -5201,6 +5209,10 @@ snapshots:
     dependencies:
       react: 19.2.7
       scheduler: 0.27.0
+
+  react-geolocated@4.5.1(react@19.2.7):
+    dependencies:
+      react: 19.2.7
 
   react-hot-toast@2.6.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
