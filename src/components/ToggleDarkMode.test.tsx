@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { renderToString } from "react-dom/server"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import ToggleDarkMode from "@/src/components/ToggleDarkMode"
 
@@ -16,6 +17,10 @@ describe("ToggleDarkMode", () => {
   beforeEach(() => {
     themeState.resolvedTheme = "light"
     themeState.setTheme.mockClear()
+  })
+
+  it("omits client theme state from server-rendered markup", () => {
+    expect(renderToString(<ToggleDarkMode />)).toBe("")
   })
 
   it("requests dark mode through the accessible light-theme control", async () => {
