@@ -16,7 +16,9 @@ export default function Card({
   return (
     <div
       className="flex flex-col items-center justify-center"
+      role={ariaLive ? "status" : undefined}
       aria-live={ariaLive}
+      aria-atomic={ariaLive ? true : undefined}
     >
       <motion.div
         initial={{ y: 8 }}
