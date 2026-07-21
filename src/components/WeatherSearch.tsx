@@ -72,11 +72,11 @@ export default function WeatherSearch({
           router.push(`/?city=${encodeURIComponent(inputCity)}`)
         }}
       >
-        <label htmlFor="city">
-          <h1 className="mb-2 rounded-xl px-4 py-1 text-2xl font-semibold tracking-tight sm:mb-0 sm:py-2 sm:text-base dark:bg-black">
+        <h1 className="mb-2 rounded-xl px-4 py-1 text-2xl font-semibold tracking-tight sm:mb-0 sm:py-2 sm:text-base dark:bg-black">
+          <label htmlFor="city">
             Weather Search:
-          </h1>
-        </label>
+          </label>
+        </h1>
         <div className="flex flex-wrap items-center justify-center">
           <input
             data-testid="weather-input"
