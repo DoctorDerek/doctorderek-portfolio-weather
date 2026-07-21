@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ButtonHTMLAttributes, HTMLAttributes } from "react"
 import { Toaster } from "react-hot-toast"
@@ -164,6 +164,21 @@ describe("WeatherSearch", () => {
     await user.click(screen.getByRole("button", { name: "Submit" }))
 
     expect(cityInput).toBeInvalid()
+    expect(routerPush).not.toHaveBeenCalled()
+  })
+
+  it("ignores a programmatically submitted blank city", () => {
+    renderWeatherSearch({ initialCity: null, weatherResult: null })
+    const cityInput = screen.getByRole("textbox", {
+      name: "Weather Search:",
+    })
+    const searchForm = cityInput.closest("form")
+
+    if (!searchForm) throw new Error("Weather search form was not rendered")
+
+    fireEvent.change(cityInput, { target: { value: "   " } })
+    fireEvent.submit(searchForm)
+
     expect(routerPush).not.toHaveBeenCalled()
   })
 
