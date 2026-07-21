@@ -3,6 +3,13 @@ import { describe, expect, it } from "vitest"
 import Card from "@/src/components/Card"
 
 describe("Card", () => {
+  it("presents live content as one atomic status update", () => {
+    render(<Card heading="Loading weather…" ariaLive="polite" />)
+
+    expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite")
+    expect(screen.getByRole("status")).toHaveAttribute("aria-atomic", "true")
+  })
+
   it("uses standard typography for concise city headings", () => {
     render(<Card heading="London" />)
 

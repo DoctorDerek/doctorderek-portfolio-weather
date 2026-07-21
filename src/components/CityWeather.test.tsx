@@ -30,11 +30,13 @@ describe("CityWeather", () => {
   it("announces the loading state without interrupting the user", () => {
     render(<CityWeather city={TEST_CITY} weatherResult={null} />)
 
+    const loadingStatus = screen.getByRole("status")
+
+    expect(loadingStatus).toHaveAttribute("aria-live", "polite")
+    expect(loadingStatus).toHaveAttribute("aria-atomic", "true")
     expect(
-      screen
-        .getByRole("heading", { name: "Loading weather…" })
-        .closest('[aria-live="polite"]'),
-    ).toBeInTheDocument()
+      screen.getByRole("heading", { name: "Loading weather…" }),
+    ).toBeVisible()
   })
 
   it("presents normalized weather details in Fahrenheit and Celsius", () => {
@@ -50,5 +52,7 @@ describe("CityWeather", () => {
     expect(screen.getByText("81 °F")).toBeVisible()
     expect(screen.getByText("27 °C")).toBeVisible()
     expect(screen.getByRole("img", { name: "clear sky" })).toBeVisible()
+    expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite")
+    expect(screen.getByRole("status")).toHaveAttribute("aria-atomic", "true")
   })
 })
