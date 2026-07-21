@@ -113,11 +113,43 @@ describe("WeatherSearch", () => {
       name: "Weather Search:",
     })
 
-    await user.type(cityInput, "Mexico City")
+    await user.type(cityInput, "  Mexico City  ")
     await user.click(screen.getByRole("button", { name: "Submit" }))
 
     expect(routerPush).toHaveBeenCalledOnce()
     expect(routerPush).toHaveBeenCalledWith("/?city=Mexico%20City")
+  })
+
+  it("uses native validity and semantic heading composition for city entry", () => {
+    renderWeatherSearch({ initialCity: null, weatherResult: null })
+
+    const cityInput = screen.getByRole("textbox", {
+      name: "Weather Search:",
+    })
+    const searchHeading = screen.getByRole("heading", {
+      name: "Weather Search:",
+    })
+    const cityLabel = searchHeading.querySelector("label")
+
+    expect(cityInput).toBeRequired()
+    expect(cityInput).toHaveAttribute("pattern", ".*\\S.*")
+    expect(cityLabel).toHaveAttribute("for", "city")
+    expect(searchHeading).toContainElement(cityLabel)
+  })
+
+  it("does not navigate for whitespace-only city input", async () => {
+    const user = userEvent.setup()
+    renderWeatherSearch({ initialCity: null, weatherResult: null })
+
+    const cityInput = screen.getByRole("textbox", {
+      name: "Weather Search:",
+    })
+
+    await user.type(cityInput, "   ")
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+
+    expect(cityInput).toBeInvalid()
+    expect(routerPush).not.toHaveBeenCalled()
   })
 
   it("announces API errors without presenting stale weather details", async () => {
