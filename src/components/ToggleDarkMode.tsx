@@ -1,21 +1,22 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useSyncExternalStore } from "react"
 import ThemeToggle from "@/src/components/ThemeToggle"
 
+const subscribeToClientReadiness = () => () => {}
+const getClientReadinessSnapshot = () => true
+const getServerReadinessSnapshot = () => false
+
 export default function ToggleDarkMode() {
-  const [mounted, setMounted] = useState(false)
+  const isClientReady = useSyncExternalStore(
+    subscribeToClientReadiness,
+    getClientReadinessSnapshot,
+    getServerReadinessSnapshot,
+  )
   const { resolvedTheme, setTheme } = useTheme()
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(true)
-    }, 0)
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (!mounted) return null
+  if (!isClientReady) return null
 
   const isDarkTheme = resolvedTheme === "dark"
 
