@@ -2,9 +2,7 @@
 
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
-import ThemeToggleArtwork from "@/src/components/ThemeToggleArtwork"
-
-const classNames = (...args: string[]) => args.filter(Boolean).join(" ")
+import ThemeToggle from "@/src/components/ThemeToggle"
 
 export default function ToggleDarkMode() {
   const [mounted, setMounted] = useState(false)
@@ -22,21 +20,11 @@ export default function ToggleDarkMode() {
   const isDarkTheme = resolvedTheme === "dark"
 
   return (
-    <button
-      type="button"
-      aria-label={
-        isDarkTheme ? "Switch to light theme" : "Switch to dark theme"
-      }
-      className={classNames(
-        "absolute top-4 right-4 z-20 inline-flex bg-transparent text-gray-900",
-        "cursor-pointer rounded-[35px] border-0 p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-        isDarkTheme ? "theme-toggle--dark" : "theme-toggle--light",
-      )}
-      onClick={() => {
+    <ThemeToggle
+      isDarkTheme={isDarkTheme}
+      onToggle={() => {
         setTheme(isDarkTheme ? "light" : "dark")
       }}
-    >
-      <ThemeToggleArtwork />
-    </button>
+    />
   )
 }
