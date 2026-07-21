@@ -3,17 +3,10 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/*
-Accessible focus effects
-https://uxdesign.cc/create-better-accessible-focus-effects-75a3de27b8ba
-*/
-
-:focus {
-  outline: none !important;
-  box-shadow: 0 0 0 4px rgb(5, 150, 105) !important;
-  /* Tailwind CSS color green-600 === rgb(5, 150, 105) */
-  border-color: transparent !important;
-  border-radius: 3px;
+:focus-visible {
+  outline: 3px solid rgb(255 255 255);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgb(4 120 87);
 }
 
 html,

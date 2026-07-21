@@ -17,7 +17,7 @@ export default function ThemeToggle({
       }
       className={classNames(
         "absolute top-4 right-4 z-20 inline-flex bg-transparent text-gray-900",
-        "cursor-pointer rounded-[35px] border-0 p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+        "cursor-pointer rounded-[35px] border-0 p-0",
         isDarkTheme ? "theme-toggle--dark" : "theme-toggle--light",
       )}
       onClick={onToggle}
