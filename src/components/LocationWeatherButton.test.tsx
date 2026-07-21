@@ -171,6 +171,45 @@ describe("LocationWeatherButton", () => {
     ).toBeEnabled()
   })
 
+  it.each([
+    {
+      code: 2,
+      expectedMessage:
+        "Your location is unavailable. Please try again or search by city.",
+    },
+    {
+      code: 3,
+      expectedMessage: "Finding your location took too long. Please try again.",
+    },
+    {
+      code: undefined,
+      expectedMessage:
+        "Location permission took too long. Please try again or search by city.",
+    },
+  ])(
+    "recovers from geolocation error code $code",
+    async ({ code, expectedMessage }) => {
+      const user = userEvent.setup()
+      renderLocationWeatherButton()
+
+      await user.click(screen.getByRole("button", { name: "Use my location" }))
+      act(() => {
+        getCurrentGeolocatedConfiguration().onError?.(
+          code === undefined
+            ? undefined
+            : ({ code } as GeolocationPositionError),
+        )
+      })
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        expectedMessage,
+      )
+      expect(
+        screen.getByRole("button", { name: "Use my location" }),
+      ).toBeEnabled()
+    },
+  )
+
   it("rounds successful coordinates before loading server weather", async () => {
     const user = userEvent.setup()
     const { onLocationWeatherLoading, onLocationWeatherResult } =
