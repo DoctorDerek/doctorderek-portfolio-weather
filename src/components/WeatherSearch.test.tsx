@@ -9,7 +9,9 @@ import type { WeatherResult } from "@/src/types/weather"
 const routerPush = vi.hoisted(() => vi.fn())
 const searchParameters = vi.hoisted(() => ({ value: "" }))
 const locationWeatherButtonProperties = vi.hoisted(() => vi.fn())
-const reducedMotionPreference = vi.hoisted(() => ({ value: false }))
+const reducedMotionPreference = vi.hoisted(() => ({
+  value: false as boolean | null,
+}))
 const motionGestureConfiguration = vi.hoisted(() => vi.fn())
 
 type MotionButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -103,6 +105,19 @@ describe("WeatherSearch", () => {
       whileHover: undefined,
       whileTap: undefined,
     })
+  })
+
+  it("treats an unresolved motion preference as motion tolerant", () => {
+    reducedMotionPreference.value = null
+    renderWeatherSearch({ initialCity: null, weatherResult: null })
+
+    expect(motionGestureConfiguration).toHaveBeenLastCalledWith({
+      whileHover: { scale: 1.03 },
+      whileTap: { scale: 0.97 },
+    })
+    expect(
+      locationWeatherButtonProperties.mock.lastCall?.[0].shouldReduceMotion,
+    ).toBe(false)
   })
 
   it("submits an accessible weather search through encoded navigation", async () => {
@@ -223,6 +238,42 @@ describe("WeatherSearch", () => {
     expect(
       screen.getByRole("textbox", { name: "Weather Search:" }),
     ).toHaveValue("")
+  })
+
+  it("loads location weather without rewriting an already clean URL", () => {
+    renderWeatherSearch({ initialCity: null, weatherResult: null })
+    const locationButtonProperties =
+      locationWeatherButtonProperties.mock.lastCall?.[0]
+
+    act(() => {
+      locationButtonProperties.onLocationWeatherLoading()
+    })
+
+    expect(window.location.pathname).toBe("/")
+    expect(window.location.search).toBe("")
+    expect(screen.getByRole("status")).toHaveTextContent("Loading weather…")
+  })
+
+  it("does not reuse stale weather while navigation selects a new city", () => {
+    searchParameters.value = "city=Puebla"
+    renderWeatherSearch({
+      initialCity: "Mexico City",
+      weatherResult: {
+        status: "success",
+        temperatureKelvin: 300.15,
+        description: "clear sky",
+        icon: "01d",
+        locationName: "Mexico City",
+      },
+    })
+
+    expect(screen.getByRole("status")).toHaveTextContent("Loading weather…")
+    expect(
+      screen.queryByRole("heading", { name: "Mexico City" }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByRole("textbox", { name: "Weather Search:" }),
+    ).toHaveValue("Puebla")
   })
 
   it("restores city weather when browser history returns to a city query", () => {
