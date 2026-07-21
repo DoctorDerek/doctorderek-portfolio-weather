@@ -132,6 +132,43 @@ describe("getCurrentWeather", () => {
     })
   })
 
+  it.each([
+    {
+      responsePayload: {
+        name: OPEN_WEATHER_MAP_TEST_CITY,
+        main: { temp: 300.15 },
+        weather: [],
+      },
+      violatedContract: "empty weather observations",
+    },
+    {
+      responsePayload: {
+        name: OPEN_WEATHER_MAP_TEST_CITY,
+        main: { temp: 300.15 },
+        weather: [null],
+      },
+      violatedContract: "malformed weather observations",
+    },
+  ])(
+    "rejects $violatedContract in successful responses",
+    async ({ responsePayload }) => {
+      vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+      mswServer.use(
+        http.get(OPEN_WEATHER_MAP_CURRENT_WEATHER_URL, () =>
+          HttpResponse.json(responsePayload),
+        ),
+      )
+
+      await expect(
+        getCurrentWeather(OPEN_WEATHER_MAP_TEST_CITY),
+      ).resolves.toEqual({
+        status: "error",
+        code: 502,
+        message: "Weather service returned invalid data",
+      })
+    },
+  )
+
   it("rejects successful responses that are not JSON", async () => {
     vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
     mswServer.use(
