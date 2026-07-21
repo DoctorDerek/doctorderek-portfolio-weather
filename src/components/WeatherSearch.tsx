@@ -84,6 +84,8 @@ export default function WeatherSearch({
             type="text"
             name="city"
             id="city"
+            required
+            pattern={".*\\S.*"}
             key={cityInputValue}
             defaultValue={cityInputValue}
           />
