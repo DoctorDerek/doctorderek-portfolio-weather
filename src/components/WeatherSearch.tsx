@@ -6,6 +6,7 @@ import { useCallback, useState } from "react"
 import CityWeather from "@/src/components/CityWeather"
 import LocationWeatherButton from "@/src/components/LocationWeatherButton"
 import type { WeatherResult } from "@/src/types/weather"
+import { normalizeCityQuery } from "@/src/utils/city"
 
 type LocationWeatherState =
   | { status: "inactive" }
@@ -27,7 +28,9 @@ export default function WeatherSearch({
   const [locationWeatherState, setLocationWeatherState] =
     useState<LocationWeatherState>({ status: "inactive" })
 
-  const selectedCity = searchParameters.get("city") || searchParameters.get("q")
+  const selectedCity = normalizeCityQuery(
+    searchParameters.get("city") || searchParameters.get("q"),
+  )
   const shouldDisplayLocationWeather =
     locationWeatherState.status !== "inactive" && !selectedCity
   const displayedCity =
@@ -62,7 +65,10 @@ export default function WeatherSearch({
         onSubmit={(event) => {
           event.preventDefault()
           const formData = new FormData(event.currentTarget)
-          const inputCity = String(formData.get("city"))
+          const inputCity = normalizeCityQuery(String(formData.get("city")))
+
+          if (!inputCity) return
+
           router.push(`/?city=${encodeURIComponent(inputCity)}`)
         }}
       >
