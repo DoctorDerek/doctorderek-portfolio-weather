@@ -16,6 +16,7 @@ const OPEN_WEATHER_MAP_INVALID_RESPONSE_MESSAGE =
   "Weather service returned invalid data"
 const CITY_NOT_FOUND_MESSAGE = "city not found"
 const CURRENT_LOCATION_FALLBACK_NAME = "Current location"
+const ISO_COUNTRY_CODE_PATTERN = /^[A-Z]{2}$/i
 
 type CurrentWeatherLocation =
   { city: string } | { coordinates: WeatherCoordinates }
@@ -86,6 +87,7 @@ function isOpenWeatherMapSuccessResponse(
     !isNonNullObject(sys) ||
     !("country" in sys) ||
     typeof sys.country !== "string" ||
+    !ISO_COUNTRY_CODE_PATTERN.test(sys.country) ||
     !isNonNullObject(main) ||
     !("temp" in main) ||
     typeof main.temp !== "number" ||
@@ -123,7 +125,16 @@ function isOpenWeatherMapGeocodingLocation(
     return false
   }
 
-  return !("state" in responsePayload) || typeof responsePayload.state === "string"
+  if ("state" in responsePayload && typeof responsePayload.state !== "string") {
+    return false
+  }
+
+  return (
+    responsePayload.name.trim().length > 0 &&
+    ISO_COUNTRY_CODE_PATTERN.test(responsePayload.country) &&
+    Number.isFinite(responsePayload.lat) &&
+    Number.isFinite(responsePayload.lon)
+  )
 }
 
 function getOpenWeatherMapErrorMessage(responsePayload: unknown) {
@@ -270,9 +281,9 @@ async function requestGeocodedLocation(
       longitude: geocodedLocation.lon,
     },
     location: {
-      name: geocodedLocation.name,
+      name: geocodedLocation.name.trim(),
       stateName: geocodedLocation.state?.trim() || null,
-      countryCode: geocodedLocation.country,
+      countryCode: geocodedLocation.country.toUpperCase(),
     },
   }
 }
@@ -329,7 +340,7 @@ async function requestCurrentWeather(
     location: resolvedLocation ?? {
       name: responsePayload.name.trim() || fallbackLocationName,
       stateName: null,
-      countryCode: responsePayload.sys.country,
+      countryCode: responsePayload.sys.country.toUpperCase(),
     },
   }
 }
