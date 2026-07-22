@@ -19,6 +19,13 @@ type MotionButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   whileTap?: { scale: number }
 }
 
+type MotionContainerProps = HTMLAttributes<HTMLElement> & {
+  initial?: false | { opacity: number; y: number }
+  animate?: { opacity: number; y: number }
+  exit?: { opacity: number; y: number }
+  transition?: { duration: number; ease: string }
+}
+
 vi.mock("motion/react", async (importOriginal) => {
   const motion = await importOriginal<typeof import("motion/react")>()
 
@@ -39,13 +46,19 @@ vi.mock("motion/react", async (importOriginal) => {
         children,
         initial: _initial,
         animate: _animate,
+        exit: _exit,
         transition: _transition,
         ...divProperties
-      }: HTMLAttributes<HTMLDivElement> & {
-        initial?: { y: number }
-        animate?: { y: number }
-        transition?: { duration: number }
-      }) => <div {...divProperties}>{children}</div>,
+      }: MotionContainerProps) => <div {...divProperties}>{children}</div>,
+      section: ({
+        children,
+        initial: _initial,
+        animate: _animate,
+        transition: _transition,
+        ...sectionProperties
+      }: MotionContainerProps) => (
+        <section {...sectionProperties}>{children}</section>
+      ),
     },
     useReducedMotion: () => reducedMotionPreference.value,
   }
