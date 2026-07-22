@@ -3,7 +3,10 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import getCurrentWeather, {
   getCurrentWeatherByCoordinates,
 } from "@/src/services/weather"
-import { OPEN_WEATHER_MAP_CURRENT_WEATHER_URL } from "@/src/services/weatherConfig"
+import {
+  OPEN_WEATHER_MAP_CURRENT_WEATHER_URL,
+  OPEN_WEATHER_MAP_DIRECT_GEOCODING_URL,
+} from "@/src/services/weatherConfig"
 import mswServer from "@/src/test/mswServer"
 import {
   OPEN_WEATHER_MAP_ERROR_RESPONSE_FIXTURE,
@@ -47,6 +50,104 @@ describe("getCurrentWeather", () => {
         stateName: OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0].state,
         countryCode: OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0].country,
       },
+    })
+  })
+
+  it("returns city not found when direct geocoding has no matches", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_DIRECT_GEOCODING_URL, () =>
+        HttpResponse.json([]),
+      ),
+    )
+
+    await expect(
+      getCurrentWeather(OPEN_WEATHER_MAP_TEST_CITY),
+    ).resolves.toEqual({
+      status: "error",
+      code: 404,
+      message: "city not found",
+    })
+  })
+
+  it("rejects direct geocoding payloads that are not location arrays", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_DIRECT_GEOCODING_URL, () =>
+        HttpResponse.json({ name: OPEN_WEATHER_MAP_TEST_CITY }),
+      ),
+    )
+
+    await expect(
+      getCurrentWeather(OPEN_WEATHER_MAP_TEST_CITY),
+    ).resolves.toEqual({
+      status: "error",
+      code: 502,
+      message: "Weather service returned invalid data",
+    })
+  })
+
+  it("rejects malformed direct geocoding locations", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_DIRECT_GEOCODING_URL, () =>
+        HttpResponse.json([
+          {
+            ...OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0],
+            state: 500,
+          },
+        ]),
+      ),
+    )
+
+    await expect(
+      getCurrentWeather(OPEN_WEATHER_MAP_TEST_CITY),
+    ).resolves.toEqual({
+      status: "error",
+      code: 502,
+      message: "Weather service returned invalid data",
+    })
+  })
+
+  it("allows direct geocoding locations without a state", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_DIRECT_GEOCODING_URL, () =>
+        HttpResponse.json([
+          {
+            name: OPEN_WEATHER_MAP_TEST_CITY,
+            country: "MX",
+            lat: OPEN_WEATHER_MAP_TEST_COORDINATES.latitude,
+            lon: OPEN_WEATHER_MAP_TEST_COORDINATES.longitude,
+          },
+        ]),
+      ),
+    )
+
+    await expect(
+      getCurrentWeather(OPEN_WEATHER_MAP_TEST_CITY),
+    ).resolves.toMatchObject({
+      status: "success",
+      location: {
+        stateName: null,
+      },
+    })
+  })
+
+  it("preserves direct geocoding API errors", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_DIRECT_GEOCODING_URL, () =>
+        HttpResponse.json({ message: "geocoding unavailable" }, { status: 503 }),
+      ),
+    )
+
+    await expect(
+      getCurrentWeather(OPEN_WEATHER_MAP_TEST_CITY),
+    ).resolves.toEqual({
+      status: "error",
+      code: 503,
+      message: "geocoding unavailable",
     })
   })
 
