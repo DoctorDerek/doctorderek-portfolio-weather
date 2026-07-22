@@ -171,6 +171,77 @@ describe("getCurrentWeather", () => {
     })
   })
 
+  it("returns a configuration error before coordinate requests", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", "")
+
+    await expect(
+      getCurrentWeatherByCoordinates(OPEN_WEATHER_MAP_TEST_COORDINATES),
+    ).resolves.toEqual({
+      status: "error",
+      code: 500,
+      message: "API key is not configured",
+    })
+  })
+
+  it("falls back to weather identity when reverse geocoding fails", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_REVERSE_GEOCODING_URL, () =>
+        HttpResponse.error(),
+      ),
+    )
+
+    await expect(
+      getCurrentWeatherByCoordinates(OPEN_WEATHER_MAP_TEST_COORDINATES),
+    ).resolves.toMatchObject({
+      status: "success",
+      location: {
+        name: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.name,
+        stateName: null,
+        countryCode: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.sys.country,
+      },
+    })
+  })
+
+  it("falls back to weather identity for malformed reverse geocoding", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_REVERSE_GEOCODING_URL, () =>
+        HttpResponse.json([{ name: OPEN_WEATHER_MAP_TEST_CITY }]),
+      ),
+    )
+
+    await expect(
+      getCurrentWeatherByCoordinates(OPEN_WEATHER_MAP_TEST_COORDINATES),
+    ).resolves.toMatchObject({
+      status: "success",
+      location: {
+        name: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.name,
+        stateName: null,
+        countryCode: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.sys.country,
+      },
+    })
+  })
+
+  it("preserves coordinate weather failures after reverse geocoding", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_CURRENT_WEATHER_URL, () =>
+        HttpResponse.json(OPEN_WEATHER_MAP_ERROR_RESPONSE_FIXTURE, {
+          status: 503,
+        }),
+      ),
+    )
+
+    await expect(
+      getCurrentWeatherByCoordinates(OPEN_WEATHER_MAP_TEST_COORDINATES),
+    ).resolves.toEqual({
+      status: "error",
+      code: 503,
+      message: OPEN_WEATHER_MAP_ERROR_RESPONSE_FIXTURE.message,
+    })
+  })
+
   it("uses a stable heading when coordinate weather has no place name", async () => {
     vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
     mswServer.use(
