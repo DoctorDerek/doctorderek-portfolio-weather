@@ -59,66 +59,98 @@ export default function WeatherSearch({
   )
 
   return (
-    <div className="relative z-10 flex h-[90vh] flex-col justify-end py-10 sm:justify-start">
-      <form
-        className="flex flex-wrap items-center justify-center"
-        onSubmit={(event) => {
-          event.preventDefault()
-          const formData = new FormData(event.currentTarget)
-          const inputCity = normalizeCityQuery(String(formData.get("city")))
-
-          if (!inputCity) return
-
-          router.push(`/?city=${encodeURIComponent(inputCity)}`)
-        }}
+    <main className="relative z-10 flex min-h-svh items-center justify-center px-4 py-24 sm:px-6 sm:py-20">
+      <section
+        aria-labelledby="weather-workspace-title"
+        className="w-full max-w-xl"
       >
-        <h1 className="mb-2 rounded-xl px-4 py-1 text-2xl font-semibold tracking-tight sm:mb-0 sm:py-2 sm:text-base dark:bg-black">
-          <label htmlFor="city">Weather Search:</label>
-        </h1>
-        <div className="flex flex-wrap items-center justify-center">
-          <input
-            data-testid="weather-input"
-            className="ml-2 h-10 w-40 rounded-l-lg border border-solid border-gray-300 p-2"
-            type="text"
-            name="city"
-            id="city"
-            required
-            pattern={".*\\S.*"}
-            key={cityInputValue}
-            defaultValue={cityInputValue}
-          />
-          <motion.button
-            className="h-10 rounded-r-lg bg-[#4683c8] p-2 text-xs font-bold text-white uppercase"
-            type="submit"
-            whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
-            whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+        <header className="mb-6 text-center">
+          <p className="text-xs font-bold tracking-[0.22em] text-slate-700 uppercase dark:text-slate-200">
+            Live conditions
+          </p>
+          <h1
+            id="weather-workspace-title"
+            className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl dark:text-white"
           >
-            Submit
-          </motion.button>
+            Weather, right now
+          </h1>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-700 dark:text-slate-200">
+            Search a city or use your current location.
+          </p>
+        </header>
+
+        <form
+          className="space-y-2"
+          onSubmit={(event) => {
+            event.preventDefault()
+            const formData = new FormData(event.currentTarget)
+            const inputCity = normalizeCityQuery(String(formData.get("city")))
+
+            if (!inputCity) return
+
+            router.push(`/?city=${encodeURIComponent(inputCity)}`)
+          }}
+        >
+          <label
+            className="block text-sm font-semibold text-slate-900 dark:text-white"
+            htmlFor="city"
+          >
+            City or place
+          </label>
+          <div className="flex">
+            <input
+              data-testid="weather-input"
+              className="h-12 min-w-0 flex-1 rounded-l-xl border border-solid border-slate-300 bg-white/90 px-4 text-base text-slate-950"
+              type="text"
+              name="city"
+              id="city"
+              placeholder="e.g. Mexico City"
+              required
+              pattern={".*\\S.*"}
+              key={cityInputValue}
+              defaultValue={cityInputValue}
+            />
+            <motion.button
+              className="h-12 rounded-r-xl bg-blue-700 px-5 text-sm font-bold text-white uppercase"
+              type="submit"
+              whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+            >
+              Search
+            </motion.button>
+          </div>
+        </form>
+
+        <div className="my-4 flex items-center gap-3" aria-hidden="true">
+          <div className="h-px flex-1 bg-slate-500/30" />
+          <span className="text-xs font-semibold text-slate-700 uppercase dark:text-slate-200">
+            or
+          </span>
+          <div className="h-px flex-1 bg-slate-500/30" />
         </div>
-      </form>
 
-      <LocationWeatherButton
-        onLocationWeatherLoading={handleLocationWeatherLoading}
-        onLocationWeatherResult={handleLocationWeatherResult}
-        shouldReduceMotion={shouldReduceMotion ?? false}
-      />
+        <LocationWeatherButton
+          onLocationWeatherLoading={handleLocationWeatherLoading}
+          onLocationWeatherResult={handleLocationWeatherResult}
+          shouldReduceMotion={shouldReduceMotion ?? false}
+        />
 
-      {shouldDisplayLocationWeather ? (
-        <CityWeather
-          city={CURRENT_LOCATION_LABEL}
-          weatherResult={
-            locationWeatherState.status === "complete"
-              ? locationWeatherState.weatherResult
-              : null
-          }
-        />
-      ) : displayedCity ? (
-        <CityWeather
-          city={displayedCity}
-          weatherResult={displayedCity === initialCity ? weatherResult : null}
-        />
-      ) : null}
-    </div>
+        {shouldDisplayLocationWeather ? (
+          <CityWeather
+            city={CURRENT_LOCATION_LABEL}
+            weatherResult={
+              locationWeatherState.status === "complete"
+                ? locationWeatherState.weatherResult
+                : null
+            }
+          />
+        ) : displayedCity ? (
+          <CityWeather
+            city={displayedCity}
+            weatherResult={displayedCity === initialCity ? weatherResult : null}
+          />
+        ) : null}
+      </section>
+    </main>
   )
 }

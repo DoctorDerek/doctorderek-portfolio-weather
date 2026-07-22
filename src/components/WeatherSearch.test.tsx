@@ -125,11 +125,11 @@ describe("WeatherSearch", () => {
     renderWeatherSearch({ initialCity: null, weatherResult: null })
 
     const cityInput = screen.getByRole("textbox", {
-      name: "Weather Search:",
+      name: "City or place",
     })
 
     await user.type(cityInput, "  Mexico City  ")
-    await user.click(screen.getByRole("button", { name: "Submit" }))
+    await user.click(screen.getByRole("button", { name: "Search" }))
 
     expect(routerPush).toHaveBeenCalledOnce()
     expect(routerPush).toHaveBeenCalledWith("/?city=Mexico%20City")
@@ -139,17 +139,17 @@ describe("WeatherSearch", () => {
     renderWeatherSearch({ initialCity: null, weatherResult: null })
 
     const cityInput = screen.getByRole("textbox", {
-      name: "Weather Search:",
+      name: "City or place",
     })
     const searchHeading = screen.getByRole("heading", {
-      name: "Weather Search:",
+      name: "Weather, right now",
     })
-    const cityLabel = searchHeading.querySelector("label")
+    const cityLabel = screen.getByText("City or place")
 
     expect(cityInput).toBeRequired()
     expect(cityInput).toHaveAttribute("pattern", ".*\\S.*")
     expect(cityLabel).toHaveAttribute("for", "city")
-    expect(searchHeading).toContainElement(cityLabel)
+    expect(searchHeading).toHaveAttribute("id", "weather-workspace-title")
   })
 
   it("does not navigate for whitespace-only city input", async () => {
@@ -157,11 +157,11 @@ describe("WeatherSearch", () => {
     renderWeatherSearch({ initialCity: null, weatherResult: null })
 
     const cityInput = screen.getByRole("textbox", {
-      name: "Weather Search:",
+      name: "City or place",
     })
 
     await user.type(cityInput, "   ")
-    await user.click(screen.getByRole("button", { name: "Submit" }))
+    await user.click(screen.getByRole("button", { name: "Search" }))
 
     expect(cityInput).toBeInvalid()
     expect(routerPush).not.toHaveBeenCalled()
@@ -170,7 +170,7 @@ describe("WeatherSearch", () => {
   it("ignores a programmatically submitted blank city", () => {
     renderWeatherSearch({ initialCity: null, weatherResult: null })
     const cityInput = screen.getByRole("textbox", {
-      name: "Weather Search:",
+      name: "City or place",
     })
     const searchForm = cityInput.closest("form")
 
@@ -263,7 +263,7 @@ describe("WeatherSearch", () => {
     expect(screen.getByRole("heading", { name: "Cuauhtémoc" })).toBeVisible()
     expect(screen.getByText("Few Clouds")).toBeVisible()
     expect(
-      screen.getByRole("textbox", { name: "Weather Search:" }),
+      screen.getByRole("textbox", { name: "City or place" }),
     ).toHaveValue("")
   })
 
@@ -303,7 +303,7 @@ describe("WeatherSearch", () => {
       screen.queryByRole("heading", { name: "Mexico City" }),
     ).not.toBeInTheDocument()
     expect(
-      screen.getByRole("textbox", { name: "Weather Search:" }),
+      screen.getByRole("textbox", { name: "City or place" }),
     ).toHaveValue("Puebla")
   })
 

@@ -21,8 +21,8 @@ test("keeps every primary weather control visibly keyboard focused", async ({
 
   const primaryWeatherControls = [
     page.getByRole("button", { name: "Switch to dark theme" }),
-    page.getByRole("textbox", { name: "Weather Search:" }),
-    page.getByRole("button", { name: "Submit" }),
+    page.getByRole("textbox", { name: "City or place" }),
+    page.getByRole("button", { name: "Search" }),
     page.getByRole("button", { name: "Use my location" }),
   ]
 

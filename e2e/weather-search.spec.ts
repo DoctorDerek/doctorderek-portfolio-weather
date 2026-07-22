@@ -26,7 +26,7 @@ test("provides restrained pointer feedback without changing submission semantics
 }) => {
   await page.goto("/")
 
-  const submitButton = page.getByRole("button", { name: "Submit" })
+  const submitButton = page.getByRole("button", { name: "Search" })
 
   await expect(submitButton).toHaveAttribute("type", "submit")
   await waitForMotionButtonHydration(submitButton)
@@ -38,9 +38,9 @@ test("searches live weather through encoded city navigation", async ({
   await page.goto("/")
 
   await page
-    .getByRole("textbox", { name: "Weather Search:" })
+    .getByRole("textbox", { name: "City or place" })
     .fill(LIVE_WEATHER_TEST_CITY)
-  const submitButton = page.getByRole("button", { name: "Submit" })
+  const submitButton = page.getByRole("button", { name: "Search" })
   await waitForMotionButtonHydration(submitButton)
   await submitButton.click()
 
@@ -79,9 +79,9 @@ test("announces live API errors without stale weather output", async ({
   await page.goto("/")
 
   await page
-    .getByRole("textbox", { name: "Weather Search:" })
+    .getByRole("textbox", { name: "City or place" })
     .fill(INVALID_LIVE_WEATHER_TEST_CITY)
-  const submitButton = page.getByRole("button", { name: "Submit" })
+  const submitButton = page.getByRole("button", { name: "Search" })
   await waitForMotionButtonHydration(submitButton)
   await submitButton.click()
 
