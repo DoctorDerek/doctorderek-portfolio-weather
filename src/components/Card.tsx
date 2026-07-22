@@ -11,11 +11,11 @@ export default function Card({
   heading: string
   ariaLive?: React.AriaAttributes["aria-live"]
 }) {
-  const useSmallFont = heading.length >= 12
+  const useSmallFont = heading.length >= 18
 
   return (
     <div
-      className="flex flex-col items-center justify-center"
+      className="mt-6 flex w-full flex-col items-center justify-center"
       role={ariaLive ? "status" : undefined}
       aria-live={ariaLive}
       aria-atomic={ariaLive ? true : undefined}
@@ -24,17 +24,17 @@ export default function Card({
         initial={{ y: 8 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.2 }}
-        className="mt-4 flex flex-col items-center justify-center rounded-lg bg-white p-3 text-gray-400 shadow-md drop-shadow-md sm:mt-10 dark:bg-black dark:text-gray-300"
+        className="flex w-full flex-col items-center justify-center rounded-2xl border border-white/70 bg-white/65 p-5 text-slate-600 shadow-lg shadow-slate-900/10 backdrop-blur-md dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-300 dark:shadow-black/25"
       >
         <h2
           className={classNames(
-            useSmallFont ? "text-base" : "text-xl",
-            "font-bold text-gray-600 uppercase dark:text-white",
+            useSmallFont ? "text-xl" : "text-2xl",
+            "text-center font-semibold tracking-tight text-slate-950 dark:text-white",
           )}
         >
           {heading}
         </h2>
-        {children && children}
+        {children}
       </motion.div>
     </div>
   )
