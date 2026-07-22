@@ -6,6 +6,14 @@ import type { WeatherResult } from "@/src/types/weather"
 
 const reducedMotionPolicy = vi.hoisted(() => vi.fn())
 const weatherSearchProperties = vi.hoisted(() => vi.fn())
+const dynamicImportOptions = vi.hoisted(() => vi.fn())
+
+vi.mock("next/dynamic", () => ({
+  default: (_loader: unknown, options: unknown) => {
+    dynamicImportOptions(options)
+    return () => null
+  },
+}))
 
 vi.mock("motion/react", () => ({
   MotionConfig: ({
@@ -24,10 +32,6 @@ vi.mock("@/src/components/BackgroundImage", () => ({
   default: () => null,
 }))
 
-vi.mock("@/src/components/ToggleDarkMode", () => ({
-  default: () => null,
-}))
-
 vi.mock("@/src/components/WeatherSearch", () => ({
   default: (properties: {
     initialCity: string | null
@@ -42,6 +46,11 @@ describe("App", () => {
   beforeEach(() => {
     reducedMotionPolicy.mockClear()
     weatherSearchProperties.mockClear()
+  })
+
+  it("loads the theme adapter exclusively in the browser", () => {
+    expect(dynamicImportOptions).toHaveBeenCalledOnce()
+    expect(dynamicImportOptions).toHaveBeenCalledWith({ ssr: false })
   })
 
   it("applies the user’s reduced-motion preference globally", () => {
