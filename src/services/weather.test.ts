@@ -6,6 +6,7 @@ import getCurrentWeather, {
 import {
   OPEN_WEATHER_MAP_CURRENT_WEATHER_URL,
   OPEN_WEATHER_MAP_DIRECT_GEOCODING_URL,
+  OPEN_WEATHER_MAP_REVERSE_GEOCODING_URL,
 } from "@/src/services/weatherConfig"
 import mswServer from "@/src/test/mswServer"
 import {
@@ -163,9 +164,9 @@ describe("getCurrentWeather", () => {
         OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].description,
       icon: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].icon,
       location: {
-        name: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.name,
-        stateName: null,
-        countryCode: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.sys.country,
+        name: OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0].name,
+        stateName: OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0].state,
+        countryCode: OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0].country,
       },
     })
   })
@@ -173,6 +174,9 @@ describe("getCurrentWeather", () => {
   it("uses a stable heading when coordinate weather has no place name", async () => {
     vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
     mswServer.use(
+      http.get(OPEN_WEATHER_MAP_REVERSE_GEOCODING_URL, () =>
+        HttpResponse.json([]),
+      ),
       http.get(OPEN_WEATHER_MAP_CURRENT_WEATHER_URL, () =>
         HttpResponse.json({
           ...OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE,

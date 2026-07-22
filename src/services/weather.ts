@@ -2,6 +2,7 @@ import "server-only"
 import {
   OPEN_WEATHER_MAP_CURRENT_WEATHER_URL,
   OPEN_WEATHER_MAP_DIRECT_GEOCODING_URL,
+  OPEN_WEATHER_MAP_REVERSE_GEOCODING_URL,
 } from "@/src/services/weatherConfig"
 import type {
   WeatherCoordinates,
@@ -31,6 +32,10 @@ type GeocodedLocationResult =
       coordinates: WeatherCoordinates
       location: WeatherLocation
     }
+  | WeatherRequestError
+
+type OpenWeatherMapApiKeyResult =
+  | { status: "success"; apiKey: string }
   | WeatherRequestError
 
 type OpenWeatherMapGeocodingLocation = {
@@ -167,6 +172,18 @@ function createDirectGeocodingRequestUrl(
   return requestUrl
 }
 
+function createReverseGeocodingRequestUrl(
+  coordinates: WeatherCoordinates,
+  openWeatherMapApiKey: string,
+) {
+  const requestUrl = new URL(OPEN_WEATHER_MAP_REVERSE_GEOCODING_URL)
+  requestUrl.searchParams.set("lat", String(coordinates.latitude))
+  requestUrl.searchParams.set("lon", String(coordinates.longitude))
+  requestUrl.searchParams.set("limit", "1")
+  requestUrl.searchParams.set("appid", openWeatherMapApiKey)
+  return requestUrl
+}
+
 async function readOpenWeatherMapResponse(openWeatherMapResponse: Response) {
   try {
     const responsePayload: unknown = await openWeatherMapResponse.json()
@@ -205,13 +222,22 @@ async function requestOpenWeatherMap(
   }
 }
 
-async function requestGeocodedCity(
-  city: string,
-  openWeatherMapApiKey: string,
+function getOpenWeatherMapApiKey(): OpenWeatherMapApiKeyResult {
+  const apiKey = process.env.OPEN_WEATHER_MAP_API_KEY
+
+  return apiKey
+    ? { status: "success", apiKey }
+    : {
+        status: "error",
+        code: 500,
+        message: "API key is not configured",
+      }
+}
+
+async function requestGeocodedLocation(
+  requestUrl: URL,
 ): Promise<GeocodedLocationResult> {
-  const requestResult = await requestOpenWeatherMap(
-    createDirectGeocodingRequestUrl(city, openWeatherMapApiKey),
-  )
+  const requestResult = await requestOpenWeatherMap(requestUrl)
 
   if (requestResult.status === "error") return requestResult
 
@@ -251,21 +277,27 @@ async function requestGeocodedCity(
   }
 }
 
+function requestGeocodedCity(city: string, openWeatherMapApiKey: string) {
+  return requestGeocodedLocation(
+    createDirectGeocodingRequestUrl(city, openWeatherMapApiKey),
+  )
+}
+
+function requestGeocodedCoordinates(
+  coordinates: WeatherCoordinates,
+  openWeatherMapApiKey: string,
+) {
+  return requestGeocodedLocation(
+    createReverseGeocodingRequestUrl(coordinates, openWeatherMapApiKey),
+  )
+}
+
 async function requestCurrentWeather(
   currentWeatherLocation: CurrentWeatherLocation,
   fallbackLocationName: string,
+  openWeatherMapApiKey: string,
   resolvedLocation?: WeatherLocation,
 ): Promise<WeatherResult> {
-  const openWeatherMapApiKey = process.env.OPEN_WEATHER_MAP_API_KEY
-
-  if (!openWeatherMapApiKey) {
-    return {
-      status: "error",
-      code: 500,
-      message: "API key is not configured",
-    }
-  }
-
   const openWeatherMapRequestResult = await requestOpenWeatherMap(
     createOpenWeatherMapRequestUrl(
       currentWeatherLocation,
@@ -305,19 +337,13 @@ async function requestCurrentWeather(
 export default async function getCurrentWeather(
   city: string,
 ): Promise<WeatherResult> {
-  const openWeatherMapApiKey = process.env.OPEN_WEATHER_MAP_API_KEY
+  const apiKeyResult = getOpenWeatherMapApiKey()
 
-  if (!openWeatherMapApiKey) {
-    return {
-      status: "error",
-      code: 500,
-      message: "API key is not configured",
-    }
-  }
+  if (apiKeyResult.status === "error") return apiKeyResult
 
   const geocodedCityResult = await requestGeocodedCity(
     city,
-    openWeatherMapApiKey,
+    apiKeyResult.apiKey,
   )
 
   if (geocodedCityResult.status === "error") return geocodedCityResult
@@ -325,12 +351,33 @@ export default async function getCurrentWeather(
   return requestCurrentWeather(
     { coordinates: geocodedCityResult.coordinates },
     city,
+    apiKeyResult.apiKey,
     geocodedCityResult.location,
   )
 }
 
-export function getCurrentWeatherByCoordinates(
+export async function getCurrentWeatherByCoordinates(
   coordinates: WeatherCoordinates,
-) {
-  return requestCurrentWeather({ coordinates }, CURRENT_LOCATION_FALLBACK_NAME)
+): Promise<WeatherResult> {
+  const apiKeyResult = getOpenWeatherMapApiKey()
+
+  if (apiKeyResult.status === "error") return apiKeyResult
+
+  const [weatherResult, geocodedLocationResult] = await Promise.all([
+    requestCurrentWeather(
+      { coordinates },
+      CURRENT_LOCATION_FALLBACK_NAME,
+      apiKeyResult.apiKey,
+    ),
+    requestGeocodedCoordinates(coordinates, apiKeyResult.apiKey),
+  ])
+
+  if (
+    weatherResult.status === "error" ||
+    geocodedLocationResult.status === "error"
+  ) {
+    return weatherResult
+  }
+
+  return { ...weatherResult, location: geocodedLocationResult.location }
 }
