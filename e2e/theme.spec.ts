@@ -1,4 +1,16 @@
 import { expect, test } from "@playwright/test"
+import type { Page } from "@playwright/test"
+
+const collectBrowserErrors = (page: Page) => {
+  const browserErrors: string[] = []
+
+  page.on("console", (message) => {
+    if (message.type() === "error") browserErrors.push(message.text())
+  })
+  page.on("pageerror", (error) => browserErrors.push(error.message))
+
+  return browserErrors
+}
 
 test("removes spatial feedback when the user prefers reduced motion", async ({
   page,
@@ -27,6 +39,8 @@ test("removes spatial feedback when the user prefers reduced motion", async ({
 test("persists dark mode through the accessible theme control", async ({
   page,
 }) => {
+  const browserErrors = collectBrowserErrors(page)
+
   await page.addInitScript(() => {
     window.localStorage.setItem("theme", "light")
   })
@@ -49,4 +63,38 @@ test("persists dark mode through the accessible theme control", async ({
   await expect
     .poll(() => page.evaluate(() => window.localStorage.getItem("theme")))
     .toBe("dark")
+  expect(browserErrors).toEqual([])
+})
+
+test("hydrates a persisted dark theme without browser errors", async ({
+  page,
+}) => {
+  const browserErrors = collectBrowserErrors(page)
+
+  await page.addInitScript(() => {
+    window.localStorage.setItem("theme", "dark")
+  })
+  await page.goto("/")
+
+  await expect(page.locator("html")).toHaveClass(/dark/)
+  await expect(
+    page.getByRole("button", { name: "Switch to light theme" }),
+  ).toBeVisible()
+  expect(browserErrors).toEqual([])
+})
+
+test("hydrates the system theme without browser errors", async ({ page }) => {
+  const browserErrors = collectBrowserErrors(page)
+
+  await page.emulateMedia({ colorScheme: "dark" })
+  await page.addInitScript(() => {
+    window.localStorage.removeItem("theme")
+  })
+  await page.goto("/")
+
+  await expect(page.locator("html")).toHaveClass(/dark/)
+  await expect(
+    page.getByRole("button", { name: "Switch to light theme" }),
+  ).toBeVisible()
+  expect(browserErrors).toEqual([])
 })
