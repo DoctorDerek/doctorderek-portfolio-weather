@@ -110,6 +110,68 @@ describe("getCurrentWeather", () => {
     })
   })
 
+  it.each([
+    {
+      invalidIdentity: {
+        ...OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0],
+        name: "   ",
+      },
+      violatedContract: "blank names",
+    },
+    {
+      invalidIdentity: {
+        ...OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0],
+        country: "MEX",
+      },
+      violatedContract: "invalid country codes",
+    },
+  ])(
+    "rejects geocoding identity with $violatedContract",
+    async ({ invalidIdentity }) => {
+      vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+      mswServer.use(
+        http.get(OPEN_WEATHER_MAP_DIRECT_GEOCODING_URL, () =>
+          HttpResponse.json([invalidIdentity]),
+        ),
+      )
+
+      await expect(
+        getCurrentWeather(OPEN_WEATHER_MAP_TEST_CITY),
+      ).resolves.toEqual({
+        status: "error",
+        code: 502,
+        message: "Weather service returned invalid data",
+      })
+    },
+  )
+
+  it("normalizes geocoded names, states, and country codes", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_DIRECT_GEOCODING_URL, () =>
+        HttpResponse.json([
+          {
+            ...OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0],
+            name: `  ${OPEN_WEATHER_MAP_TEST_CITY}  `,
+            state: "  Mexico City  ",
+            country: "mx",
+          },
+        ]),
+      ),
+    )
+
+    await expect(
+      getCurrentWeather(OPEN_WEATHER_MAP_TEST_CITY),
+    ).resolves.toMatchObject({
+      status: "success",
+      location: {
+        name: OPEN_WEATHER_MAP_TEST_CITY,
+        stateName: "Mexico City",
+        countryCode: "MX",
+      },
+    })
+  })
+
   it("allows direct geocoding locations without a state", async () => {
     vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
     mswServer.use(
@@ -307,6 +369,26 @@ describe("getCurrentWeather", () => {
     mswServer.use(
       http.get(OPEN_WEATHER_MAP_CURRENT_WEATHER_URL, () =>
         HttpResponse.json({ main: { temp: "warm" }, weather: [] }),
+      ),
+    )
+
+    await expect(
+      getCurrentWeather(OPEN_WEATHER_MAP_TEST_CITY),
+    ).resolves.toEqual({
+      status: "error",
+      code: 502,
+      message: "Weather service returned invalid data",
+    })
+  })
+
+  it("rejects weather responses with invalid country identity", async () => {
+    vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
+    mswServer.use(
+      http.get(OPEN_WEATHER_MAP_CURRENT_WEATHER_URL, () =>
+        HttpResponse.json({
+          ...OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE,
+          sys: { country: "MEX" },
+        }),
       ),
     )
 
