@@ -5,6 +5,7 @@ import { useEffect } from "react"
 import toast from "react-hot-toast"
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
+import WeatherLocationDetails from "@/src/components/WeatherLocationDetails"
 import type { WeatherResult } from "@/src/types/weather"
 import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
 import {
@@ -61,6 +62,7 @@ export default function CityWeather({
       heading={location.name}
       ariaLive="polite"
     >
+      <WeatherLocationDetails location={location} />
       <div className="grid h-20 w-20">
         <div className="relative">
           <ImageFixed
