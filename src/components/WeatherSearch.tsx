@@ -111,7 +111,7 @@ export default function WeatherSearch({
               defaultValue={cityInputValue}
             />
             <motion.button
-              className="h-12 rounded-r-xl bg-blue-700 px-5 text-sm font-bold text-white uppercase shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-500 dark:hover:bg-blue-400"
+              className="h-12 rounded-r-xl bg-blue-700 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-500 dark:hover:bg-blue-400"
               type="submit"
               whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
               whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
