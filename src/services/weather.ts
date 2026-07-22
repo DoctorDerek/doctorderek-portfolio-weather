@@ -11,6 +11,12 @@ const CURRENT_LOCATION_FALLBACK_NAME = "Current location"
 type CurrentWeatherLocation =
   { city: string } | { coordinates: WeatherCoordinates }
 
+type WeatherRequestError = Extract<WeatherResult, { status: "error" }>
+
+type OpenWeatherMapRequestResult =
+  | { status: "success"; responsePayload: unknown }
+  | WeatherRequestError
+
 type OpenWeatherMapSuccessResponse = {
   name: string
   sys: {
@@ -115,6 +121,35 @@ async function readOpenWeatherMapResponse(openWeatherMapResponse: Response) {
   }
 }
 
+async function requestOpenWeatherMap(
+  requestUrl: URL,
+): Promise<OpenWeatherMapRequestResult> {
+  try {
+    const openWeatherMapResponse = await fetch(requestUrl, {
+      cache: "no-store",
+    })
+    const responsePayload = await readOpenWeatherMapResponse(
+      openWeatherMapResponse,
+    )
+
+    if (!openWeatherMapResponse.ok) {
+      return {
+        status: "error",
+        code: openWeatherMapResponse.status,
+        message: getOpenWeatherMapErrorMessage(responsePayload),
+      }
+    }
+
+    return { status: "success", responsePayload }
+  } catch (error) {
+    return {
+      status: "error",
+      code: 500,
+      message: getErrorMessage(error),
+    }
+  }
+}
+
 async function requestCurrentWeather(
   currentWeatherLocation: CurrentWeatherLocation,
   fallbackLocationName: string,
@@ -129,54 +164,39 @@ async function requestCurrentWeather(
     }
   }
 
-  try {
-    const openWeatherMapResponse = await fetch(
-      createOpenWeatherMapRequestUrl(
-        currentWeatherLocation,
-        openWeatherMapApiKey,
-      ),
-      { cache: "no-store" },
-    )
-    const openWeatherMapResponsePayload = await readOpenWeatherMapResponse(
-      openWeatherMapResponse,
-    )
+  const openWeatherMapRequestResult = await requestOpenWeatherMap(
+    createOpenWeatherMapRequestUrl(
+      currentWeatherLocation,
+      openWeatherMapApiKey,
+    ),
+  )
 
-    if (!openWeatherMapResponse.ok) {
-      return {
-        status: "error",
-        code: openWeatherMapResponse.status,
-        message: getOpenWeatherMapErrorMessage(openWeatherMapResponsePayload),
-      }
-    }
+  if (openWeatherMapRequestResult.status === "error") {
+    return openWeatherMapRequestResult
+  }
 
-    if (!isOpenWeatherMapSuccessResponse(openWeatherMapResponsePayload)) {
-      return {
-        status: "error",
-        code: 502,
-        message: OPEN_WEATHER_MAP_INVALID_RESPONSE_MESSAGE,
-      }
-    }
+  const { responsePayload } = openWeatherMapRequestResult
 
-    const [currentWeather] = openWeatherMapResponsePayload.weather
-
-    return {
-      status: "success",
-      temperatureKelvin: openWeatherMapResponsePayload.main.temp,
-      description: currentWeather.description,
-      icon: currentWeather.icon,
-      location: {
-        name:
-          openWeatherMapResponsePayload.name.trim() || fallbackLocationName,
-        stateName: null,
-        countryCode: openWeatherMapResponsePayload.sys.country,
-      },
-    }
-  } catch (error) {
+  if (!isOpenWeatherMapSuccessResponse(responsePayload)) {
     return {
       status: "error",
-      code: 500,
-      message: getErrorMessage(error),
+      code: 502,
+      message: OPEN_WEATHER_MAP_INVALID_RESPONSE_MESSAGE,
     }
+  }
+
+  const [currentWeather] = responsePayload.weather
+
+  return {
+    status: "success",
+    temperatureKelvin: responsePayload.main.temp,
+    description: currentWeather.description,
+    icon: currentWeather.icon,
+    location: {
+      name: responsePayload.name.trim() || fallbackLocationName,
+      stateName: null,
+      countryCode: responsePayload.sys.country,
+    },
   }
 }
 
