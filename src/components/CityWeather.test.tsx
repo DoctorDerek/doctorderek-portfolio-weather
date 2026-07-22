@@ -41,6 +41,7 @@ describe("CityWeather", () => {
     expect(
       screen.getByRole("heading", { name: "Loading weather…" }),
     ).toBeVisible()
+    expect(screen.getByText("Fetching current conditions")).toBeVisible()
   })
 
   it("presents normalized weather details in Fahrenheit and Celsius", () => {
