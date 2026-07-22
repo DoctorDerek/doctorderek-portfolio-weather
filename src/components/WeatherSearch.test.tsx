@@ -198,7 +198,7 @@ describe("WeatherSearch", () => {
     expect(
       screen.queryByRole("heading", { name: "Atlantis" }),
     ).not.toBeInTheDocument()
-    expect(screen.queryByText("Temperature:")).not.toBeInTheDocument()
+    expect(screen.queryByLabelText("Temperature")).not.toBeInTheDocument()
   })
 
   it("shows ephemeral location weather without placing coordinates in history", () => {
