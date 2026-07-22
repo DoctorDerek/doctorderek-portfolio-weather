@@ -201,7 +201,10 @@ describe("getCurrentWeather", () => {
     vi.stubEnv("OPEN_WEATHER_MAP_API_KEY", OPEN_WEATHER_MAP_TEST_API_KEY)
     mswServer.use(
       http.get(OPEN_WEATHER_MAP_DIRECT_GEOCODING_URL, () =>
-        HttpResponse.json({ message: "geocoding unavailable" }, { status: 503 }),
+        HttpResponse.json(
+          { message: "geocoding unavailable" },
+          { status: 503 },
+        ),
       ),
     )
 

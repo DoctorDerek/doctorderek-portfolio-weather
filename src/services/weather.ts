@@ -21,8 +21,7 @@ const ISO_COUNTRY_CODE_PATTERN = /^[A-Z]{2}$/i
 type WeatherRequestError = Extract<WeatherResult, { status: "error" }>
 
 type OpenWeatherMapRequestResult =
-  | { status: "success"; responsePayload: unknown }
-  | WeatherRequestError
+  { status: "success"; responsePayload: unknown } | WeatherRequestError
 
 type GeocodedLocationResult =
   | {
@@ -33,8 +32,7 @@ type GeocodedLocationResult =
   | WeatherRequestError
 
 type OpenWeatherMapApiKeyResult =
-  | { status: "success"; apiKey: string }
-  | WeatherRequestError
+  { status: "success"; apiKey: string } | WeatherRequestError
 
 type OpenWeatherMapGeocodingLocation = {
   name: string
@@ -295,10 +293,7 @@ async function requestCurrentWeather(
   resolvedLocation?: WeatherLocation,
 ): Promise<WeatherResult> {
   const openWeatherMapRequestResult = await requestOpenWeatherMap(
-    createOpenWeatherMapRequestUrl(
-      coordinates,
-      openWeatherMapApiKey,
-    ),
+    createOpenWeatherMapRequestUrl(coordinates, openWeatherMapApiKey),
   )
 
   if (openWeatherMapRequestResult.status === "error") {

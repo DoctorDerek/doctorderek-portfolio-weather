@@ -358,9 +358,9 @@ describe("WeatherSearch", () => {
     expect(window.location.search).toBe("")
     expect(screen.getByRole("heading", { name: "Cuauhtémoc" })).toBeVisible()
     expect(screen.getByText("Few Clouds")).toBeVisible()
-    expect(
-      screen.getByRole("textbox", { name: "City or place" }),
-    ).toHaveValue("")
+    expect(screen.getByRole("textbox", { name: "City or place" })).toHaveValue(
+      "",
+    )
   })
 
   it("loads location weather without rewriting an already clean URL", () => {
@@ -398,9 +398,9 @@ describe("WeatherSearch", () => {
     expect(
       screen.queryByRole("heading", { name: "Mexico City" }),
     ).not.toBeInTheDocument()
-    expect(
-      screen.getByRole("textbox", { name: "City or place" }),
-    ).toHaveValue("Puebla")
+    expect(screen.getByRole("textbox", { name: "City or place" })).toHaveValue(
+      "Puebla",
+    )
   })
 
   it("restores city weather when browser history returns to a city query", () => {
