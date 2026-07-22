@@ -41,7 +41,11 @@ describe("getCurrentWeather", () => {
       description:
         OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].description,
       icon: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].icon,
-      locationName: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.name,
+      location: {
+        name: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.name,
+        stateName: null,
+        countryCode: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.sys.country,
+      },
     })
   })
 
@@ -56,7 +60,11 @@ describe("getCurrentWeather", () => {
       description:
         OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].description,
       icon: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].icon,
-      locationName: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.name,
+      location: {
+        name: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.name,
+        stateName: null,
+        countryCode: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.sys.country,
+      },
     })
   })
 
@@ -75,7 +83,9 @@ describe("getCurrentWeather", () => {
       getCurrentWeatherByCoordinates(OPEN_WEATHER_MAP_TEST_COORDINATES),
     ).resolves.toMatchObject({
       status: "success",
-      locationName: "Current location",
+      location: {
+        name: "Current location",
+      },
     })
   })
 

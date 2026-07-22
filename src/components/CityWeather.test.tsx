@@ -11,7 +11,11 @@ const SUCCESSFUL_WEATHER_RESULT = {
   temperatureKelvin: 300.15,
   description: "clear sky",
   icon: "01d",
-  locationName: TEST_CITY,
+  location: {
+    name: TEST_CITY,
+    stateName: "Mexico City",
+    countryCode: "MX",
+  },
 } satisfies WeatherResult
 
 vi.mock("next/image", async () => {

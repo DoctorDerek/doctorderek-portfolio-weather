@@ -52,7 +52,11 @@ const SUCCESSFUL_WEATHER_RESULT = {
   temperatureKelvin: 300.15,
   description: "clear sky",
   icon: "01d",
-  locationName: "Mexico City",
+  location: {
+    name: "Mexico City",
+    stateName: "Mexico City",
+    countryCode: "MX",
+  },
 } satisfies WeatherResult
 
 const TEST_POSITION = {

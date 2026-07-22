@@ -17,6 +17,9 @@ export const OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE = [
 
 export const OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE = {
   name: OPEN_WEATHER_MAP_TEST_CITY,
+  sys: {
+    country: "MX",
+  },
   main: {
     temp: 300.15,
   },

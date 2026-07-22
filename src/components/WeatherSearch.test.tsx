@@ -211,7 +211,11 @@ describe("WeatherSearch", () => {
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
-        locationName: "Mexico City",
+        location: {
+          name: "Mexico City",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
       },
     })
     const locationButtonProperties =
@@ -231,7 +235,11 @@ describe("WeatherSearch", () => {
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
-            locationName: "Mexico City",
+            location: {
+              name: "Mexico City",
+              stateName: "Mexico City",
+              countryCode: "MX",
+            },
           }}
         />
       </>,
@@ -242,7 +250,11 @@ describe("WeatherSearch", () => {
         temperatureKelvin: 299.15,
         description: "few clouds",
         icon: "02d",
-        locationName: "Cuauhtémoc",
+        location: {
+          name: "Cuauhtémoc",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
       })
     })
 
@@ -278,7 +290,11 @@ describe("WeatherSearch", () => {
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
-        locationName: "Mexico City",
+        location: {
+          name: "Mexico City",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
       },
     })
 
@@ -300,7 +316,11 @@ describe("WeatherSearch", () => {
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
-        locationName: "Mexico City",
+        location: {
+          name: "Mexico City",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
       },
     })
     const locationButtonProperties =
@@ -320,7 +340,11 @@ describe("WeatherSearch", () => {
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
-            locationName: "Mexico City",
+            location: {
+              name: "Mexico City",
+              stateName: "Mexico City",
+              countryCode: "MX",
+            },
           }}
         />
       </>,
@@ -336,7 +360,11 @@ describe("WeatherSearch", () => {
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
-            locationName: "Mexico City",
+            location: {
+              name: "Mexico City",
+              stateName: "Mexico City",
+              countryCode: "MX",
+            },
           }}
         />
       </>,

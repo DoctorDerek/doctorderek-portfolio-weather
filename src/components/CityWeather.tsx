@@ -49,7 +49,7 @@ export default function CityWeather({
 
   if (weatherResult.status === "error") return null
 
-  const { icon, description, locationName, temperatureKelvin } = weatherResult
+  const { icon, description, location, temperatureKelvin } = weatherResult
   const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`
 
   const temperatureCelsius = convertKelvinToCelsius(temperatureKelvin)
@@ -58,7 +58,7 @@ export default function CityWeather({
   return (
     <Card
       key={`weather-result-${city}`}
-      heading={locationName}
+      heading={location.name}
       ariaLive="polite"
     >
       <div className="grid h-20 w-20">

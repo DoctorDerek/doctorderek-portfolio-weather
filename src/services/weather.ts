@@ -13,6 +13,9 @@ type CurrentWeatherLocation =
 
 type OpenWeatherMapSuccessResponse = {
   name: string
+  sys: {
+    country: string
+  }
   main: {
     temp: number
   }
@@ -35,15 +38,19 @@ function isOpenWeatherMapSuccessResponse(
     !isNonNullObject(responsePayload) ||
     !("name" in responsePayload) ||
     typeof responsePayload.name !== "string" ||
+    !("sys" in responsePayload) ||
     !("main" in responsePayload) ||
     !("weather" in responsePayload)
   ) {
     return false
   }
 
-  const { main, weather } = responsePayload
+  const { main, sys, weather } = responsePayload
 
   if (
+    !isNonNullObject(sys) ||
+    !("country" in sys) ||
+    typeof sys.country !== "string" ||
     !isNonNullObject(main) ||
     !("temp" in main) ||
     typeof main.temp !== "number" ||
@@ -157,8 +164,12 @@ async function requestCurrentWeather(
       temperatureKelvin: openWeatherMapResponsePayload.main.temp,
       description: currentWeather.description,
       icon: currentWeather.icon,
-      locationName:
-        openWeatherMapResponsePayload.name.trim() || fallbackLocationName,
+      location: {
+        name:
+          openWeatherMapResponsePayload.name.trim() || fallbackLocationName,
+        stateName: null,
+        countryCode: openWeatherMapResponsePayload.sys.country,
+      },
     }
   } catch (error) {
     return {
