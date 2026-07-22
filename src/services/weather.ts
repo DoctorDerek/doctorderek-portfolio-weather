@@ -18,9 +18,6 @@ const CITY_NOT_FOUND_MESSAGE = "city not found"
 const CURRENT_LOCATION_FALLBACK_NAME = "Current location"
 const ISO_COUNTRY_CODE_PATTERN = /^[A-Z]{2}$/i
 
-type CurrentWeatherLocation =
-  { city: string } | { coordinates: WeatherCoordinates }
-
 type WeatherRequestError = Extract<WeatherResult, { status: "error" }>
 
 type OpenWeatherMapRequestResult =
@@ -150,24 +147,12 @@ function getOpenWeatherMapErrorMessage(responsePayload: unknown) {
 }
 
 function createOpenWeatherMapRequestUrl(
-  currentWeatherLocation: CurrentWeatherLocation,
+  coordinates: WeatherCoordinates,
   openWeatherMapApiKey: string,
 ) {
   const requestUrl = new URL(OPEN_WEATHER_MAP_CURRENT_WEATHER_URL)
-
-  if ("city" in currentWeatherLocation) {
-    requestUrl.searchParams.set("q", currentWeatherLocation.city)
-  } else {
-    requestUrl.searchParams.set(
-      "lat",
-      String(currentWeatherLocation.coordinates.latitude),
-    )
-    requestUrl.searchParams.set(
-      "lon",
-      String(currentWeatherLocation.coordinates.longitude),
-    )
-  }
-
+  requestUrl.searchParams.set("lat", String(coordinates.latitude))
+  requestUrl.searchParams.set("lon", String(coordinates.longitude))
   requestUrl.searchParams.set("appid", openWeatherMapApiKey)
   return requestUrl
 }
@@ -304,14 +289,14 @@ function requestGeocodedCoordinates(
 }
 
 async function requestCurrentWeather(
-  currentWeatherLocation: CurrentWeatherLocation,
+  coordinates: WeatherCoordinates,
   fallbackLocationName: string,
   openWeatherMapApiKey: string,
   resolvedLocation?: WeatherLocation,
 ): Promise<WeatherResult> {
   const openWeatherMapRequestResult = await requestOpenWeatherMap(
     createOpenWeatherMapRequestUrl(
-      currentWeatherLocation,
+      coordinates,
       openWeatherMapApiKey,
     ),
   )
@@ -360,7 +345,7 @@ export default async function getCurrentWeather(
   if (geocodedCityResult.status === "error") return geocodedCityResult
 
   return requestCurrentWeather(
-    { coordinates: geocodedCityResult.coordinates },
+    geocodedCityResult.coordinates,
     city,
     apiKeyResult.apiKey,
     geocodedCityResult.location,
@@ -376,7 +361,7 @@ export async function getCurrentWeatherByCoordinates(
 
   const [weatherResult, geocodedLocationResult] = await Promise.all([
     requestCurrentWeather(
-      { coordinates },
+      coordinates,
       CURRENT_LOCATION_FALLBACK_NAME,
       apiKeyResult.apiKey,
     ),
