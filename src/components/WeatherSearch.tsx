@@ -76,6 +76,7 @@ export default function WeatherSearch({
     <main className="relative z-10 flex min-h-svh items-center justify-center px-4 py-24 sm:px-6 sm:py-20">
       <motion.section
         aria-labelledby="weather-workspace-title"
+        data-testid="weather-workspace"
         className="w-full max-w-xl rounded-[2rem] border border-white/60 bg-white/70 p-5 shadow-2xl shadow-slate-900/20 ring-1 ring-black/5 backdrop-blur-xl sm:p-8 dark:border-white/15 dark:bg-slate-950/70 dark:shadow-black/50 dark:ring-white/5"
         initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
