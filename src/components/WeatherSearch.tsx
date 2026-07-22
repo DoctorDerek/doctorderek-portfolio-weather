@@ -39,6 +39,20 @@ export default function WeatherSearch({
   const cityInputValue = shouldDisplayLocationWeather
     ? ""
     : selectedCity || initialCity || ""
+  const displayedWeather = shouldDisplayLocationWeather
+    ? {
+        city: CURRENT_LOCATION_LABEL,
+        weatherResult:
+          locationWeatherState.status === "complete"
+            ? locationWeatherState.weatherResult
+            : null,
+      }
+    : displayedCity
+      ? {
+          city: displayedCity,
+          weatherResult: displayedCity === initialCity ? weatherResult : null,
+        }
+      : null
 
   const handleLocationWeatherLoading = useCallback(() => {
     if (selectedCity) {
@@ -135,19 +149,10 @@ export default function WeatherSearch({
           shouldReduceMotion={shouldReduceMotion ?? false}
         />
 
-        {shouldDisplayLocationWeather ? (
+        {displayedWeather ? (
           <CityWeather
-            city={CURRENT_LOCATION_LABEL}
-            weatherResult={
-              locationWeatherState.status === "complete"
-                ? locationWeatherState.weatherResult
-                : null
-            }
-          />
-        ) : displayedCity ? (
-          <CityWeather
-            city={displayedCity}
-            weatherResult={displayedCity === initialCity ? weatherResult : null}
+            city={displayedWeather.city}
+            weatherResult={displayedWeather.weatherResult}
           />
         ) : null}
       </section>
