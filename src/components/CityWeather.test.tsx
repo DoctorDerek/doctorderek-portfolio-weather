@@ -61,7 +61,7 @@ describe("CityWeather", () => {
     expect(screen.getByText("Clear Sky")).toBeVisible()
     expect(screen.getByText("81 °F")).toBeVisible()
     expect(screen.getByText("27 °C")).toBeVisible()
-    expect(screen.getByRole("img", { name: "clear sky" })).toBeVisible()
+    expect(screen.queryByRole("img")).not.toBeInTheDocument()
     expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite")
     expect(screen.getByRole("status")).toHaveAttribute("aria-atomic", "true")
   })

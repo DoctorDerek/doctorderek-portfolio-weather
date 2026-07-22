@@ -63,18 +63,20 @@ export default function CityWeather({
       ariaLive="polite"
     >
       <WeatherLocationDetails location={location} />
-      <div className="grid h-20 w-20">
+      <div className="mt-2 grid h-28 w-28">
         <div className="relative">
           <ImageFixed
             src={iconUrl}
-            alt={description}
+            alt=""
             fill
-            sizes="80px"
-            className="object-cover"
+            sizes="112px"
+            className="object-contain drop-shadow-sm"
           />
         </div>
       </div>
-      <div>{upperCaseFirstLetterOfEachWord(description)}</div>
+      <p className="-mt-2 text-lg font-medium text-slate-700 dark:text-slate-200">
+        {upperCaseFirstLetterOfEachWord(description)}
+      </p>
       <Temperature
         temperatureCelsius={temperatureCelsius}
         temperatureFahrenheit={temperatureFahrenheit}
