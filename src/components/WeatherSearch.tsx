@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, useReducedMotion } from "motion/react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useState } from "react"
 import CityWeather from "@/src/components/CityWeather"
@@ -39,6 +39,20 @@ export default function WeatherSearch({
   const cityInputValue = shouldDisplayLocationWeather
     ? ""
     : selectedCity || initialCity || ""
+  const displayedWeather = shouldDisplayLocationWeather
+    ? {
+        city: CURRENT_LOCATION_LABEL,
+        weatherResult:
+          locationWeatherState.status === "complete"
+            ? locationWeatherState.weatherResult
+            : null,
+      }
+    : displayedCity
+      ? {
+          city: displayedCity,
+          weatherResult: displayedCity === initialCity ? weatherResult : null,
+        }
+      : null
 
   const handleLocationWeatherLoading = useCallback(() => {
     if (selectedCity) {
@@ -59,66 +73,104 @@ export default function WeatherSearch({
   )
 
   return (
-    <div className="relative z-10 flex h-[90vh] flex-col justify-end py-10 sm:justify-start">
-      <form
-        className="flex flex-wrap items-center justify-center"
-        onSubmit={(event) => {
-          event.preventDefault()
-          const formData = new FormData(event.currentTarget)
-          const inputCity = normalizeCityQuery(String(formData.get("city")))
-
-          if (!inputCity) return
-
-          router.push(`/?city=${encodeURIComponent(inputCity)}`)
-        }}
+    <main className="relative z-10 flex min-h-svh items-center justify-center px-4 py-24 sm:px-6 sm:py-20">
+      <motion.section
+        aria-labelledby="weather-workspace-title"
+        data-testid="weather-workspace"
+        className="w-full max-w-xl rounded-[2rem] border border-white/60 bg-white/70 p-5 shadow-2xl ring-1 shadow-slate-900/20 ring-black/5 backdrop-blur-xl sm:p-8 dark:border-white/15 dark:bg-slate-950/70 dark:shadow-black/50 dark:ring-white/5"
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
       >
-        <h1 className="mb-2 rounded-xl px-4 py-1 text-2xl font-semibold tracking-tight sm:mb-0 sm:py-2 sm:text-base dark:bg-black">
-          <label htmlFor="city">Weather Search:</label>
-        </h1>
-        <div className="flex flex-wrap items-center justify-center">
-          <input
-            data-testid="weather-input"
-            className="ml-2 h-10 w-40 rounded-l-lg border border-solid border-gray-300 p-2"
-            type="text"
-            name="city"
-            id="city"
-            required
-            pattern={".*\\S.*"}
-            key={cityInputValue}
-            defaultValue={cityInputValue}
-          />
-          <motion.button
-            className="h-10 rounded-r-lg bg-[#4683c8] p-2 text-xs font-bold text-white uppercase"
-            type="submit"
-            whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
-            whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+        <header className="mb-6 text-center">
+          <p className="text-xs font-bold tracking-[0.22em] text-slate-700 uppercase dark:text-slate-200">
+            Live conditions
+          </p>
+          <h1
+            id="weather-workspace-title"
+            className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl dark:text-white"
           >
-            Submit
-          </motion.button>
+            Weather, right now
+          </h1>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-700 dark:text-slate-200">
+            Search a city or use your current location.
+          </p>
+        </header>
+
+        <form
+          className="space-y-2"
+          onSubmit={(event) => {
+            event.preventDefault()
+            const formData = new FormData(event.currentTarget)
+            const inputCity = normalizeCityQuery(String(formData.get("city")))
+
+            if (!inputCity) return
+
+            router.push(`/?city=${encodeURIComponent(inputCity)}`)
+          }}
+        >
+          <label
+            className="block text-sm font-semibold text-slate-900 dark:text-white"
+            htmlFor="city"
+          >
+            City or place
+          </label>
+          <div className="flex">
+            <input
+              data-testid="weather-input"
+              className="h-12 min-w-0 flex-1 rounded-l-xl border border-solid border-slate-300 bg-white/90 px-4 text-base text-slate-950 placeholder:text-slate-500 dark:border-white/20 dark:bg-slate-900/85 dark:text-white dark:placeholder:text-slate-400"
+              type="text"
+              name="city"
+              id="city"
+              placeholder="e.g. Mexico City"
+              required
+              pattern={".*\\S.*"}
+              key={cityInputValue}
+              defaultValue={cityInputValue}
+            />
+            <motion.button
+              className="h-12 rounded-r-xl bg-blue-700 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-500 dark:hover:bg-blue-400"
+              type="submit"
+              whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+            >
+              Search
+            </motion.button>
+          </div>
+        </form>
+
+        <div className="my-4 flex items-center gap-3" aria-hidden="true">
+          <div className="h-px flex-1 bg-slate-500/30" />
+          <span className="text-xs font-semibold text-slate-700 uppercase dark:text-slate-200">
+            or
+          </span>
+          <div className="h-px flex-1 bg-slate-500/30" />
         </div>
-      </form>
 
-      <LocationWeatherButton
-        onLocationWeatherLoading={handleLocationWeatherLoading}
-        onLocationWeatherResult={handleLocationWeatherResult}
-        shouldReduceMotion={shouldReduceMotion ?? false}
-      />
+        <LocationWeatherButton
+          onLocationWeatherLoading={handleLocationWeatherLoading}
+          onLocationWeatherResult={handleLocationWeatherResult}
+          shouldReduceMotion={shouldReduceMotion ?? false}
+        />
 
-      {shouldDisplayLocationWeather ? (
-        <CityWeather
-          city={CURRENT_LOCATION_LABEL}
-          weatherResult={
-            locationWeatherState.status === "complete"
-              ? locationWeatherState.weatherResult
-              : null
-          }
-        />
-      ) : displayedCity ? (
-        <CityWeather
-          city={displayedCity}
-          weatherResult={displayedCity === initialCity ? weatherResult : null}
-        />
-      ) : null}
-    </div>
+        <AnimatePresence initial={false} mode="wait">
+          {displayedWeather ? (
+            <motion.div
+              key={displayedWeather.city}
+              data-testid="forecast-transition"
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={shouldReduceMotion ? undefined : { opacity: 0, y: -4 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
+              <CityWeather
+                city={displayedWeather.city}
+                weatherResult={displayedWeather.weatherResult}
+              />
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </motion.section>
+    </main>
   )
 }

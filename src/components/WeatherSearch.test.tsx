@@ -13,10 +13,19 @@ const reducedMotionPreference = vi.hoisted(() => ({
   value: false as boolean | null,
 }))
 const motionGestureConfiguration = vi.hoisted(() => vi.fn())
+const motionContainerConfiguration = vi.hoisted(() => vi.fn())
 
 type MotionButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   whileHover?: { scale: number }
   whileTap?: { scale: number }
+}
+
+type MotionContainerProps = HTMLAttributes<HTMLElement> & {
+  "data-testid"?: string
+  initial?: false | { opacity: number; y: number }
+  animate?: { opacity: number; y: number }
+  exit?: { opacity: number; y: number }
+  transition?: { duration: number; ease: string }
 }
 
 vi.mock("motion/react", async (importOriginal) => {
@@ -37,15 +46,37 @@ vi.mock("motion/react", async (importOriginal) => {
       },
       div: ({
         children,
-        initial: _initial,
-        animate: _animate,
-        transition: _transition,
+        initial,
+        animate,
+        exit,
+        transition,
         ...divProperties
-      }: HTMLAttributes<HTMLDivElement> & {
-        initial?: { y: number }
-        animate?: { y: number }
-        transition?: { duration: number }
-      }) => <div {...divProperties}>{children}</div>,
+      }: MotionContainerProps) => {
+        motionContainerConfiguration({
+          element: "div",
+          testId: divProperties["data-testid"],
+          initial,
+          animate,
+          exit,
+          transition,
+        })
+        return <div {...divProperties}>{children}</div>
+      },
+      section: ({
+        children,
+        initial,
+        animate,
+        transition,
+        ...sectionProperties
+      }: MotionContainerProps) => {
+        motionContainerConfiguration({
+          element: "section",
+          initial,
+          animate,
+          transition,
+        })
+        return <section {...sectionProperties}>{children}</section>
+      },
     },
     useReducedMotion: () => reducedMotionPreference.value,
   }
@@ -84,6 +115,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = ""
     reducedMotionPreference.value = false
     motionGestureConfiguration.mockClear()
+    motionContainerConfiguration.mockClear()
     locationWeatherButtonProperties.mockClear()
     window.history.replaceState(null, "", "/")
   })
@@ -120,16 +152,80 @@ describe("WeatherSearch", () => {
     ).toBe(false)
   })
 
+  it("uses restrained spatial feedback for workspace and forecast entry", () => {
+    renderWeatherSearch({
+      initialCity: "Mexico City",
+      weatherResult: {
+        status: "success",
+        temperatureKelvin: 300.15,
+        description: "clear sky",
+        icon: "01d",
+        location: {
+          name: "Mexico City",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
+      },
+    })
+
+    expect(motionContainerConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        element: "section",
+        initial: { opacity: 0, y: 12 },
+        animate: { opacity: 1, y: 0 },
+      }),
+    )
+    expect(motionContainerConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        element: "div",
+        testId: "forecast-transition",
+        initial: { opacity: 0, y: 8 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -4 },
+      }),
+    )
+  })
+
+  it("removes spatial workspace and forecast transitions for reduced motion", () => {
+    reducedMotionPreference.value = true
+    renderWeatherSearch({
+      initialCity: "Mexico City",
+      weatherResult: {
+        status: "success",
+        temperatureKelvin: 300.15,
+        description: "clear sky",
+        icon: "01d",
+        location: {
+          name: "Mexico City",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
+      },
+    })
+
+    expect(motionContainerConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({ element: "section", initial: false }),
+    )
+    expect(motionContainerConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        element: "div",
+        testId: "forecast-transition",
+        initial: false,
+        exit: undefined,
+      }),
+    )
+  })
+
   it("submits an accessible weather search through encoded navigation", async () => {
     const user = userEvent.setup()
     renderWeatherSearch({ initialCity: null, weatherResult: null })
 
     const cityInput = screen.getByRole("textbox", {
-      name: "Weather Search:",
+      name: "City or place",
     })
 
     await user.type(cityInput, "  Mexico City  ")
-    await user.click(screen.getByRole("button", { name: "Submit" }))
+    await user.click(screen.getByRole("button", { name: "Search" }))
 
     expect(routerPush).toHaveBeenCalledOnce()
     expect(routerPush).toHaveBeenCalledWith("/?city=Mexico%20City")
@@ -139,17 +235,17 @@ describe("WeatherSearch", () => {
     renderWeatherSearch({ initialCity: null, weatherResult: null })
 
     const cityInput = screen.getByRole("textbox", {
-      name: "Weather Search:",
+      name: "City or place",
     })
     const searchHeading = screen.getByRole("heading", {
-      name: "Weather Search:",
+      name: "Weather, right now",
     })
-    const cityLabel = searchHeading.querySelector("label")
+    const cityLabel = screen.getByText("City or place")
 
     expect(cityInput).toBeRequired()
     expect(cityInput).toHaveAttribute("pattern", ".*\\S.*")
     expect(cityLabel).toHaveAttribute("for", "city")
-    expect(searchHeading).toContainElement(cityLabel)
+    expect(searchHeading).toHaveAttribute("id", "weather-workspace-title")
   })
 
   it("does not navigate for whitespace-only city input", async () => {
@@ -157,11 +253,11 @@ describe("WeatherSearch", () => {
     renderWeatherSearch({ initialCity: null, weatherResult: null })
 
     const cityInput = screen.getByRole("textbox", {
-      name: "Weather Search:",
+      name: "City or place",
     })
 
     await user.type(cityInput, "   ")
-    await user.click(screen.getByRole("button", { name: "Submit" }))
+    await user.click(screen.getByRole("button", { name: "Search" }))
 
     expect(cityInput).toBeInvalid()
     expect(routerPush).not.toHaveBeenCalled()
@@ -170,7 +266,7 @@ describe("WeatherSearch", () => {
   it("ignores a programmatically submitted blank city", () => {
     renderWeatherSearch({ initialCity: null, weatherResult: null })
     const cityInput = screen.getByRole("textbox", {
-      name: "Weather Search:",
+      name: "City or place",
     })
     const searchForm = cityInput.closest("form")
 
@@ -198,7 +294,7 @@ describe("WeatherSearch", () => {
     expect(
       screen.queryByRole("heading", { name: "Atlantis" }),
     ).not.toBeInTheDocument()
-    expect(screen.queryByText("Temperature:")).not.toBeInTheDocument()
+    expect(screen.queryByLabelText("Temperature")).not.toBeInTheDocument()
   })
 
   it("shows ephemeral location weather without placing coordinates in history", () => {
@@ -211,7 +307,11 @@ describe("WeatherSearch", () => {
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
-        locationName: "Mexico City",
+        location: {
+          name: "Mexico City",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
       },
     })
     const locationButtonProperties =
@@ -231,7 +331,11 @@ describe("WeatherSearch", () => {
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
-            locationName: "Mexico City",
+            location: {
+              name: "Mexico City",
+              stateName: "Mexico City",
+              countryCode: "MX",
+            },
           }}
         />
       </>,
@@ -242,7 +346,11 @@ describe("WeatherSearch", () => {
         temperatureKelvin: 299.15,
         description: "few clouds",
         icon: "02d",
-        locationName: "Cuauhtémoc",
+        location: {
+          name: "Cuauhtémoc",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
       })
     })
 
@@ -250,9 +358,9 @@ describe("WeatherSearch", () => {
     expect(window.location.search).toBe("")
     expect(screen.getByRole("heading", { name: "Cuauhtémoc" })).toBeVisible()
     expect(screen.getByText("Few Clouds")).toBeVisible()
-    expect(
-      screen.getByRole("textbox", { name: "Weather Search:" }),
-    ).toHaveValue("")
+    expect(screen.getByRole("textbox", { name: "City or place" })).toHaveValue(
+      "",
+    )
   })
 
   it("loads location weather without rewriting an already clean URL", () => {
@@ -278,7 +386,11 @@ describe("WeatherSearch", () => {
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
-        locationName: "Mexico City",
+        location: {
+          name: "Mexico City",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
       },
     })
 
@@ -286,9 +398,9 @@ describe("WeatherSearch", () => {
     expect(
       screen.queryByRole("heading", { name: "Mexico City" }),
     ).not.toBeInTheDocument()
-    expect(
-      screen.getByRole("textbox", { name: "Weather Search:" }),
-    ).toHaveValue("Puebla")
+    expect(screen.getByRole("textbox", { name: "City or place" })).toHaveValue(
+      "Puebla",
+    )
   })
 
   it("restores city weather when browser history returns to a city query", () => {
@@ -300,7 +412,11 @@ describe("WeatherSearch", () => {
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
-        locationName: "Mexico City",
+        location: {
+          name: "Mexico City",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
       },
     })
     const locationButtonProperties =
@@ -320,7 +436,11 @@ describe("WeatherSearch", () => {
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
-            locationName: "Mexico City",
+            location: {
+              name: "Mexico City",
+              stateName: "Mexico City",
+              countryCode: "MX",
+            },
           }}
         />
       </>,
@@ -336,7 +456,11 @@ describe("WeatherSearch", () => {
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
-            locationName: "Mexico City",
+            location: {
+              name: "Mexico City",
+              stateName: "Mexico City",
+              countryCode: "MX",
+            },
           }}
         />
       </>,

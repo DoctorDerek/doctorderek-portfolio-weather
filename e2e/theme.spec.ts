@@ -24,7 +24,7 @@ test("removes spatial feedback when the user prefers reduced motion", async ({
   const themeToggle = page.getByRole("button", {
     name: "Switch to dark theme",
   })
-  const submitButton = page.getByRole("button", { name: "Submit" })
+  const submitButton = page.getByRole("button", { name: "Search" })
 
   await expect(themeToggle.locator(".sun")).toHaveCSS(
     "transition-duration",

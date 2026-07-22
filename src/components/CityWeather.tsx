@@ -5,6 +5,7 @@ import { useEffect } from "react"
 import toast from "react-hot-toast"
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
+import WeatherLocationDetails from "@/src/components/WeatherLocationDetails"
 import type { WeatherResult } from "@/src/types/weather"
 import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
 import {
@@ -44,12 +45,21 @@ export default function CityWeather({
         key={`weather-loading-${city}`}
         heading="Loading weather…"
         ariaLive="polite"
-      />
+      >
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          Fetching current conditions
+        </p>
+        <div className="mt-4 flex gap-2" aria-hidden="true">
+          <span className="size-2 rounded-full bg-blue-600 motion-safe:animate-pulse dark:bg-blue-400" />
+          <span className="size-2 rounded-full bg-blue-600 motion-safe:animate-pulse dark:bg-blue-400" />
+          <span className="size-2 rounded-full bg-blue-600 motion-safe:animate-pulse dark:bg-blue-400" />
+        </div>
+      </Card>
     )
 
   if (weatherResult.status === "error") return null
 
-  const { icon, description, locationName, temperatureKelvin } = weatherResult
+  const { icon, description, location, temperatureKelvin } = weatherResult
   const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`
 
   const temperatureCelsius = convertKelvinToCelsius(temperatureKelvin)
@@ -58,21 +68,24 @@ export default function CityWeather({
   return (
     <Card
       key={`weather-result-${city}`}
-      heading={locationName}
+      heading={location.name}
       ariaLive="polite"
     >
-      <div className="grid h-20 w-20">
+      <WeatherLocationDetails location={location} />
+      <div className="mt-2 grid h-28 w-28">
         <div className="relative">
           <ImageFixed
             src={iconUrl}
-            alt={description}
+            alt=""
             fill
-            sizes="80px"
-            className="object-cover"
+            sizes="112px"
+            className="object-contain drop-shadow-sm"
           />
         </div>
       </div>
-      <div>{upperCaseFirstLetterOfEachWord(description)}</div>
+      <p className="-mt-2 text-lg font-medium text-slate-700 dark:text-slate-200">
+        {upperCaseFirstLetterOfEachWord(description)}
+      </p>
       <Temperature
         temperatureCelsius={temperatureCelsius}
         temperatureFahrenheit={temperatureFahrenheit}

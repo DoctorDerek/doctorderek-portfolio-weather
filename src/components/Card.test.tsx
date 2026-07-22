@@ -14,10 +14,10 @@ describe("Card", () => {
     render(<Card heading="London" />)
 
     expect(screen.getByRole("heading", { name: "London" })).toHaveClass(
-      "text-xl",
+      "text-2xl",
     )
     expect(screen.getByRole("heading", { name: "London" })).not.toHaveClass(
-      "text-base",
+      "text-xl",
     )
   })
 
@@ -30,10 +30,10 @@ describe("Card", () => {
 
     expect(
       screen.getByRole("heading", { name: "Mexico City, Mexico" }),
-    ).toHaveClass("text-base")
+    ).toHaveClass("text-xl")
     expect(
       screen.getByRole("heading", { name: "Mexico City, Mexico" }),
-    ).not.toHaveClass("text-xl")
+    ).not.toHaveClass("text-2xl")
     expect(screen.getByText("Weather details")).toBeVisible()
   })
 })

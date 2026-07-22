@@ -8,10 +8,12 @@ export default function BackgroundImage() {
         src={unsplash}
         alt=""
         placeholder="blur"
+        sizes="100vw"
+        priority
         className="object-cover"
         fill
       />
-      <div className="absolute inset-0 z-0 h-full w-full opacity-0 backdrop-brightness-50 backdrop-filter transition-all duration-500 dark:bg-[rgba(0,0,0,0.3)] dark:opacity-100"></div>
+      <div className="absolute inset-0 bg-linear-to-b from-white/15 via-transparent to-slate-900/10 dark:from-slate-950/60 dark:via-slate-950/35 dark:to-slate-950/70" />
     </div>
   )
 }

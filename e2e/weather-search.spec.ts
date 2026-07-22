@@ -26,7 +26,7 @@ test("provides restrained pointer feedback without changing submission semantics
 }) => {
   await page.goto("/")
 
-  const submitButton = page.getByRole("button", { name: "Submit" })
+  const submitButton = page.getByRole("button", { name: "Search" })
 
   await expect(submitButton).toHaveAttribute("type", "submit")
   await waitForMotionButtonHydration(submitButton)
@@ -38,9 +38,9 @@ test("searches live weather through encoded city navigation", async ({
   await page.goto("/")
 
   await page
-    .getByRole("textbox", { name: "Weather Search:" })
+    .getByRole("textbox", { name: "City or place" })
     .fill(LIVE_WEATHER_TEST_CITY)
-  const submitButton = page.getByRole("button", { name: "Submit" })
+  const submitButton = page.getByRole("button", { name: "Search" })
   await waitForMotionButtonHydration(submitButton)
   await submitButton.click()
 
@@ -48,7 +48,15 @@ test("searches live weather through encoded city navigation", async ({
   await expect(
     page.getByRole("heading", { name: LIVE_WEATHER_TEST_CITY }),
   ).toBeVisible()
-  await expect(page.getByText("Temperature:")).toBeVisible()
+  const locationDetails = page.getByLabel("Location details", { exact: true })
+
+  await expect(
+    locationDetails.getByText(LIVE_WEATHER_TEST_CITY, { exact: true }),
+  ).toBeVisible()
+  await expect(
+    locationDetails.getByText("Mexico", { exact: true }),
+  ).toBeVisible()
+  await expect(page.getByLabel("Temperature", { exact: true })).toBeVisible()
 })
 
 test("loads live weather after explicit browser location consent", async ({
@@ -68,7 +76,12 @@ test("loads live weather after explicit browser location consent", async ({
   await waitForMotionButtonHydration(locationButton)
   await locationButton.click()
 
-  await expect(page.getByText("Temperature:")).toBeVisible()
+  await expect(page.getByLabel("Temperature", { exact: true })).toBeVisible()
+  await expect(
+    page
+      .getByLabel("Location details", { exact: true })
+      .getByText("Mexico", { exact: true }),
+  ).toBeVisible()
   await expect(locationButton).toBeEnabled()
   expect(new URL(page.url()).search).toBe("")
 })
@@ -79,9 +92,9 @@ test("announces live API errors without stale weather output", async ({
   await page.goto("/")
 
   await page
-    .getByRole("textbox", { name: "Weather Search:" })
+    .getByRole("textbox", { name: "City or place" })
     .fill(INVALID_LIVE_WEATHER_TEST_CITY)
-  const submitButton = page.getByRole("button", { name: "Submit" })
+  const submitButton = page.getByRole("button", { name: "Search" })
   await waitForMotionButtonHydration(submitButton)
   await submitButton.click()
 
@@ -89,5 +102,5 @@ test("announces live API errors without stale weather output", async ({
   await expect(
     page.getByRole("alert").filter({ hasText: "Error 404: City Not Found" }),
   ).toBeVisible()
-  await expect(page.getByText("Temperature:")).toHaveCount(0)
+  await expect(page.getByLabel("Temperature", { exact: true })).toHaveCount(0)
 })

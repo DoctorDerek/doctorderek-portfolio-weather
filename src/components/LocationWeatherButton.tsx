@@ -110,9 +110,9 @@ export default function LocationWeatherButton({
         : "Use my location"
 
   return (
-    <div className="mt-3 flex flex-col items-center gap-1">
+    <div className="flex flex-col items-stretch gap-2">
       <motion.button
-        className="rounded-lg border border-[#4683c8] bg-white/90 px-4 py-2 text-xs font-bold text-[#2f679e] uppercase shadow-sm disabled:cursor-wait disabled:opacity-70 dark:bg-black/90 dark:text-blue-300"
+        className="h-12 w-full rounded-xl border border-blue-700/30 bg-blue-50/80 px-4 text-sm font-semibold text-blue-900 shadow-sm transition-colors hover:bg-blue-100 disabled:cursor-wait disabled:opacity-70 dark:border-blue-300/30 dark:bg-blue-400/10 dark:text-blue-200 dark:hover:bg-blue-400/20"
         type="button"
         disabled={isLocationRequestPending}
         aria-busy={isLocationRequestPending}
@@ -150,7 +150,7 @@ export default function LocationWeatherButton({
       </motion.button>
       <p
         id="location-privacy-note"
-        className="px-4 text-center text-xs text-gray-700 dark:text-gray-200"
+        className="px-4 text-center text-xs leading-5 text-slate-700 dark:text-slate-300"
       >
         Your location is used once and isn’t stored.
       </p>
