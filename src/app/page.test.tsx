@@ -79,6 +79,37 @@ describe("Page", () => {
     )
   })
 
+  it("normalizes a padded direct city query before requesting weather", async () => {
+    getCurrentWeatherMock.mockResolvedValue(SUCCESSFUL_WEATHER_RESULT)
+
+    render(
+      await Page({
+        searchParams: Promise.resolve({ city: "  Mexico City  " }),
+      }),
+    )
+
+    expect(getCurrentWeatherMock).toHaveBeenCalledOnce()
+    expect(getCurrentWeatherMock).toHaveBeenCalledWith("Mexico City")
+    expect(screen.getByTestId("application-boundary")).toHaveAttribute(
+      "data-city",
+      "Mexico City",
+    )
+  })
+
+  it("does not request a whitespace-only direct city query", async () => {
+    render(
+      await Page({
+        searchParams: Promise.resolve({ city: "   " }),
+      }),
+    )
+
+    expect(getCurrentWeatherMock).not.toHaveBeenCalled()
+    expect(screen.getByTestId("application-boundary")).toHaveAttribute(
+      "data-city",
+      "",
+    )
+  })
+
   it("uses the legacy query parameter when city is absent", async () => {
     getCurrentWeatherMock.mockResolvedValue(SUCCESSFUL_WEATHER_RESULT)
 

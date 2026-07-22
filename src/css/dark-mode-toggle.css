@@ -7,10 +7,6 @@
   height: 70px;
 }
 
-.button {
-  transition: transform 0.5s;
-}
-
 .cloud1,
 .cloud2,
 .sun {
@@ -32,10 +28,6 @@
 .background-top-color,
 .background-bottom-color {
   transition: stop-color 0.7s;
-}
-
-.theme-toggle--dark .button {
-  transform: translateX(100px);
 }
 
 .theme-toggle--dark .cloud1 {
@@ -76,10 +68,6 @@
 
 .theme-toggle--dark .background-bottom-color {
   stop-color: #210658;
-}
-
-.theme-toggle--light .button {
-  transform: translateX(0);
 }
 
 .theme-toggle--light .cloud1 {

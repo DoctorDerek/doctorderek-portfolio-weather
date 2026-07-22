@@ -56,7 +56,11 @@ export default function CityWeather({
   const temperatureFahrenheit = convertKelvinToFahrenheit(temperatureKelvin)
 
   return (
-    <Card key={`weather-result-${city}`} heading={locationName}>
+    <Card
+      key={`weather-result-${city}`}
+      heading={locationName}
+      ariaLive="polite"
+    >
       <div className="grid h-20 w-20">
         <div className="relative">
           <ImageFixed

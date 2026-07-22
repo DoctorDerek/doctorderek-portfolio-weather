@@ -22,7 +22,7 @@ describe("ToggleDarkMode", () => {
     const user = userEvent.setup()
     render(<ToggleDarkMode />)
 
-    const themeToggle = await screen.findByRole("button", {
+    const themeToggle = screen.getByRole("button", {
       name: "Switch to dark theme",
     })
 
@@ -39,7 +39,7 @@ describe("ToggleDarkMode", () => {
     themeState.resolvedTheme = "dark"
     render(<ToggleDarkMode />)
 
-    const themeToggle = await screen.findByRole("button", {
+    const themeToggle = screen.getByRole("button", {
       name: "Switch to light theme",
     })
 
@@ -51,11 +51,11 @@ describe("ToggleDarkMode", () => {
     expect(themeState.setTheme).toHaveBeenCalledWith("light")
   })
 
-  it("preserves the fixed top-right placement", async () => {
+  it("preserves the fixed top-right placement", () => {
     render(<ToggleDarkMode />)
 
     expect(
-      await screen.findByRole("button", { name: "Switch to dark theme" }),
+      screen.getByRole("button", { name: "Switch to dark theme" }),
     ).toHaveClass("top-4", "right-4")
   })
 })

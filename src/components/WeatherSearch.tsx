@@ -6,6 +6,7 @@ import { useCallback, useState } from "react"
 import CityWeather from "@/src/components/CityWeather"
 import LocationWeatherButton from "@/src/components/LocationWeatherButton"
 import type { WeatherResult } from "@/src/types/weather"
+import { normalizeCityQuery } from "@/src/utils/city"
 
 type LocationWeatherState =
   | { status: "inactive" }
@@ -27,7 +28,9 @@ export default function WeatherSearch({
   const [locationWeatherState, setLocationWeatherState] =
     useState<LocationWeatherState>({ status: "inactive" })
 
-  const selectedCity = searchParameters.get("city") || searchParameters.get("q")
+  const selectedCity = normalizeCityQuery(
+    searchParameters.get("city") || searchParameters.get("q"),
+  )
   const shouldDisplayLocationWeather =
     locationWeatherState.status !== "inactive" && !selectedCity
   const displayedCity =
@@ -62,15 +65,16 @@ export default function WeatherSearch({
         onSubmit={(event) => {
           event.preventDefault()
           const formData = new FormData(event.currentTarget)
-          const inputCity = String(formData.get("city"))
+          const inputCity = normalizeCityQuery(String(formData.get("city")))
+
+          if (!inputCity) return
+
           router.push(`/?city=${encodeURIComponent(inputCity)}`)
         }}
       >
-        <label htmlFor="city">
-          <h1 className="mb-2 rounded-xl px-4 py-1 text-2xl font-semibold tracking-tight sm:mb-0 sm:py-2 sm:text-base dark:bg-black">
-            Weather Search:
-          </h1>
-        </label>
+        <h1 className="mb-2 rounded-xl px-4 py-1 text-2xl font-semibold tracking-tight sm:mb-0 sm:py-2 sm:text-base dark:bg-black">
+          <label htmlFor="city">Weather Search:</label>
+        </h1>
         <div className="flex flex-wrap items-center justify-center">
           <input
             data-testid="weather-input"
@@ -78,6 +82,8 @@ export default function WeatherSearch({
             type="text"
             name="city"
             id="city"
+            required
+            pattern={".*\\S.*"}
             key={cityInputValue}
             defaultValue={cityInputValue}
           />
