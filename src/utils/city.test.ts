@@ -10,8 +10,6 @@ describe("normalizeCityQuery", () => {
   )
 
   it("trims surrounding whitespace without changing city content", () => {
-    expect(normalizeCityQuery("  Ciudad de México  ")).toBe(
-      "Ciudad de México",
-    )
+    expect(normalizeCityQuery("  Ciudad de México  ")).toBe("Ciudad de México")
   })
 })

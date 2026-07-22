@@ -73,9 +73,7 @@ export default function WeatherSearch({
         }}
       >
         <h1 className="mb-2 rounded-xl px-4 py-1 text-2xl font-semibold tracking-tight sm:mb-0 sm:py-2 sm:text-base dark:bg-black">
-          <label htmlFor="city">
-            Weather Search:
-          </label>
+          <label htmlFor="city">Weather Search:</label>
         </h1>
         <div className="flex flex-wrap items-center justify-center">
           <input
