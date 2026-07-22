@@ -13,6 +13,7 @@ const reducedMotionPreference = vi.hoisted(() => ({
   value: false as boolean | null,
 }))
 const motionGestureConfiguration = vi.hoisted(() => vi.fn())
+const motionContainerConfiguration = vi.hoisted(() => vi.fn())
 
 type MotionButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   whileHover?: { scale: number }
@@ -20,6 +21,7 @@ type MotionButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 }
 
 type MotionContainerProps = HTMLAttributes<HTMLElement> & {
+  "data-testid"?: string
   initial?: false | { opacity: number; y: number }
   animate?: { opacity: number; y: number }
   exit?: { opacity: number; y: number }
@@ -44,21 +46,37 @@ vi.mock("motion/react", async (importOriginal) => {
       },
       div: ({
         children,
-        initial: _initial,
-        animate: _animate,
-        exit: _exit,
-        transition: _transition,
+        initial,
+        animate,
+        exit,
+        transition,
         ...divProperties
-      }: MotionContainerProps) => <div {...divProperties}>{children}</div>,
+      }: MotionContainerProps) => {
+        motionContainerConfiguration({
+          element: "div",
+          testId: divProperties["data-testid"],
+          initial,
+          animate,
+          exit,
+          transition,
+        })
+        return <div {...divProperties}>{children}</div>
+      },
       section: ({
         children,
-        initial: _initial,
-        animate: _animate,
-        transition: _transition,
+        initial,
+        animate,
+        transition,
         ...sectionProperties
-      }: MotionContainerProps) => (
-        <section {...sectionProperties}>{children}</section>
-      ),
+      }: MotionContainerProps) => {
+        motionContainerConfiguration({
+          element: "section",
+          initial,
+          animate,
+          transition,
+        })
+        return <section {...sectionProperties}>{children}</section>
+      },
     },
     useReducedMotion: () => reducedMotionPreference.value,
   }
@@ -97,6 +115,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = ""
     reducedMotionPreference.value = false
     motionGestureConfiguration.mockClear()
+    motionContainerConfiguration.mockClear()
     locationWeatherButtonProperties.mockClear()
     window.history.replaceState(null, "", "/")
   })
@@ -131,6 +150,70 @@ describe("WeatherSearch", () => {
     expect(
       locationWeatherButtonProperties.mock.lastCall?.[0].shouldReduceMotion,
     ).toBe(false)
+  })
+
+  it("uses restrained spatial feedback for workspace and forecast entry", () => {
+    renderWeatherSearch({
+      initialCity: "Mexico City",
+      weatherResult: {
+        status: "success",
+        temperatureKelvin: 300.15,
+        description: "clear sky",
+        icon: "01d",
+        location: {
+          name: "Mexico City",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
+      },
+    })
+
+    expect(motionContainerConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        element: "section",
+        initial: { opacity: 0, y: 12 },
+        animate: { opacity: 1, y: 0 },
+      }),
+    )
+    expect(motionContainerConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        element: "div",
+        testId: "forecast-transition",
+        initial: { opacity: 0, y: 8 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -4 },
+      }),
+    )
+  })
+
+  it("removes spatial workspace and forecast transitions for reduced motion", () => {
+    reducedMotionPreference.value = true
+    renderWeatherSearch({
+      initialCity: "Mexico City",
+      weatherResult: {
+        status: "success",
+        temperatureKelvin: 300.15,
+        description: "clear sky",
+        icon: "01d",
+        location: {
+          name: "Mexico City",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
+      },
+    })
+
+    expect(motionContainerConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({ element: "section", initial: false }),
+    )
+    expect(motionContainerConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        element: "div",
+        testId: "forecast-transition",
+        initial: false,
+        exit: undefined,
+      }),
+    )
   })
 
   it("submits an accessible weather search through encoded navigation", async () => {

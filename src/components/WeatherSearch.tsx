@@ -156,6 +156,7 @@ export default function WeatherSearch({
           {displayedWeather ? (
             <motion.div
               key={displayedWeather.city}
+              data-testid="forecast-transition"
               initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={shouldReduceMotion ? undefined : { opacity: 0, y: -4 }}
