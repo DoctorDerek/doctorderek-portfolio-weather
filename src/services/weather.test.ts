@@ -7,6 +7,7 @@ import { OPEN_WEATHER_MAP_CURRENT_WEATHER_URL } from "@/src/services/weatherConf
 import mswServer from "@/src/test/mswServer"
 import {
   OPEN_WEATHER_MAP_ERROR_RESPONSE_FIXTURE,
+  OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE,
   OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE,
   OPEN_WEATHER_MAP_TEST_API_KEY,
   OPEN_WEATHER_MAP_TEST_CITY,
@@ -42,9 +43,9 @@ describe("getCurrentWeather", () => {
         OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].description,
       icon: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.weather[0].icon,
       location: {
-        name: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.name,
-        stateName: null,
-        countryCode: OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE.sys.country,
+        name: OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0].name,
+        stateName: OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0].state,
+        countryCode: OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0].country,
       },
     })
   })
