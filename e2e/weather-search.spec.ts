@@ -48,6 +48,14 @@ test("searches live weather through encoded city navigation", async ({
   await expect(
     page.getByRole("heading", { name: LIVE_WEATHER_TEST_CITY }),
   ).toBeVisible()
+  const locationDetails = page.getByLabel("Location details", { exact: true })
+
+  await expect(
+    locationDetails.getByText(LIVE_WEATHER_TEST_CITY, { exact: true }),
+  ).toBeVisible()
+  await expect(
+    locationDetails.getByText("Mexico", { exact: true }),
+  ).toBeVisible()
   await expect(page.getByLabel("Temperature", { exact: true })).toBeVisible()
 })
 
@@ -69,6 +77,11 @@ test("loads live weather after explicit browser location consent", async ({
   await locationButton.click()
 
   await expect(page.getByLabel("Temperature", { exact: true })).toBeVisible()
+  await expect(
+    page
+      .getByLabel("Location details", { exact: true })
+      .getByText("Mexico", { exact: true }),
+  ).toBeVisible()
   await expect(locationButton).toBeEnabled()
   expect(new URL(page.url()).search).toBe("")
 })
