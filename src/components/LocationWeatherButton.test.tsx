@@ -59,6 +59,12 @@ const SUCCESSFUL_WEATHER_RESULT = {
   },
 } satisfies WeatherResult
 
+const ERROR_WEATHER_RESULT = {
+  status: "error",
+  code: 404,
+  message: "service unavailable",
+} satisfies WeatherResult
+
 const TEST_POSITION = {
   coords: {
     latitude: 19.432_608,
@@ -260,6 +266,24 @@ describe("LocationWeatherButton", () => {
         code: 500,
         message: "Server action unavailable",
       })
+    })
+  })
+
+  it("forwards weather API errors from the server action payload", async () => {
+    const user = userEvent.setup()
+    const { onLocationWeatherResult } = renderLocationWeatherButton()
+    getCurrentLocationWeatherMock.mockResolvedValueOnce(ERROR_WEATHER_RESULT)
+
+    await user.click(screen.getByRole("button", { name: "Use my location" }))
+    act(() => {
+      getCurrentGeolocatedConfiguration().onSuccess?.(TEST_POSITION)
+    })
+
+    await waitFor(() => {
+      expect(onLocationWeatherResult).toHaveBeenCalledWith(ERROR_WEATHER_RESULT)
+      expect(
+        screen.getByRole("button", { name: "Use my location" }),
+      ).toBeEnabled()
     })
   })
 })
