@@ -1,16 +1,45 @@
 import { expect, test } from "@playwright/test"
 import type { Page } from "@playwright/test"
 
+const VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR =
+  "TypeError: undefined is not an object (evaluating 'navigator.storage.persisted')"
+const VERCEL_PREVIEW_TOOLBAR_URL =
+  "https://vercel.live/_next-live/feedback/feedback.html"
+
+const isVercelPreviewToolbarStorageError = (error: Error) =>
+  error.message === VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR &&
+  error.stack?.includes(VERCEL_PREVIEW_TOOLBAR_URL) === true
+
 const collectBrowserErrors = (page: Page) => {
   const browserErrors: string[] = []
 
   page.on("console", (message) => {
     if (message.type() === "error") browserErrors.push(message.text())
   })
-  page.on("pageerror", (error) => browserErrors.push(error.message))
+  page.on("pageerror", (error) => {
+    if (!isVercelPreviewToolbarStorageError(error)) {
+      browserErrors.push(error.message)
+    }
+  })
 
   return browserErrors
 }
+
+test("isolates the verified Vercel toolbar storage error", () => {
+  const vercelToolbarError = new Error(VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR)
+  vercelToolbarError.stack = `${VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR}\n    at ${VERCEL_PREVIEW_TOOLBAR_URL}:9:91077`
+
+  const applicationError = new Error(VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR)
+  applicationError.stack = `${VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR}\n    at http://localhost:3000/app.js:1:1`
+
+  expect(isVercelPreviewToolbarStorageError(vercelToolbarError)).toBe(true)
+  expect(isVercelPreviewToolbarStorageError(applicationError)).toBe(false)
+  expect(
+    isVercelPreviewToolbarStorageError(
+      new Error("Unexpected application failure"),
+    ),
+  ).toBe(false)
+})
 
 test("removes spatial feedback when the user prefers reduced motion", async ({
   page,
