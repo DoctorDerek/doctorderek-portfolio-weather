@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import type { FormEvent } from "react"
 import CityWeather from "@/src/components/CityWeather"
 import LocationWeatherButton from "@/src/components/LocationWeatherButton"
@@ -14,8 +14,7 @@ type LocationWeatherState =
   | { status: "loading" }
   | { status: "complete"; weatherResult: WeatherResult }
 type SearchWeatherState =
-  | { status: "idle" }
-  | { status: "pending"; city: string }
+  { status: "idle" } | { status: "pending"; city: string }
 
 const CURRENT_LOCATION_LABEL = "Current location"
 
@@ -57,7 +56,7 @@ export default function WeatherSearch({
       ? {
           city: displayedCity,
           weatherResult: displayedCity === initialCity ? weatherResult : null,
-      }
+        }
       : null
 
   const handleLocationWeatherLoading = useCallback(() => {
@@ -91,16 +90,9 @@ export default function WeatherSearch({
     },
     [router, selectedCity],
   )
-
-  useEffect(() => {
-    if (
-      searchWeatherState.status !== "pending" ||
-      searchWeatherState.city !== selectedCity
-    )
-      return
-
-    setSearchWeatherState({ status: "idle" })
-  }, [searchWeatherState, selectedCity])
+  const shouldDisplaySearchPending =
+    searchWeatherState.status === "pending" &&
+    searchWeatherState.city !== selectedCity
 
   return (
     <main className="relative z-10 flex min-h-svh items-center justify-center px-4 py-24 sm:px-6 sm:py-20">
@@ -127,10 +119,7 @@ export default function WeatherSearch({
           </p>
         </header>
 
-        <form
-          className="space-y-2"
-          onSubmit={handleWeatherSearchSubmit}
-        >
+        <form className="space-y-2" onSubmit={handleWeatherSearchSubmit}>
           <label
             className="block text-sm font-semibold text-slate-900 dark:text-white"
             htmlFor="city"
@@ -154,8 +143,8 @@ export default function WeatherSearch({
               data-testid="weather-search-submit"
               className="h-12 rounded-r-xl bg-blue-700 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-500 dark:hover:bg-blue-400"
               type="submit"
-              disabled={searchWeatherState.status === "pending"}
-              aria-busy={searchWeatherState.status === "pending"}
+              disabled={shouldDisplaySearchPending}
+              aria-busy={shouldDisplaySearchPending}
               whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
               whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
             >
@@ -164,7 +153,7 @@ export default function WeatherSearch({
           </div>
         </form>
 
-        {searchWeatherState.status === "pending" ? (
+        {shouldDisplaySearchPending ? (
           <p
             role="status"
             aria-live="polite"
