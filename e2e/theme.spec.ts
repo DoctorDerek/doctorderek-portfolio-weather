@@ -127,3 +127,21 @@ test("hydrates the system theme without browser errors", async ({ page }) => {
   ).toBeVisible()
   expect(browserErrors).toEqual([])
 })
+
+test("keeps the theme control in the expected top-right control area", async ({
+  page,
+}) => {
+  await page.goto("/")
+
+  const themeToggle = page.getByRole("button", {
+    name: "Switch to dark theme",
+  })
+  const viewport = page.viewportSize()
+  const toggleBounds = await themeToggle.boundingBox()
+
+  expect(viewport).not.toBeNull()
+  expect(toggleBounds).not.toBeNull()
+  expect(toggleBounds!.y).toBeLessThan(72)
+  expect(toggleBounds!.x).toBeGreaterThan(viewport!.width - 120)
+  await expect(themeToggle).toBeVisible()
+})
