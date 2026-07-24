@@ -89,6 +89,31 @@ test("loads live weather after explicit browser location consent", async ({
   expect(new URL(page.url()).search).toBe("")
 })
 
+test("auto-loads local weather when location permission is already granted", async ({
+  context,
+  page,
+}) => {
+  await context.grantPermissions(["geolocation"])
+  await context.setGeolocation(LIVE_WEATHER_TEST_COORDINATES)
+  await page.goto("/")
+
+  const locationButton = page.getByTestId("weather-location-button")
+
+  await expect(
+    page.getByText("Your location is used once and isn’t stored."),
+  ).toBeVisible()
+  await expect(locationButton).toBeDisabled({ timeout: 8_000 })
+  await expect(page.getByLabel("Temperature", { exact: true })).toBeVisible({
+    timeout: 18_000,
+  })
+  await expect(
+    page
+      .getByLabel("Location details", { exact: true })
+      .getByText("Mexico", { exact: true }),
+  ).toBeVisible()
+  expect(new URL(page.url()).search).toBe("")
+})
+
 test("announces live API errors without stale weather output", async ({
   page,
 }) => {
