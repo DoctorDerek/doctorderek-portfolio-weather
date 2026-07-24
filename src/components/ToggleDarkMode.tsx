@@ -4,9 +4,10 @@ import { useTheme } from "next-themes"
 import ThemeToggle from "@/src/components/ThemeToggle"
 
 export default function ToggleDarkMode() {
-  const { resolvedTheme, setTheme } = useTheme()
-  const isDarkTheme = resolvedTheme === "dark"
-  const isThemeSettled = resolvedTheme === "light" || isDarkTheme
+  const { resolvedTheme, theme, setTheme } = useTheme()
+  const effectiveTheme = resolvedTheme ?? theme
+  const isDarkTheme = effectiveTheme === "dark"
+  const isThemeSettled = isDarkTheme || effectiveTheme === "light"
 
   if (!isThemeSettled) {
     return null
