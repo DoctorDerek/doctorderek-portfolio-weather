@@ -5,6 +5,7 @@ import ToggleDarkMode from "@/src/components/ToggleDarkMode"
 
 const themeState = vi.hoisted(() => ({
   resolvedTheme: "light" as "dark" | "light" | undefined,
+  theme: "system" as "system" | "light" | "dark" | undefined,
   setTheme: vi.fn(),
 }))
 
@@ -15,6 +16,7 @@ vi.mock("next-themes", () => ({
 describe("ToggleDarkMode", () => {
   beforeEach(() => {
     themeState.resolvedTheme = "light"
+    themeState.theme = "system"
     themeState.setTheme.mockClear()
   })
 
@@ -56,7 +58,23 @@ describe("ToggleDarkMode", () => {
 
     expect(
       screen.getByRole("button", { name: "Switch to dark theme" }),
-    ).toHaveClass("fixed", "top-4", "right-4")
+    ).toHaveClass("fixed")
+  })
+
+  it("falls back to resolved system theme when theme mode is system", async () => {
+    themeState.theme = "system"
+    themeState.resolvedTheme = "dark"
+    render(<ToggleDarkMode />)
+
+    const themeToggle = screen.getByRole("button", {
+      name: "Switch to light theme",
+    })
+    const user = userEvent.setup()
+
+    await user.click(themeToggle)
+
+    expect(themeState.setTheme).toHaveBeenCalledOnce()
+    expect(themeState.setTheme).toHaveBeenCalledWith("light")
   })
 
   it("does not render before theme resolves to a concrete value", () => {
