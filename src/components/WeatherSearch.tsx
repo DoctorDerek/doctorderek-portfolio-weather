@@ -122,7 +122,11 @@ export default function WeatherSearch({
           </p>
         </header>
 
-        <form className="space-y-2" onSubmit={handleWeatherSearchSubmit}>
+        <form
+          className="space-y-2"
+          data-testid="weather-search-form"
+          onSubmit={handleWeatherSearchSubmit}
+        >
           <label
             className="block text-sm font-semibold text-slate-900 dark:text-white"
             htmlFor="city"
@@ -158,6 +162,7 @@ export default function WeatherSearch({
 
         {shouldDisplaySearchPending ? (
           <p
+            data-testid="weather-search-status"
             role="status"
             aria-live="polite"
             className="mx-auto mt-4 max-w-full text-sm font-semibold text-blue-900 dark:text-blue-200"

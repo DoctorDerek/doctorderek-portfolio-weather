@@ -22,6 +22,7 @@ export default function ThemeToggle({
       aria-label={
         isDarkTheme ? "Switch to light theme" : "Switch to dark theme"
       }
+      data-testid="theme-toggle"
       style={themeButtonStyle}
       className={classNames(
         "fixed z-20 inline-flex bg-transparent text-gray-900",
