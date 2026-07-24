@@ -93,6 +93,9 @@ export default function WeatherSearch({
   const shouldDisplaySearchPending =
     searchWeatherState.status === "pending" &&
     searchWeatherState.city !== selectedCity
+  const shouldAutoDetectLocation = selectedCity
+    ? false
+    : locationWeatherState.status === "inactive"
 
   return (
     <main className="relative z-10 flex min-h-svh items-center justify-center px-4 py-24 sm:px-6 sm:py-20">
@@ -174,6 +177,7 @@ export default function WeatherSearch({
         <LocationWeatherButton
           onLocationWeatherLoading={handleLocationWeatherLoading}
           onLocationWeatherResult={handleLocationWeatherResult}
+          shouldAutoFetchIfPermitted={shouldAutoDetectLocation}
           shouldReduceMotion={shouldReduceMotion ?? false}
         />
 

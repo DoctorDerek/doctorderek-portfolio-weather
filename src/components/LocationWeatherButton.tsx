@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "motion/react"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useGeolocated } from "react-geolocated"
 import toast from "react-hot-toast"
 import { getCurrentLocationWeather } from "@/src/actions/getCurrentLocationWeather"
@@ -36,13 +36,17 @@ export default function LocationWeatherButton({
   onLocationWeatherLoading,
   onLocationWeatherResult,
   shouldReduceMotion,
+  shouldAutoFetchIfPermitted,
 }: {
   onLocationWeatherLoading: () => void
   onLocationWeatherResult: (weatherResult: WeatherResult) => void
   shouldReduceMotion: boolean
+  shouldAutoFetchIfPermitted?: boolean
 }) {
   const [locationRequestPhase, setLocationRequestPhase] =
     useState<LocationRequestPhase>("idle")
+  const [hasCheckedAutoPermission, setHasCheckedAutoPermission] =
+    useState(false)
 
   const handleLocationError = useCallback(
     (positionError?: GeolocationPositionError) => {
@@ -101,6 +105,48 @@ export default function LocationWeatherButton({
     },
   })
 
+  const requestLocationWeather = useCallback(() => {
+    setLocationRequestPhase("requesting")
+    getPosition()
+  }, [getPosition])
+
+  useEffect(() => {
+    if (
+      !shouldAutoFetchIfPermitted ||
+      hasCheckedAutoPermission ||
+      locationRequestPhase !== "idle" ||
+      !isGeolocationAvailable ||
+      !("permissions" in navigator)
+    ) {
+      return
+    }
+
+    const tryAutoFetch = async () => {
+      setHasCheckedAutoPermission(true)
+
+      try {
+        const permissionStatus = await navigator.permissions.query({
+          name: "geolocation" as PermissionName,
+        })
+
+        if (permissionStatus.state === "granted") {
+          requestLocationWeather()
+        }
+      } catch {
+        return
+      }
+    }
+
+    void tryAutoFetch()
+  }, [
+    hasCheckedAutoPermission,
+    isGeolocationAvailable,
+    locationRequestPhase,
+    setHasCheckedAutoPermission,
+    requestLocationWeather,
+    shouldAutoFetchIfPermitted,
+  ])
+
   const isLocationRequestPending = locationRequestPhase !== "idle"
   const buttonLabel =
     locationRequestPhase === "requesting"
@@ -143,8 +189,7 @@ export default function LocationWeatherButton({
             return
           }
 
-          setLocationRequestPhase("requesting")
-          getPosition()
+          requestLocationWeather()
         }}
       >
         <span aria-live="polite">{buttonLabel}</span>
