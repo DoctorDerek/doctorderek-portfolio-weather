@@ -53,6 +53,7 @@ describe("CityWeather", () => {
     )
 
     expect(screen.getByRole("heading", { name: TEST_CITY })).toBeVisible()
+    expect(screen.getByText("Mexico City, Mexico")).toBeVisible()
     const locationDetails = screen.getByLabelText("Location details")
 
     expect(within(locationDetails).getByText("State or region")).toBeVisible()
@@ -87,6 +88,7 @@ describe("CityWeather", () => {
     expect(
       within(locationDetails).queryByText("State or region"),
     ).not.toBeInTheDocument()
+    expect(screen.getAllByText("United Kingdom")).toHaveLength(2)
     expect(within(locationDetails).getByText("United Kingdom")).toBeVisible()
   })
 })
