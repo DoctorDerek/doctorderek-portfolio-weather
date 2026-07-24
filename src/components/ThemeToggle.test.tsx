@@ -14,7 +14,12 @@ describe("ThemeToggle", () => {
     })
     const artwork = container.querySelector("svg")
 
-    expect(themeToggle).toHaveClass("top-4", "right-4", "theme-toggle--light")
+    expect(themeToggle).toHaveClass(
+      "fixed",
+      "top-4",
+      "right-4",
+      "theme-toggle--light",
+    )
     expect(artwork).toHaveAttribute("aria-hidden", "true")
     expect(artwork).toHaveAttribute("focusable", "false")
   })

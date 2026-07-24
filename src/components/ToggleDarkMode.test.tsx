@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import ToggleDarkMode from "@/src/components/ToggleDarkMode"
 
 const themeState = vi.hoisted(() => ({
-  resolvedTheme: "light" as "dark" | "light",
+  resolvedTheme: "light" as "dark" | "light" | undefined,
   setTheme: vi.fn(),
 }))
 
@@ -56,6 +56,16 @@ describe("ToggleDarkMode", () => {
 
     expect(
       screen.getByRole("button", { name: "Switch to dark theme" }),
-    ).toHaveClass("top-4", "right-4")
+    ).toHaveClass("fixed", "top-4", "right-4")
+  })
+
+  it("does not render before theme resolves to a concrete value", () => {
+    themeState.resolvedTheme = undefined
+
+    render(<ToggleDarkMode />)
+
+    expect(
+      screen.queryByRole("button", { name: "Switch to dark theme" }),
+    ).not.toBeInTheDocument()
   })
 })
