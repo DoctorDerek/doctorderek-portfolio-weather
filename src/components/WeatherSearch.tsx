@@ -2,7 +2,8 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
+import type { FormEvent } from "react"
 import CityWeather from "@/src/components/CityWeather"
 import LocationWeatherButton from "@/src/components/LocationWeatherButton"
 import type { WeatherResult } from "@/src/types/weather"
@@ -12,6 +13,9 @@ type LocationWeatherState =
   | { status: "inactive" }
   | { status: "loading" }
   | { status: "complete"; weatherResult: WeatherResult }
+type SearchWeatherState =
+  | { status: "idle" }
+  | { status: "pending"; city: string }
 
 const CURRENT_LOCATION_LABEL = "Current location"
 
@@ -27,6 +31,8 @@ export default function WeatherSearch({
   const shouldReduceMotion = useReducedMotion()
   const [locationWeatherState, setLocationWeatherState] =
     useState<LocationWeatherState>({ status: "inactive" })
+  const [searchWeatherState, setSearchWeatherState] =
+    useState<SearchWeatherState>({ status: "idle" })
 
   const selectedCity = normalizeCityQuery(
     searchParameters.get("city") || searchParameters.get("q"),
@@ -51,7 +57,7 @@ export default function WeatherSearch({
       ? {
           city: displayedCity,
           weatherResult: displayedCity === initialCity ? weatherResult : null,
-        }
+      }
       : null
 
   const handleLocationWeatherLoading = useCallback(() => {
@@ -71,6 +77,30 @@ export default function WeatherSearch({
     },
     [],
   )
+
+  const handleWeatherSearchSubmit = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      const formData = new FormData(event.currentTarget)
+      const inputCity = normalizeCityQuery(String(formData.get("city")))
+
+      if (!inputCity || inputCity === selectedCity) return
+
+      setSearchWeatherState({ status: "pending", city: inputCity })
+      router.push(`/?city=${encodeURIComponent(inputCity)}`)
+    },
+    [router, selectedCity],
+  )
+
+  useEffect(() => {
+    if (
+      searchWeatherState.status !== "pending" ||
+      searchWeatherState.city !== selectedCity
+    )
+      return
+
+    setSearchWeatherState({ status: "idle" })
+  }, [searchWeatherState, selectedCity])
 
   return (
     <main className="relative z-10 flex min-h-svh items-center justify-center px-4 py-24 sm:px-6 sm:py-20">
@@ -99,15 +129,7 @@ export default function WeatherSearch({
 
         <form
           className="space-y-2"
-          onSubmit={(event) => {
-            event.preventDefault()
-            const formData = new FormData(event.currentTarget)
-            const inputCity = normalizeCityQuery(String(formData.get("city")))
-
-            if (!inputCity) return
-
-            router.push(`/?city=${encodeURIComponent(inputCity)}`)
-          }}
+          onSubmit={handleWeatherSearchSubmit}
         >
           <label
             className="block text-sm font-semibold text-slate-900 dark:text-white"
@@ -132,6 +154,8 @@ export default function WeatherSearch({
               data-testid="weather-search-submit"
               className="h-12 rounded-r-xl bg-blue-700 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-500 dark:hover:bg-blue-400"
               type="submit"
+              disabled={searchWeatherState.status === "pending"}
+              aria-busy={searchWeatherState.status === "pending"}
               whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
               whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
             >
@@ -139,6 +163,16 @@ export default function WeatherSearch({
             </motion.button>
           </div>
         </form>
+
+        {searchWeatherState.status === "pending" ? (
+          <p
+            role="status"
+            aria-live="polite"
+            className="mx-auto mt-4 max-w-full text-sm font-semibold text-blue-900 dark:text-blue-200"
+          >
+            Loading forecast for {searchWeatherState.city}...
+          </p>
+        ) : null}
 
         <div className="my-4 flex items-center gap-3" aria-hidden="true">
           <div className="h-px flex-1 bg-slate-500/30" />
