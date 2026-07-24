@@ -231,6 +231,51 @@ describe("WeatherSearch", () => {
     expect(routerPush).toHaveBeenCalledWith("/?city=Mexico%20City")
   })
 
+  it("displays search-pending status while awaiting a city weather lookup", async () => {
+    const user = userEvent.setup()
+    const { rerender } = renderWeatherSearch({
+      initialCity: null,
+      weatherResult: null,
+    })
+    const cityInput = screen.getByRole("textbox", { name: "City or place" })
+    const submitButton = screen.getByRole("button", { name: "Search" })
+
+    await user.type(cityInput, "Mexico City")
+    await user.click(submitButton)
+
+    expect(submitButton).toBeDisabled()
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading forecast for Mexico City...",
+    )
+    expect(routerPush).toHaveBeenCalledWith("/?city=Mexico%20City")
+
+    searchParameters.value = "city=Mexico%20City"
+    rerender(
+      <>
+        <Toaster />
+        <WeatherSearch
+          initialCity="Mexico City"
+          weatherResult={{
+            status: "success",
+            temperatureKelvin: 300.15,
+            description: "clear sky",
+            icon: "01d",
+            location: {
+              name: "Mexico City",
+              stateName: "Mexico City",
+              countryCode: "MX",
+            },
+          }}
+        />
+      </>,
+    )
+
+    expect(screen.getByRole("button", { name: "Search" })).not.toBeDisabled()
+    expect(
+      screen.queryByText("Loading forecast for Mexico City..."),
+    ).not.toBeInTheDocument()
+  })
+
   it("uses native validity and semantic heading composition for city entry", () => {
     renderWeatherSearch({ initialCity: null, weatherResult: null })
 
