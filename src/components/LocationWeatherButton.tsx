@@ -112,6 +112,7 @@ export default function LocationWeatherButton({
   return (
     <div className="flex flex-col items-stretch gap-2">
       <motion.button
+        data-testid="weather-location-button"
         className="h-12 w-full rounded-xl border border-blue-700/30 bg-blue-50/80 px-4 text-sm font-semibold text-blue-900 shadow-sm transition-colors hover:bg-blue-100 disabled:cursor-wait disabled:opacity-70 dark:border-blue-300/30 dark:bg-blue-400/10 dark:text-blue-200 dark:hover:bg-blue-400/20"
         type="button"
         disabled={isLocationRequestPending}

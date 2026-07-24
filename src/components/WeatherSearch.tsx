@@ -129,6 +129,7 @@ export default function WeatherSearch({
               defaultValue={cityInputValue}
             />
             <motion.button
+              data-testid="weather-search-submit"
               className="h-12 rounded-r-xl bg-blue-700 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-500 dark:hover:bg-blue-400"
               type="submit"
               whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}

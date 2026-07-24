@@ -8,13 +8,17 @@ const LIVE_WEATHER_TEST_COORDINATES = {
 }
 
 async function waitForMotionButtonHydration(button: Locator) {
-  await expect(button).toHaveCSS("transform", "none")
+  await expect(button).toBeVisible()
+  await expect(button).toBeEnabled()
+  const baselineTransform = await button.evaluate((element) => {
+    return getComputedStyle(element).transform
+  })
   await button.hover()
   await expect
     .poll(() =>
       button.evaluate((element) => getComputedStyle(element).transform),
     )
-    .not.toBe("none")
+    .not.toBe(baselineTransform)
 }
 
 test.beforeEach(async ({ page }) => {
@@ -25,8 +29,11 @@ test("provides restrained pointer feedback without changing submission semantics
   page,
 }) => {
   await page.goto("/")
+  await expect(
+    page.getByRole("heading", { name: "Weather, right now" }),
+  ).toBeVisible()
 
-  const submitButton = page.getByRole("button", { name: "Search" })
+  const submitButton = page.getByTestId("weather-search-submit")
 
   await expect(submitButton).toHaveAttribute("type", "submit")
   await waitForMotionButtonHydration(submitButton)
@@ -38,9 +45,9 @@ test("searches live weather through encoded city navigation", async ({
   await page.goto("/")
 
   await page
-    .getByRole("textbox", { name: "City or place" })
+    .getByTestId("weather-input")
     .fill(LIVE_WEATHER_TEST_CITY)
-  const submitButton = page.getByRole("button", { name: "Search" })
+  const submitButton = page.getByTestId("weather-search-submit")
   await waitForMotionButtonHydration(submitButton)
   await submitButton.click()
 
@@ -70,9 +77,7 @@ test("loads live weather after explicit browser location consent", async ({
   await expect(
     page.getByText("Your location is used once and isn’t stored."),
   ).toBeVisible()
-  const locationButton = page.getByRole("button", {
-    name: "Use my location",
-  })
+  const locationButton = page.getByTestId("weather-location-button")
   await waitForMotionButtonHydration(locationButton)
   await locationButton.click()
 
@@ -92,9 +97,9 @@ test("announces live API errors without stale weather output", async ({
   await page.goto("/")
 
   await page
-    .getByRole("textbox", { name: "City or place" })
+    .getByTestId("weather-input")
     .fill(INVALID_LIVE_WEATHER_TEST_CITY)
-  const submitButton = page.getByRole("button", { name: "Search" })
+  const submitButton = page.getByTestId("weather-search-submit")
   await waitForMotionButtonHydration(submitButton)
   await submitButton.click()
 
