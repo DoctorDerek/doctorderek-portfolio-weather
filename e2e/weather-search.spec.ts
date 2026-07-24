@@ -1,10 +1,20 @@
-import { expect, test, type Locator } from "@playwright/test"
+import { expect, test, type Locator, type Page } from "@playwright/test"
 
 const LIVE_WEATHER_TEST_CITY = "Mexico City"
 const INVALID_LIVE_WEATHER_TEST_CITY = "NoSuchCityQream987654321"
 const LIVE_WEATHER_TEST_COORDINATES = {
   latitude: 19.432_608,
   longitude: -99.133_209,
+}
+
+async function waitForSearchSubmitReadiness(page: Page) {
+  const searchForm = page.getByTestId("weather-search-form")
+  const submitButton = page.getByTestId("weather-search-submit")
+
+  await expect(searchForm).toBeVisible()
+  await expect(submitButton).toBeVisible()
+  await expect(submitButton).toBeEnabled()
+  await expect(submitButton).toHaveAttribute("type", "submit")
 }
 
 async function waitForMotionButtonHydration(button: Locator) {
@@ -29,6 +39,7 @@ test("provides restrained pointer feedback without changing submission semantics
   page,
 }) => {
   await page.goto("/")
+  await waitForSearchSubmitReadiness(page)
   await expect(
     page.getByRole("heading", { name: "Weather, right now" }),
   ).toBeVisible()
@@ -43,11 +54,15 @@ test("searches live weather through encoded city navigation", async ({
   page,
 }) => {
   await page.goto("/")
+  await waitForSearchSubmitReadiness(page)
 
   await page.getByTestId("weather-input").fill(LIVE_WEATHER_TEST_CITY)
   const submitButton = page.getByTestId("weather-search-submit")
   await waitForMotionButtonHydration(submitButton)
-  await submitButton.click()
+  await Promise.all([
+    page.waitForLoadState("networkidle"),
+    submitButton.click(),
+  ])
 
   await expect(page).toHaveURL(/\?city=Mexico%20City$/)
   await expect(
@@ -71,6 +86,7 @@ test("loads live weather after explicit browser location consent", async ({
   await context.grantPermissions(["geolocation"])
   await context.setGeolocation(LIVE_WEATHER_TEST_COORDINATES)
   await page.goto("/")
+  await waitForSearchSubmitReadiness(page)
 
   await expect(
     page.getByText("Your location is used once and isn’t stored."),
@@ -96,6 +112,7 @@ test("auto-loads local weather when location permission is already granted", asy
   await context.grantPermissions(["geolocation"])
   await context.setGeolocation(LIVE_WEATHER_TEST_COORDINATES)
   await page.goto("/")
+  await waitForSearchSubmitReadiness(page)
 
   const locationButton = page.getByTestId("weather-location-button")
 
@@ -118,11 +135,15 @@ test("announces live API errors without stale weather output", async ({
   page,
 }) => {
   await page.goto("/")
+  await waitForSearchSubmitReadiness(page)
 
   await page.getByTestId("weather-input").fill(INVALID_LIVE_WEATHER_TEST_CITY)
   const submitButton = page.getByTestId("weather-search-submit")
   await waitForMotionButtonHydration(submitButton)
-  await submitButton.click()
+  await Promise.all([
+    page.waitForLoadState("networkidle"),
+    submitButton.click(),
+  ])
 
   await expect(page).toHaveURL(/\?city=NoSuchCityQream987654321$/)
   await expect(

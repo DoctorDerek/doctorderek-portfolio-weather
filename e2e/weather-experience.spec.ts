@@ -1,7 +1,10 @@
 import { expect, test } from "@playwright/test"
+import type { Page } from "@playwright/test"
 
 const NARROW_VIEWPORT = { width: 320, height: 568 }
 const LIVE_WEATHER_TEST_CITY = "Mexico City"
+
+const getThemeToggle = (page: Page) => page.getByTestId("theme-toggle")
 
 test("keeps the complete forecast workspace inside a narrow viewport", async ({
   page,
@@ -13,9 +16,7 @@ test("keeps the complete forecast workspace inside a narrow viewport", async ({
   await page.goto("/?city=Mexico%20City")
 
   const workspace = page.getByTestId("weather-workspace")
-  const themeToggle = page.getByRole("button", {
-    name: "Switch to dark theme",
-  })
+  const themeToggle = getThemeToggle(page)
 
   await expect(workspace).toBeVisible()
   await expect(themeToggle).toBeVisible()

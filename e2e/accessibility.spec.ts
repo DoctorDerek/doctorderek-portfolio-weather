@@ -1,4 +1,7 @@
 import { expect, test, type Locator } from "@playwright/test"
+import type { Page } from "@playwright/test"
+
+const getThemeToggle = (page: Page) => page.getByTestId("theme-toggle")
 
 async function expectKeyboardVisibleFocus(control: Locator) {
   await expect(control).toBeFocused()
@@ -20,7 +23,7 @@ test("keeps every primary weather control visibly keyboard focused", async ({
   await page.goto("/")
 
   const primaryWeatherControls = [
-    page.getByRole("button", { name: "Switch to dark theme" }),
+    getThemeToggle(page),
     page.getByRole("textbox", { name: "City or place" }),
     page.getByRole("button", { name: "Search" }),
     page.getByRole("button", { name: "Use my location" }),

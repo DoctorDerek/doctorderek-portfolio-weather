@@ -25,6 +25,10 @@ const collectBrowserErrors = (page: Page) => {
   return browserErrors
 }
 
+const getThemeToggle = (page: Page) => {
+  return page.getByTestId("theme-toggle")
+}
+
 test("isolates the verified Vercel toolbar storage error", () => {
   const vercelToolbarError = new Error(VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR)
   vercelToolbarError.stack = `${VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR}\n    at ${VERCEL_PREVIEW_TOOLBAR_URL}:9:91077`
@@ -50,9 +54,7 @@ test("removes spatial feedback when the user prefers reduced motion", async ({
   })
   await page.goto("/")
 
-  const themeToggle = page.getByRole("button", {
-    name: "Switch to dark theme",
-  })
+  const themeToggle = getThemeToggle(page)
   const submitButton = page.getByRole("button", { name: "Search" })
 
   await expect(themeToggle.locator(".sun")).toHaveCSS(
@@ -76,9 +78,7 @@ test("persists dark mode through the accessible theme control", async ({
   await page.goto("/")
 
   const documentRoot = page.locator("html")
-  const darkThemeToggle = page.getByRole("button", {
-    name: "Switch to dark theme",
-  })
+  const darkThemeToggle = getThemeToggle(page)
 
   await expect(documentRoot).toHaveClass(/light/)
   await expect(darkThemeToggle).toBeVisible()
@@ -86,9 +86,7 @@ test("persists dark mode through the accessible theme control", async ({
   await darkThemeToggle.click()
 
   await expect(documentRoot).toHaveClass(/dark/)
-  await expect(
-    page.getByRole("button", { name: "Switch to light theme" }),
-  ).toBeVisible()
+  await expect(getThemeToggle(page)).toBeVisible()
   await expect
     .poll(() => page.evaluate(() => window.localStorage.getItem("theme")))
     .toBe("dark")
@@ -106,9 +104,7 @@ test("hydrates a persisted dark theme without browser errors", async ({
   await page.goto("/")
 
   await expect(page.locator("html")).toHaveClass(/dark/)
-  await expect(
-    page.getByRole("button", { name: "Switch to light theme" }),
-  ).toBeVisible()
+  await expect(getThemeToggle(page)).toBeVisible()
   expect(browserErrors).toEqual([])
 })
 
@@ -122,9 +118,7 @@ test("hydrates the system theme without browser errors", async ({ page }) => {
   await page.goto("/")
 
   await expect(page.locator("html")).toHaveClass(/dark/)
-  await expect(
-    page.getByRole("button", { name: "Switch to light theme" }),
-  ).toBeVisible()
+  await expect(getThemeToggle(page)).toBeVisible()
   expect(browserErrors).toEqual([])
 })
 
@@ -133,9 +127,7 @@ test("keeps the theme control in the expected top-right control area", async ({
 }) => {
   await page.goto("/")
 
-  const themeToggle = page.getByRole("button", {
-    name: "Switch to dark theme",
-  })
+  const themeToggle = getThemeToggle(page)
   const viewport = page.viewportSize()
   const toggleBounds = await themeToggle.boundingBox()
 
