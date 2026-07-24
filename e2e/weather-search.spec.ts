@@ -44,9 +44,7 @@ test("searches live weather through encoded city navigation", async ({
 }) => {
   await page.goto("/")
 
-  await page
-    .getByTestId("weather-input")
-    .fill(LIVE_WEATHER_TEST_CITY)
+  await page.getByTestId("weather-input").fill(LIVE_WEATHER_TEST_CITY)
   const submitButton = page.getByTestId("weather-search-submit")
   await waitForMotionButtonHydration(submitButton)
   await submitButton.click()
@@ -96,9 +94,7 @@ test("announces live API errors without stale weather output", async ({
 }) => {
   await page.goto("/")
 
-  await page
-    .getByTestId("weather-input")
-    .fill(INVALID_LIVE_WEATHER_TEST_CITY)
+  await page.getByTestId("weather-input").fill(INVALID_LIVE_WEATHER_TEST_CITY)
   const submitButton = page.getByTestId("weather-search-submit")
   await waitForMotionButtonHydration(submitButton)
   await submitButton.click()
