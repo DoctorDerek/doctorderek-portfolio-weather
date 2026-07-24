@@ -7,6 +7,7 @@ import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
 import WeatherLocationDetails from "@/src/components/WeatherLocationDetails"
 import type { WeatherResult } from "@/src/types/weather"
+import { getCountryName } from "@/src/utils/country"
 import { upperCaseFirstLetterOfEachWord } from "@/src/utils/text"
 import {
   convertKelvinToCelsius,
@@ -61,6 +62,10 @@ export default function CityWeather({
 
   const { icon, description, location, temperatureKelvin } = weatherResult
   const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`
+  const countryName = getCountryName(location.countryCode)
+  const locationSummary = location.stateName
+    ? `${location.stateName}, ${countryName}`
+    : countryName
 
   const temperatureCelsius = convertKelvinToCelsius(temperatureKelvin)
   const temperatureFahrenheit = convertKelvinToFahrenheit(temperatureKelvin)
@@ -71,6 +76,12 @@ export default function CityWeather({
       heading={location.name}
       ariaLive="polite"
     >
+      <p
+        aria-hidden="true"
+        className="mt-2 text-xs tracking-wide text-slate-500 dark:text-slate-300"
+      >
+        {locationSummary}
+      </p>
       <WeatherLocationDetails location={location} />
       <div className="mt-2 grid h-28 w-28">
         <div className="relative">
