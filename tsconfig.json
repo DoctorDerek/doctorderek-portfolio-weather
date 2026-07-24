@@ -8,7 +8,6 @@
     "plugins": [{ "name": "next" }],
     "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
