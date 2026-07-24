@@ -92,6 +92,7 @@ vi.mock("@/src/components/LocationWeatherButton", () => ({
     onLocationWeatherLoading: () => void
     onLocationWeatherResult: (weatherResult: WeatherResult) => void
     shouldReduceMotion: boolean
+    shouldAutoFetchIfPermitted: boolean
   }) => {
     locationWeatherButtonProperties(properties)
     return <button type="button">Use my location</button>
@@ -184,6 +185,38 @@ describe("WeatherSearch", () => {
         exit: { opacity: 0, y: -4 },
       }),
     )
+  })
+
+  it("enables location auto-detect when no city is selected", () => {
+    renderWeatherSearch({ initialCity: null, weatherResult: null })
+
+    expect(
+      locationWeatherButtonProperties.mock.lastCall?.[0]
+        .shouldAutoFetchIfPermitted,
+    ).toBe(true)
+  })
+
+  it("disables location auto-detect when a city query is active", () => {
+    searchParameters.value = "city=Mexico%20City"
+    renderWeatherSearch({
+      initialCity: "Mexico City",
+      weatherResult: {
+        status: "success",
+        temperatureKelvin: 300.15,
+        description: "clear sky",
+        icon: "01d",
+        location: {
+          name: "Mexico City",
+          stateName: "Mexico City",
+          countryCode: "MX",
+        },
+      },
+    })
+
+    expect(
+      locationWeatherButtonProperties.mock.lastCall?.[0]
+        .shouldAutoFetchIfPermitted,
+    ).toBe(false)
   })
 
   it("removes spatial workspace and forecast transitions for reduced motion", () => {

@@ -80,6 +80,30 @@ const TEST_POSITION = {
   toJSON: () => ({}),
 } satisfies GeolocationPosition
 
+function setGeolocationPermissionState(
+  newPermissionState: PermissionState | "unsupported",
+) {
+  if (newPermissionState === "unsupported") {
+    Object.defineProperty(
+      navigator as Navigator & { permissions?: unknown },
+      "permissions",
+      {
+        configurable: true,
+        value: undefined,
+      },
+    )
+    return
+  }
+
+  const permissionStatus = { state: newPermissionState }
+  const permissionQuery = vi.fn().mockResolvedValue(permissionStatus)
+
+  Object.defineProperty(navigator, "permissions", {
+    configurable: true,
+    value: { query: permissionQuery },
+  })
+}
+
 function getCurrentGeolocatedConfiguration() {
   if (!geolocatedConfiguration.value) {
     throw new Error("Geolocation configuration was not initialized")
@@ -99,6 +123,7 @@ function renderLocationWeatherButton() {
         onLocationWeatherLoading={onLocationWeatherLoading}
         onLocationWeatherResult={onLocationWeatherResult}
         shouldReduceMotion={false}
+        shouldAutoFetchIfPermitted={false}
       />
     </>,
   )
@@ -112,13 +137,17 @@ describe("LocationWeatherButton", () => {
     getCurrentLocationWeatherMock.mockReset()
     getCurrentLocationWeatherMock.mockResolvedValue(SUCCESSFUL_WEATHER_RESULT)
     getPositionMock.mockReset()
+    setGeolocationPermissionState("prompt")
     geolocationAvailability.value = true
     geolocatedConfiguration.value = null
   })
 
-  it("waits for explicit consent and configures one low-power position", () => {
+  it("waits for explicit consent and configures one low-power position", async () => {
     renderLocationWeatherButton()
 
+    await waitFor(() => {
+      expect(getCurrentGeolocatedConfiguration()).toBeDefined()
+    })
     expect(getPositionMock).not.toHaveBeenCalled()
     expect(getCurrentGeolocatedConfiguration()).toMatchObject({
       positionOptions: {
@@ -135,6 +164,45 @@ describe("LocationWeatherButton", () => {
     expect(
       screen.getByText("Your location is used once and isn’t stored."),
     ).toBeVisible()
+  })
+
+  it("auto-fills on mount only when geolocation permission is already granted", async () => {
+    setGeolocationPermissionState("granted")
+    render(
+      <>
+        <Toaster />
+        <LocationWeatherButton
+          onLocationWeatherLoading={vi.fn()}
+          onLocationWeatherResult={vi.fn()}
+          shouldReduceMotion={false}
+          shouldAutoFetchIfPermitted={true}
+        />
+      </>,
+    )
+
+    await waitFor(() => {
+      expect(getPositionMock).toHaveBeenCalledOnce()
+    })
+    expect(
+      screen.getByRole("button", { name: "Allow location access…" }),
+    ).toBeDisabled()
+  })
+
+  it("does not auto-fill when geolocation permission is still pending", () => {
+    setGeolocationPermissionState("prompt")
+    renderLocationWeatherButton()
+
+    expect(getPositionMock).not.toHaveBeenCalled()
+    expect(
+      screen.getByRole("button", { name: "Use my location" }),
+    ).toBeEnabled()
+  })
+
+  it("does not auto-fetch when permission API is unavailable", () => {
+    setGeolocationPermissionState("unsupported")
+    renderLocationWeatherButton()
+
+    expect(getPositionMock).not.toHaveBeenCalled()
   })
 
   it("requests permission only after the location button is activated", async () => {
