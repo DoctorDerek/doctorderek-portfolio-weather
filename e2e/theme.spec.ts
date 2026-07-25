@@ -134,6 +134,8 @@ test("keeps the theme control in the expected top-right control area", async ({
   expect(viewport).not.toBeNull()
   expect(toggleBounds).not.toBeNull()
   expect(toggleBounds!.y).toBeLessThan(72)
-  expect(toggleBounds!.x).toBeGreaterThan(viewport!.width - 120)
+  const toggleRightEdge = toggleBounds!.x + toggleBounds!.width
+  expect(toggleRightEdge).toBeGreaterThan(viewport!.width - 24)
+  expect(toggleRightEdge).toBeLessThanOrEqual(viewport!.width)
   await expect(themeToggle).toBeVisible()
 })
