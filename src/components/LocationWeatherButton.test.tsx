@@ -13,6 +13,7 @@ const geolocationAvailability = vi.hoisted(() => ({ value: true }))
 const geolocatedConfiguration = vi.hoisted(() => ({
   value: null as GeolocatedConfig | null,
 }))
+type PermissionQuery = () => Promise<{ state: PermissionState }>
 
 vi.mock("@/src/actions/getCurrentLocationWeather", () => ({
   getCurrentLocationWeather: getCurrentLocationWeatherMock,
@@ -82,6 +83,7 @@ const TEST_POSITION = {
 
 function setGeolocationPermissionState(
   newPermissionState: PermissionState | "unsupported",
+  permissionQuery?: PermissionQuery,
 ) {
   if (newPermissionState === "unsupported") {
     Object.defineProperty(
@@ -95,12 +97,15 @@ function setGeolocationPermissionState(
     return
   }
 
-  const permissionStatus = { state: newPermissionState }
-  const permissionQuery = vi.fn().mockResolvedValue(permissionStatus)
+  const permissionQueryValue =
+    permissionQuery ??
+    vi.fn().mockResolvedValue({ state: newPermissionState } as {
+      state: PermissionState
+    })
 
   Object.defineProperty(navigator, "permissions", {
     configurable: true,
-    value: { query: permissionQuery },
+    value: { query: permissionQueryValue },
   })
 }
 
@@ -112,7 +117,9 @@ function getCurrentGeolocatedConfiguration() {
   return geolocatedConfiguration.value
 }
 
-function renderLocationWeatherButton() {
+function renderLocationWeatherButton({
+  shouldAutoFetchIfPermitted = false,
+}: { shouldAutoFetchIfPermitted?: boolean } = {}) {
   const onLocationWeatherLoading = vi.fn()
   const onLocationWeatherResult = vi.fn()
 
@@ -123,7 +130,7 @@ function renderLocationWeatherButton() {
         onLocationWeatherLoading={onLocationWeatherLoading}
         onLocationWeatherResult={onLocationWeatherResult}
         shouldReduceMotion={false}
-        shouldAutoFetchIfPermitted={false}
+        shouldAutoFetchIfPermitted={shouldAutoFetchIfPermitted}
       />
     </>,
   )
@@ -203,6 +210,35 @@ describe("LocationWeatherButton", () => {
     renderLocationWeatherButton()
 
     expect(getPositionMock).not.toHaveBeenCalled()
+  })
+
+  it("does not auto-fetch on mount when permission is still pending", async () => {
+    const permissionQuery = vi
+      .fn()
+      .mockResolvedValue({ state: "prompt" } as { state: PermissionState })
+    setGeolocationPermissionState("prompt", permissionQuery)
+    renderLocationWeatherButton({ shouldAutoFetchIfPermitted: true })
+
+    await waitFor(() => {
+      expect(permissionQuery).toHaveBeenCalledOnce()
+    })
+    expect(getPositionMock).not.toHaveBeenCalled()
+  })
+
+  it("does not auto-fetch when permission check throws", async () => {
+    const permissionQuery = vi
+      .fn()
+      .mockRejectedValue(new Error("permission lookup unavailable"))
+    setGeolocationPermissionState("granted", permissionQuery)
+    renderLocationWeatherButton({ shouldAutoFetchIfPermitted: true })
+
+    await waitFor(() => {
+      expect(permissionQuery).toHaveBeenCalledOnce()
+    })
+    expect(getPositionMock).not.toHaveBeenCalled()
+    expect(
+      screen.getByRole("button", { name: "Use my location" }),
+    ).toBeEnabled()
   })
 
   it("requests permission only after the location button is activated", async () => {
