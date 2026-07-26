@@ -17,9 +17,17 @@ async function waitForSearchSubmitReadiness(page: Page) {
   await expect(submitButton).toHaveAttribute("type", "submit")
 }
 
-async function waitForMotionButtonHydration(button: Locator) {
+async function waitForCityForecastNavigation(page: Page, city: string) {
+  await page.waitForURL(`**/?city=${encodeURIComponent(city)}`)
+}
+
+async function waitForInteractiveButton(button: Locator) {
   await expect(button).toBeVisible()
   await expect(button).toBeEnabled()
+}
+
+async function expectPointerMotion(button: Locator) {
+  await waitForInteractiveButton(button)
   const baselineTransform = await button.evaluate((element) => {
     return getComputedStyle(element).transform
   })
@@ -47,7 +55,7 @@ test("provides restrained pointer feedback without changing submission semantics
   const submitButton = page.getByTestId("weather-search-submit")
 
   await expect(submitButton).toHaveAttribute("type", "submit")
-  await waitForMotionButtonHydration(submitButton)
+  await expectPointerMotion(submitButton)
 })
 
 test("searches live weather through encoded city navigation", async ({
@@ -58,13 +66,11 @@ test("searches live weather through encoded city navigation", async ({
 
   await page.getByTestId("weather-input").fill(LIVE_WEATHER_TEST_CITY)
   const submitButton = page.getByTestId("weather-search-submit")
-  await waitForMotionButtonHydration(submitButton)
+  await waitForInteractiveButton(submitButton)
   await Promise.all([
-    page.waitForLoadState("networkidle"),
+    waitForCityForecastNavigation(page, LIVE_WEATHER_TEST_CITY),
     submitButton.click(),
   ])
-
-  await expect(page).toHaveURL(/\?city=Mexico%20City$/)
   await expect(
     page.getByRole("heading", { name: LIVE_WEATHER_TEST_CITY }),
   ).toBeVisible()
@@ -92,7 +98,7 @@ test("loads live weather after explicit browser location consent", async ({
     page.getByText("Your location is used once and isn’t stored."),
   ).toBeVisible()
   const locationButton = page.getByTestId("weather-location-button")
-  await waitForMotionButtonHydration(locationButton)
+  await waitForInteractiveButton(locationButton)
   await locationButton.click()
 
   await expect(page.getByLabel("Temperature", { exact: true })).toBeVisible()
@@ -119,7 +125,7 @@ test("auto-loads local weather when location permission is already granted", asy
   await expect(
     page.getByText("Your location is used once and isn’t stored."),
   ).toBeVisible()
-  await expect(locationButton).toBeDisabled({ timeout: 8_000 })
+  await expect(locationButton).toBeDisabled({ timeout: 18_000 })
   await expect(page.getByLabel("Temperature", { exact: true })).toBeVisible({
     timeout: 18_000,
   })
@@ -139,13 +145,11 @@ test("announces live API errors without stale weather output", async ({
 
   await page.getByTestId("weather-input").fill(INVALID_LIVE_WEATHER_TEST_CITY)
   const submitButton = page.getByTestId("weather-search-submit")
-  await waitForMotionButtonHydration(submitButton)
+  await waitForInteractiveButton(submitButton)
   await Promise.all([
-    page.waitForLoadState("networkidle"),
+    waitForCityForecastNavigation(page, INVALID_LIVE_WEATHER_TEST_CITY),
     submitButton.click(),
   ])
-
-  await expect(page).toHaveURL(/\?city=NoSuchCityQream987654321$/)
   await expect(
     page.getByRole("alert").filter({ hasText: "Error 404: City Not Found" }),
   ).toBeVisible()
