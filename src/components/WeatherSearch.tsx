@@ -64,6 +64,7 @@ export default function WeatherSearch({
       window.history.pushState(null, "", "/")
     }
 
+    setSearchWeatherState({ status: "idle" })
     setLocationWeatherState({ status: "loading" })
   }, [selectedCity])
 
