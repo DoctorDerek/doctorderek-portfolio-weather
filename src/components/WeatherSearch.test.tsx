@@ -367,7 +367,9 @@ describe("WeatherSearch", () => {
     expect(
       screen.getByRole("heading", { name: "Loading weather…" }),
     ).toBeVisible()
-    expect(screen.queryByTestId("weather-search-status")).not.toBeInTheDocument()
+    expect(
+      screen.queryByTestId("weather-search-status"),
+    ).not.toBeInTheDocument()
   })
 
   it("uses native validity and semantic heading composition for city entry", () => {
@@ -483,7 +485,9 @@ describe("WeatherSearch", () => {
     expect(
       screen.getByRole("heading", { name: "Loading weather…" }),
     ).toBeVisible()
-    expect(screen.queryByTestId("weather-search-status")).not.toBeInTheDocument()
+    expect(
+      screen.queryByTestId("weather-search-status"),
+    ).not.toBeInTheDocument()
 
     act(() => {
       locationButtonProperties.onLocationWeatherResult({
