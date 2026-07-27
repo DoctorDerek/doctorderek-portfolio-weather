@@ -309,6 +309,67 @@ describe("WeatherSearch", () => {
     ).not.toBeInTheDocument()
   })
 
+  it("clears city search status when location weather starts loading", async () => {
+    const user = userEvent.setup()
+    const { rerender } = renderWeatherSearch({
+      initialCity: null,
+      weatherResult: null,
+    })
+    const cityInput = screen.getByRole("textbox", { name: "City or place" })
+
+    await user.type(cityInput, "San Francisco")
+    await user.click(screen.getByRole("button", { name: "Search" }))
+
+    expect(screen.getByTestId("weather-search-status")).toHaveTextContent(
+      "Loading forecast for San Francisco...",
+    )
+
+    const weatherResult = {
+      status: "success",
+      temperatureKelvin: 300.15,
+      description: "clear sky",
+      icon: "01d",
+      location: {
+        name: "San Francisco",
+        stateName: "California",
+        countryCode: "US",
+      },
+    } satisfies WeatherResult
+
+    searchParameters.value = "city=San%20Francisco"
+    rerender(
+      <>
+        <Toaster />
+        <WeatherSearch
+          initialCity="San Francisco"
+          weatherResult={weatherResult}
+        />
+      </>,
+    )
+
+    const locationButtonProperties =
+      locationWeatherButtonProperties.mock.lastCall?.[0]
+
+    act(() => {
+      locationButtonProperties.onLocationWeatherLoading()
+    })
+    searchParameters.value = ""
+    rerender(
+      <>
+        <Toaster />
+        <WeatherSearch
+          initialCity="San Francisco"
+          weatherResult={weatherResult}
+        />
+      </>,
+    )
+
+    expect(
+      screen.getByRole("heading", { name: "Loading weather…" }),
+    ).toBeVisible()
+    expect(screen.queryByTestId("weather-search-status")).not.toBeInTheDocument()
+  })
+
   it("uses native validity and semantic heading composition for city entry", () => {
     renderWeatherSearch({ initialCity: null, weatherResult: null })
 
@@ -418,6 +479,12 @@ describe("WeatherSearch", () => {
         />
       </>,
     )
+
+    expect(
+      screen.getByRole("heading", { name: "Loading weather…" }),
+    ).toBeVisible()
+    expect(screen.queryByTestId("weather-search-status")).not.toBeInTheDocument()
+
     act(() => {
       locationButtonProperties.onLocationWeatherResult({
         status: "success",
