@@ -140,7 +140,7 @@ export default function WeatherSearch({
               type="text"
               name="city"
               id="city"
-              placeholder="e.g. Mexico City"
+              placeholder="e.g. San Francisco"
               required
               pattern={".*\\S.*"}
               key={cityInputValue}
