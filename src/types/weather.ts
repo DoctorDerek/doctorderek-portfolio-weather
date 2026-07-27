@@ -3,13 +3,19 @@ export type WeatherCoordinates = {
   longitude: number
 }
 
+export type WeatherLocation = {
+  name: string
+  stateName: string | null
+  countryCode: string
+}
+
 export type WeatherResult =
   | {
       status: "success"
       temperatureKelvin: number
       description: string
       icon: string
-      locationName: string
+      location: WeatherLocation
     }
   | {
       status: "error"

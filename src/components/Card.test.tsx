@@ -14,26 +14,26 @@ describe("Card", () => {
     render(<Card heading="London" />)
 
     expect(screen.getByRole("heading", { name: "London" })).toHaveClass(
-      "text-xl",
+      "text-2xl",
     )
     expect(screen.getByRole("heading", { name: "London" })).not.toHaveClass(
-      "text-base",
+      "text-xl",
     )
   })
 
   it("uses compact typography without dropping long-city content", () => {
     render(
-      <Card heading="Mexico City, Mexico">
+      <Card heading="San Francisco, United States">
         <div>Weather details</div>
       </Card>,
     )
 
     expect(
-      screen.getByRole("heading", { name: "Mexico City, Mexico" }),
-    ).toHaveClass("text-base")
+      screen.getByRole("heading", { name: "San Francisco, United States" }),
+    ).toHaveClass("text-xl")
     expect(
-      screen.getByRole("heading", { name: "Mexico City, Mexico" }),
-    ).not.toHaveClass("text-xl")
+      screen.getByRole("heading", { name: "San Francisco, United States" }),
+    ).not.toHaveClass("text-2xl")
     expect(screen.getByText("Weather details")).toBeVisible()
   })
 })

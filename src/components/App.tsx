@@ -1,6 +1,5 @@
 "use client"
 
-import { MotionConfig } from "motion/react"
 import dynamic from "next/dynamic"
 import { Toaster } from "react-hot-toast"
 import BackgroundImage from "@/src/components/BackgroundImage"
@@ -21,7 +20,7 @@ export default function App({
   weatherResult: WeatherResult | null
 }) {
   return (
-    <MotionConfig reducedMotion="user">
+    <>
       <Toaster
         position="top-left"
         toastOptions={{ duration: WEATHER_ERROR_TOAST_DURATION_MILLISECONDS }}
@@ -29,6 +28,6 @@ export default function App({
       <ToggleDarkMode />
       <WeatherSearch initialCity={initialCity} weatherResult={weatherResult} />
       <BackgroundImage />
-    </MotionConfig>
+    </>
   )
 }

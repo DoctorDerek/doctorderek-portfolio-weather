@@ -13,10 +13,19 @@ const reducedMotionPreference = vi.hoisted(() => ({
   value: false as boolean | null,
 }))
 const motionGestureConfiguration = vi.hoisted(() => vi.fn())
+const motionContainerConfiguration = vi.hoisted(() => vi.fn())
 
 type MotionButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   whileHover?: { scale: number }
   whileTap?: { scale: number }
+}
+
+type MotionContainerProps = HTMLAttributes<HTMLElement> & {
+  "data-testid"?: string
+  initial?: false | { opacity: number; y: number }
+  animate?: { opacity: number; y: number }
+  exit?: { opacity: number; y: number }
+  transition?: { duration: number; ease: string }
 }
 
 vi.mock("motion/react", async (importOriginal) => {
@@ -37,15 +46,37 @@ vi.mock("motion/react", async (importOriginal) => {
       },
       div: ({
         children,
-        initial: _initial,
-        animate: _animate,
-        transition: _transition,
+        initial,
+        animate,
+        exit,
+        transition,
         ...divProperties
-      }: HTMLAttributes<HTMLDivElement> & {
-        initial?: { y: number }
-        animate?: { y: number }
-        transition?: { duration: number }
-      }) => <div {...divProperties}>{children}</div>,
+      }: MotionContainerProps) => {
+        motionContainerConfiguration({
+          element: "div",
+          testId: divProperties["data-testid"],
+          initial,
+          animate,
+          exit,
+          transition,
+        })
+        return <div {...divProperties}>{children}</div>
+      },
+      section: ({
+        children,
+        initial,
+        animate,
+        transition,
+        ...sectionProperties
+      }: MotionContainerProps) => {
+        motionContainerConfiguration({
+          element: "section",
+          initial,
+          animate,
+          transition,
+        })
+        return <section {...sectionProperties}>{children}</section>
+      },
     },
     useReducedMotion: () => reducedMotionPreference.value,
   }
@@ -61,6 +92,7 @@ vi.mock("@/src/components/LocationWeatherButton", () => ({
     onLocationWeatherLoading: () => void
     onLocationWeatherResult: (weatherResult: WeatherResult) => void
     shouldReduceMotion: boolean
+    shouldAutoFetchIfPermitted: boolean
   }) => {
     locationWeatherButtonProperties(properties)
     return <button type="button">Use my location</button>
@@ -84,6 +116,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = ""
     reducedMotionPreference.value = false
     motionGestureConfiguration.mockClear()
+    motionContainerConfiguration.mockClear()
     locationWeatherButtonProperties.mockClear()
     window.history.replaceState(null, "", "/")
   })
@@ -120,36 +153,240 @@ describe("WeatherSearch", () => {
     ).toBe(false)
   })
 
+  it("uses restrained spatial feedback for workspace and forecast entry", () => {
+    renderWeatherSearch({
+      initialCity: "San Francisco",
+      weatherResult: {
+        status: "success",
+        temperatureKelvin: 300.15,
+        description: "clear sky",
+        icon: "01d",
+        location: {
+          name: "San Francisco",
+          stateName: "California",
+          countryCode: "US",
+        },
+      },
+    })
+
+    expect(motionContainerConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        element: "section",
+        initial: { opacity: 0, y: 12 },
+        animate: { opacity: 1, y: 0 },
+      }),
+    )
+    expect(motionContainerConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        element: "div",
+        testId: "forecast-transition",
+        initial: { opacity: 0, y: 8 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -4 },
+      }),
+    )
+  })
+
+  it("enables location auto-detect when no city is selected", () => {
+    renderWeatherSearch({ initialCity: null, weatherResult: null })
+
+    expect(
+      locationWeatherButtonProperties.mock.lastCall?.[0]
+        .shouldAutoFetchIfPermitted,
+    ).toBe(true)
+  })
+
+  it("disables location auto-detect when a city query is active", () => {
+    searchParameters.value = "city=San%20Francisco"
+    renderWeatherSearch({
+      initialCity: "San Francisco",
+      weatherResult: {
+        status: "success",
+        temperatureKelvin: 300.15,
+        description: "clear sky",
+        icon: "01d",
+        location: {
+          name: "San Francisco",
+          stateName: "California",
+          countryCode: "US",
+        },
+      },
+    })
+
+    expect(
+      locationWeatherButtonProperties.mock.lastCall?.[0]
+        .shouldAutoFetchIfPermitted,
+    ).toBe(false)
+  })
+
+  it("removes spatial workspace and forecast transitions for reduced motion", () => {
+    reducedMotionPreference.value = true
+    renderWeatherSearch({
+      initialCity: "San Francisco",
+      weatherResult: {
+        status: "success",
+        temperatureKelvin: 300.15,
+        description: "clear sky",
+        icon: "01d",
+        location: {
+          name: "San Francisco",
+          stateName: "California",
+          countryCode: "US",
+        },
+      },
+    })
+
+    expect(motionContainerConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({ element: "section", initial: false }),
+    )
+    expect(motionContainerConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        element: "div",
+        testId: "forecast-transition",
+        initial: false,
+        exit: undefined,
+      }),
+    )
+  })
+
   it("submits an accessible weather search through encoded navigation", async () => {
     const user = userEvent.setup()
     renderWeatherSearch({ initialCity: null, weatherResult: null })
 
     const cityInput = screen.getByRole("textbox", {
-      name: "Weather Search:",
+      name: "City or place",
     })
 
-    await user.type(cityInput, "  Mexico City  ")
-    await user.click(screen.getByRole("button", { name: "Submit" }))
+    await user.type(cityInput, "  San Francisco  ")
+    await user.click(screen.getByRole("button", { name: "Search" }))
 
     expect(routerPush).toHaveBeenCalledOnce()
-    expect(routerPush).toHaveBeenCalledWith("/?city=Mexico%20City")
+    expect(routerPush).toHaveBeenCalledWith("/?city=San%20Francisco")
+  })
+
+  it("displays search-pending status while awaiting a city weather lookup", async () => {
+    const user = userEvent.setup()
+    const { rerender } = renderWeatherSearch({
+      initialCity: null,
+      weatherResult: null,
+    })
+    const cityInput = screen.getByRole("textbox", { name: "City or place" })
+    const submitButton = screen.getByRole("button", { name: "Search" })
+
+    await user.type(cityInput, "San Francisco")
+    await user.click(submitButton)
+
+    expect(submitButton).toBeDisabled()
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading forecast for San Francisco...",
+    )
+    expect(routerPush).toHaveBeenCalledWith("/?city=San%20Francisco")
+
+    searchParameters.value = "city=San%20Francisco"
+    rerender(
+      <>
+        <Toaster />
+        <WeatherSearch
+          initialCity="San Francisco"
+          weatherResult={{
+            status: "success",
+            temperatureKelvin: 300.15,
+            description: "clear sky",
+            icon: "01d",
+            location: {
+              name: "San Francisco",
+              stateName: "California",
+              countryCode: "US",
+            },
+          }}
+        />
+      </>,
+    )
+
+    expect(screen.getByRole("button", { name: "Search" })).not.toBeDisabled()
+    expect(
+      screen.queryByText("Loading forecast for San Francisco..."),
+    ).not.toBeInTheDocument()
+  })
+
+  it("clears city search status when location weather starts loading", async () => {
+    const user = userEvent.setup()
+    const { rerender } = renderWeatherSearch({
+      initialCity: null,
+      weatherResult: null,
+    })
+    const cityInput = screen.getByRole("textbox", { name: "City or place" })
+
+    await user.type(cityInput, "San Francisco")
+    await user.click(screen.getByRole("button", { name: "Search" }))
+
+    expect(screen.getByTestId("weather-search-status")).toHaveTextContent(
+      "Loading forecast for San Francisco...",
+    )
+
+    const weatherResult = {
+      status: "success",
+      temperatureKelvin: 300.15,
+      description: "clear sky",
+      icon: "01d",
+      location: {
+        name: "San Francisco",
+        stateName: "California",
+        countryCode: "US",
+      },
+    } satisfies WeatherResult
+
+    searchParameters.value = "city=San%20Francisco"
+    rerender(
+      <>
+        <Toaster />
+        <WeatherSearch
+          initialCity="San Francisco"
+          weatherResult={weatherResult}
+        />
+      </>,
+    )
+
+    const locationButtonProperties =
+      locationWeatherButtonProperties.mock.lastCall?.[0]
+
+    act(() => {
+      locationButtonProperties.onLocationWeatherLoading()
+    })
+    searchParameters.value = ""
+    rerender(
+      <>
+        <Toaster />
+        <WeatherSearch
+          initialCity="San Francisco"
+          weatherResult={weatherResult}
+        />
+      </>,
+    )
+
+    expect(
+      screen.getByRole("heading", { name: "Loading weather…" }),
+    ).toBeVisible()
+    expect(
+      screen.queryByTestId("weather-search-status"),
+    ).not.toBeInTheDocument()
   })
 
   it("uses native validity and semantic heading composition for city entry", () => {
     renderWeatherSearch({ initialCity: null, weatherResult: null })
 
     const cityInput = screen.getByRole("textbox", {
-      name: "Weather Search:",
+      name: "City or place",
     })
     const searchHeading = screen.getByRole("heading", {
-      name: "Weather Search:",
+      name: "Weather, right now",
     })
-    const cityLabel = searchHeading.querySelector("label")
+    const cityLabel = screen.getByText("City or place")
 
     expect(cityInput).toBeRequired()
     expect(cityInput).toHaveAttribute("pattern", ".*\\S.*")
     expect(cityLabel).toHaveAttribute("for", "city")
-    expect(searchHeading).toContainElement(cityLabel)
+    expect(searchHeading).toHaveAttribute("id", "weather-workspace-title")
   })
 
   it("does not navigate for whitespace-only city input", async () => {
@@ -157,11 +394,11 @@ describe("WeatherSearch", () => {
     renderWeatherSearch({ initialCity: null, weatherResult: null })
 
     const cityInput = screen.getByRole("textbox", {
-      name: "Weather Search:",
+      name: "City or place",
     })
 
     await user.type(cityInput, "   ")
-    await user.click(screen.getByRole("button", { name: "Submit" }))
+    await user.click(screen.getByRole("button", { name: "Search" }))
 
     expect(cityInput).toBeInvalid()
     expect(routerPush).not.toHaveBeenCalled()
@@ -170,7 +407,7 @@ describe("WeatherSearch", () => {
   it("ignores a programmatically submitted blank city", () => {
     renderWeatherSearch({ initialCity: null, weatherResult: null })
     const cityInput = screen.getByRole("textbox", {
-      name: "Weather Search:",
+      name: "City or place",
     })
     const searchForm = cityInput.closest("form")
 
@@ -198,20 +435,24 @@ describe("WeatherSearch", () => {
     expect(
       screen.queryByRole("heading", { name: "Atlantis" }),
     ).not.toBeInTheDocument()
-    expect(screen.queryByText("Temperature:")).not.toBeInTheDocument()
+    expect(screen.queryByLabelText("Temperature")).not.toBeInTheDocument()
   })
 
   it("shows ephemeral location weather without placing coordinates in history", () => {
-    searchParameters.value = "city=Mexico%20City"
-    window.history.replaceState(null, "", "/?city=Mexico%20City")
+    searchParameters.value = "city=San%20Francisco"
+    window.history.replaceState(null, "", "/?city=San%20Francisco")
     const { rerender } = renderWeatherSearch({
-      initialCity: "Mexico City",
+      initialCity: "San Francisco",
       weatherResult: {
         status: "success",
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
-        locationName: "Mexico City",
+        location: {
+          name: "San Francisco",
+          stateName: "California",
+          countryCode: "US",
+        },
       },
     })
     const locationButtonProperties =
@@ -225,34 +466,50 @@ describe("WeatherSearch", () => {
       <>
         <Toaster />
         <WeatherSearch
-          initialCity="Mexico City"
+          initialCity="San Francisco"
           weatherResult={{
             status: "success",
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
-            locationName: "Mexico City",
+            location: {
+              name: "San Francisco",
+              stateName: "California",
+              countryCode: "US",
+            },
           }}
         />
       </>,
     )
+
+    expect(
+      screen.getByRole("heading", { name: "Loading weather…" }),
+    ).toBeVisible()
+    expect(
+      screen.queryByTestId("weather-search-status"),
+    ).not.toBeInTheDocument()
+
     act(() => {
       locationButtonProperties.onLocationWeatherResult({
         status: "success",
         temperatureKelvin: 299.15,
         description: "few clouds",
         icon: "02d",
-        locationName: "Cuauhtémoc",
+        location: {
+          name: "SoMa",
+          stateName: "California",
+          countryCode: "US",
+        },
       })
     })
 
     expect(window.location.pathname).toBe("/")
     expect(window.location.search).toBe("")
-    expect(screen.getByRole("heading", { name: "Cuauhtémoc" })).toBeVisible()
+    expect(screen.getByRole("heading", { name: "SoMa" })).toBeVisible()
     expect(screen.getByText("Few Clouds")).toBeVisible()
-    expect(
-      screen.getByRole("textbox", { name: "Weather Search:" }),
-    ).toHaveValue("")
+    expect(screen.getByRole("textbox", { name: "City or place" })).toHaveValue(
+      "",
+    )
   })
 
   it("loads location weather without rewriting an already clean URL", () => {
@@ -272,35 +529,43 @@ describe("WeatherSearch", () => {
   it("does not reuse stale weather while navigation selects a new city", () => {
     searchParameters.value = "city=Puebla"
     renderWeatherSearch({
-      initialCity: "Mexico City",
+      initialCity: "San Francisco",
       weatherResult: {
         status: "success",
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
-        locationName: "Mexico City",
+        location: {
+          name: "San Francisco",
+          stateName: "California",
+          countryCode: "US",
+        },
       },
     })
 
     expect(screen.getByRole("status")).toHaveTextContent("Loading weather…")
     expect(
-      screen.queryByRole("heading", { name: "Mexico City" }),
+      screen.queryByRole("heading", { name: "San Francisco" }),
     ).not.toBeInTheDocument()
-    expect(
-      screen.getByRole("textbox", { name: "Weather Search:" }),
-    ).toHaveValue("Puebla")
+    expect(screen.getByRole("textbox", { name: "City or place" })).toHaveValue(
+      "Puebla",
+    )
   })
 
   it("restores city weather when browser history returns to a city query", () => {
-    searchParameters.value = "city=Mexico%20City"
+    searchParameters.value = "city=San%20Francisco"
     const { rerender } = renderWeatherSearch({
-      initialCity: "Mexico City",
+      initialCity: "San Francisco",
       weatherResult: {
         status: "success",
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
-        locationName: "Mexico City",
+        location: {
+          name: "San Francisco",
+          stateName: "California",
+          countryCode: "US",
+        },
       },
     })
     const locationButtonProperties =
@@ -314,35 +579,43 @@ describe("WeatherSearch", () => {
       <>
         <Toaster />
         <WeatherSearch
-          initialCity="Mexico City"
+          initialCity="San Francisco"
           weatherResult={{
             status: "success",
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
-            locationName: "Mexico City",
+            location: {
+              name: "San Francisco",
+              stateName: "California",
+              countryCode: "US",
+            },
           }}
         />
       </>,
     )
-    searchParameters.value = "city=Mexico%20City"
+    searchParameters.value = "city=San%20Francisco"
     rerender(
       <>
         <Toaster />
         <WeatherSearch
-          initialCity="Mexico City"
+          initialCity="San Francisco"
           weatherResult={{
             status: "success",
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
-            locationName: "Mexico City",
+            location: {
+              name: "San Francisco",
+              stateName: "California",
+              countryCode: "US",
+            },
           }}
         />
       </>,
     )
 
-    expect(screen.getByRole("heading", { name: "Mexico City" })).toBeVisible()
+    expect(screen.getByRole("heading", { name: "San Francisco" })).toBeVisible()
     expect(screen.getByText("Clear Sky")).toBeVisible()
   })
 })

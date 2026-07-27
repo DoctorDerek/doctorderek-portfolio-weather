@@ -1,16 +1,49 @@
 import { expect, test } from "@playwright/test"
 import type { Page } from "@playwright/test"
 
+const VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR =
+  "TypeError: undefined is not an object (evaluating 'navigator.storage.persisted')"
+const VERCEL_PREVIEW_TOOLBAR_URL =
+  "https://vercel.live/_next-live/feedback/feedback.html"
+
+const isVercelPreviewToolbarStorageError = (error: Error) =>
+  error.message === VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR &&
+  error.stack?.includes(VERCEL_PREVIEW_TOOLBAR_URL) === true
+
 const collectBrowserErrors = (page: Page) => {
   const browserErrors: string[] = []
 
   page.on("console", (message) => {
     if (message.type() === "error") browserErrors.push(message.text())
   })
-  page.on("pageerror", (error) => browserErrors.push(error.message))
+  page.on("pageerror", (error) => {
+    if (!isVercelPreviewToolbarStorageError(error)) {
+      browserErrors.push(error.message)
+    }
+  })
 
   return browserErrors
 }
+
+const getThemeToggle = (page: Page) => {
+  return page.getByTestId("theme-toggle")
+}
+
+test("isolates the verified Vercel toolbar storage error", () => {
+  const vercelToolbarError = new Error(VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR)
+  vercelToolbarError.stack = `${VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR}\n    at ${VERCEL_PREVIEW_TOOLBAR_URL}:9:91077`
+
+  const applicationError = new Error(VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR)
+  applicationError.stack = `${VERCEL_PREVIEW_TOOLBAR_STORAGE_ERROR}\n    at http://localhost:3000/app.js:1:1`
+
+  expect(isVercelPreviewToolbarStorageError(vercelToolbarError)).toBe(true)
+  expect(isVercelPreviewToolbarStorageError(applicationError)).toBe(false)
+  expect(
+    isVercelPreviewToolbarStorageError(
+      new Error("Unexpected application failure"),
+    ),
+  ).toBe(false)
+})
 
 test("removes spatial feedback when the user prefers reduced motion", async ({
   page,
@@ -21,11 +54,12 @@ test("removes spatial feedback when the user prefers reduced motion", async ({
   })
   await page.goto("/")
 
-  const themeToggle = page.getByRole("button", {
-    name: "Switch to dark theme",
-  })
-  const submitButton = page.getByRole("button", { name: "Submit" })
+  const themeToggle = getThemeToggle(page)
+  const submitButton = page.getByRole("button", { name: "Search" })
 
+  await expect(themeToggle).toBeVisible()
+  await expect(submitButton).toBeVisible()
+  await expect(submitButton).toBeEnabled()
   await expect(themeToggle.locator(".sun")).toHaveCSS(
     "transition-duration",
     "0s",
@@ -47,9 +81,7 @@ test("persists dark mode through the accessible theme control", async ({
   await page.goto("/")
 
   const documentRoot = page.locator("html")
-  const darkThemeToggle = page.getByRole("button", {
-    name: "Switch to dark theme",
-  })
+  const darkThemeToggle = getThemeToggle(page)
 
   await expect(documentRoot).toHaveClass(/light/)
   await expect(darkThemeToggle).toBeVisible()
@@ -57,9 +89,7 @@ test("persists dark mode through the accessible theme control", async ({
   await darkThemeToggle.click()
 
   await expect(documentRoot).toHaveClass(/dark/)
-  await expect(
-    page.getByRole("button", { name: "Switch to light theme" }),
-  ).toBeVisible()
+  await expect(getThemeToggle(page)).toBeVisible()
   await expect
     .poll(() => page.evaluate(() => window.localStorage.getItem("theme")))
     .toBe("dark")
@@ -77,9 +107,7 @@ test("hydrates a persisted dark theme without browser errors", async ({
   await page.goto("/")
 
   await expect(page.locator("html")).toHaveClass(/dark/)
-  await expect(
-    page.getByRole("button", { name: "Switch to light theme" }),
-  ).toBeVisible()
+  await expect(getThemeToggle(page)).toBeVisible()
   expect(browserErrors).toEqual([])
 })
 
@@ -93,8 +121,24 @@ test("hydrates the system theme without browser errors", async ({ page }) => {
   await page.goto("/")
 
   await expect(page.locator("html")).toHaveClass(/dark/)
-  await expect(
-    page.getByRole("button", { name: "Switch to light theme" }),
-  ).toBeVisible()
+  await expect(getThemeToggle(page)).toBeVisible()
   expect(browserErrors).toEqual([])
+})
+
+test("keeps the theme control in the expected top-right control area", async ({
+  page,
+}) => {
+  await page.goto("/")
+
+  const themeToggle = getThemeToggle(page)
+  await expect(themeToggle).toBeVisible()
+  const viewport = page.viewportSize()
+  const toggleBounds = await themeToggle.boundingBox()
+
+  expect(viewport).not.toBeNull()
+  expect(toggleBounds).not.toBeNull()
+  expect(toggleBounds!.y).toBeLessThan(72)
+  const toggleRightEdge = toggleBounds!.x + toggleBounds!.width
+  expect(toggleRightEdge).toBeGreaterThan(viewport!.width - 24)
+  expect(toggleRightEdge).toBeLessThanOrEqual(viewport!.width)
 })

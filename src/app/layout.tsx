@@ -44,6 +44,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       lang="en"
       className={`h-full w-full ${roboto.variable}`}
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
     >
       <head />
       <body className="h-full w-full subpixel-antialiased">

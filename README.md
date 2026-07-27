@@ -2,14 +2,14 @@
 
 [![Production](https://img.shields.io/website?url=https%3A%2F%2Fportfolio-weather.doctorderek.com%2F&up_message=live&down_message=offline&label=production&logo=vercel&logoColor=white)](https://portfolio-weather.doctorderek.com/) [![Codecov](https://codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather/graph/badge.svg)](https://app.codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather) [![Test and Lint](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/test-and-lint.yml/badge.svg)](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/test-and-lint.yml) [![Playwright](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/playwright.yml/badge.svg)](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/playwright.yml)
 
-A responsive current-weather search built with Next.js 16, React 19, TypeScript 6, and Tailwind CSS 4. Visitors can search by city or explicitly share a one-time browser location. OpenWeatherMap requests run exclusively on the server so the API key is never sent to the browser.
+A responsive current-weather search built with Next.js 16, React 19, TypeScript 6, and Tailwind CSS 4. Visitors can search by city or optionally use browser location when permission is granted. OpenWeatherMap requests run exclusively on the server so the API key is never sent to the browser.
 
 [Open the live application](https://portfolio-weather.doctorderek.com/)
 
 ## Highlights
 
 - Searches current weather conditions by city through a server-only OpenWeatherMap integration.
-- Offers an optional, user-triggered browser location lookup without storing precise coordinates.
+- Offers an optional browser location lookup after permission is granted without storing precise coordinates.
 - Validates upstream success payloads at runtime before rendering typed application data.
 - Presents API failures in accessible, auto-dismissing toast notifications.
 - Persists light and dark themes through an animated, keyboard-accessible control.
@@ -17,7 +17,7 @@ A responsive current-weather search built with Next.js 16, React 19, TypeScript 
 
 ## Architecture
 
-The App Router page reads the shareable city query parameter and performs the weather request through a server-only service. An optional browser-location control requests a single low-power position only after explicit interaction, rounds its coordinates to two decimal places, and sends them to a validated Server Action without placing them in the URL or persistent browser state. Both lookup paths use the same OpenWeatherMap service and discriminated `WeatherResult` rather than exposing the upstream response shape to the UI. Client components own navigation, theme interaction, and transient error feedback.
+The App Router page reads the shareable city query parameter and performs the weather request through a server-only service. An optional browser-location control uses a single low-power position only when permission is granted; otherwise, it waits for explicit interaction before requesting access. It rounds coordinates to two decimal places and sends them to a validated Server Action without placing them in the URL or persistent browser state. Both lookup paths use the same OpenWeatherMap service and discriminated `WeatherResult` rather than exposing the upstream response shape to the UI. Client components own navigation, theme interaction, and transient error feedback.
 
 The primary stack is:
 
@@ -35,6 +35,8 @@ Create `.env.local` from `.env.example`, then provide an OpenWeatherMap API key:
 ```dotenv
 OPEN_WEATHER_MAP_API_KEY=your_key_here
 ```
+
+Keep `.env.local` untracked and never commit the API key.
 
 Install and run the project with the repository’s declared Node and pnpm versions:
 
