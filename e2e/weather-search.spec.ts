@@ -1,10 +1,12 @@
 import { expect, test, type Locator, type Page } from "@playwright/test"
 
-const LIVE_WEATHER_TEST_CITY = "Mexico City"
+const LIVE_WEATHER_TEST_CITY = "San Francisco"
+const LIVE_WEATHER_TEST_STATE = "California"
+const LIVE_WEATHER_TEST_COUNTRY = "United States"
 const INVALID_LIVE_WEATHER_TEST_CITY = "NoSuchCityQream987654321"
 const LIVE_WEATHER_TEST_COORDINATES = {
-  latitude: 19.432_608,
-  longitude: -99.133_209,
+  latitude: 37.774_9,
+  longitude: -122.419_4,
 }
 
 async function waitForSearchSubmitReadiness(page: Page) {
@@ -77,10 +79,10 @@ test("searches live weather through encoded city navigation", async ({
   const locationDetails = page.getByLabel("Location details", { exact: true })
 
   await expect(
-    locationDetails.getByText(LIVE_WEATHER_TEST_CITY, { exact: true }),
+    locationDetails.getByText(LIVE_WEATHER_TEST_STATE, { exact: true }),
   ).toBeVisible()
   await expect(
-    locationDetails.getByText("Mexico", { exact: true }),
+    locationDetails.getByText(LIVE_WEATHER_TEST_COUNTRY, { exact: true }),
   ).toBeVisible()
   await expect(page.getByLabel("Temperature", { exact: true })).toBeVisible()
 })
@@ -105,7 +107,7 @@ test("loads live weather after explicit browser location consent", async ({
   await expect(
     page
       .getByLabel("Location details", { exact: true })
-      .getByText("Mexico", { exact: true }),
+      .getByText(LIVE_WEATHER_TEST_COUNTRY, { exact: true }),
   ).toBeVisible()
   await expect(locationButton).toBeEnabled()
   expect(new URL(page.url()).search).toBe("")
@@ -131,7 +133,7 @@ test("auto-loads local weather when location permission is already granted", asy
   await expect(
     page
       .getByLabel("Location details", { exact: true })
-      .getByText("Mexico", { exact: true }),
+      .getByText(LIVE_WEATHER_TEST_COUNTRY, { exact: true }),
   ).toBeVisible()
   await expect(locationButton).toBeEnabled()
   await expect(locationButton).toHaveAttribute("aria-busy", "false")

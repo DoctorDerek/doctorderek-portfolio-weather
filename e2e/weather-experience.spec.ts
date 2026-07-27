@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test"
 import type { Page } from "@playwright/test"
 
 const NARROW_VIEWPORT = { width: 320, height: 568 }
-const LIVE_WEATHER_TEST_CITY = "Mexico City"
+const LIVE_WEATHER_TEST_CITY = "San Francisco"
 
 const getThemeToggle = (page: Page) => page.getByTestId("theme-toggle")
 
@@ -13,7 +13,7 @@ test("keeps the complete forecast workspace inside a narrow viewport", async ({
   await page.addInitScript(() => {
     window.localStorage.setItem("theme", "light")
   })
-  await page.goto("/?city=Mexico%20City")
+  await page.goto("/?city=San%20Francisco")
 
   const workspace = page.getByTestId("weather-workspace")
   const themeToggle = getThemeToggle(page)
@@ -79,7 +79,7 @@ test("removes spatial workspace and forecast motion when requested", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" })
-  await page.goto("/?city=Mexico%20City")
+  await page.goto("/?city=San%20Francisco")
 
   await expect(page.getByTestId("weather-workspace")).toHaveCSS(
     "transform",
