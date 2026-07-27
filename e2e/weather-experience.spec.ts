@@ -57,17 +57,18 @@ test("renders the weather workspace as a translucent backdrop surface", async ({
 }) => {
   await page.goto("/")
 
-  const visualContract = await page
-    .getByTestId("weather-workspace")
-    .evaluate((element) => {
-      const computedStyle = getComputedStyle(element)
+  const workspace = page.getByTestId("weather-workspace")
+  await expect(workspace).toBeVisible()
 
-      return {
-        backdropFilter: computedStyle.backdropFilter,
-        backgroundColor: computedStyle.backgroundColor,
-        borderRadius: computedStyle.borderRadius,
-      }
-    })
+  const visualContract = await workspace.evaluate((element) => {
+    const computedStyle = getComputedStyle(element)
+
+    return {
+      backdropFilter: computedStyle.backdropFilter,
+      backgroundColor: computedStyle.backgroundColor,
+      borderRadius: computedStyle.borderRadius,
+    }
+  })
 
   expect(visualContract.backdropFilter).toContain("blur")
   expect(visualContract.backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
