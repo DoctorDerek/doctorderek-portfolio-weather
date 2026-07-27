@@ -125,7 +125,6 @@ test("auto-loads local weather when location permission is already granted", asy
   await expect(
     page.getByText("Your location is used once and isn’t stored."),
   ).toBeVisible()
-  await expect(locationButton).toBeDisabled({ timeout: 18_000 })
   await expect(page.getByLabel("Temperature", { exact: true })).toBeVisible({
     timeout: 18_000,
   })
@@ -134,6 +133,8 @@ test("auto-loads local weather when location permission is already granted", asy
       .getByLabel("Location details", { exact: true })
       .getByText("Mexico", { exact: true }),
   ).toBeVisible()
+  await expect(locationButton).toBeEnabled()
+  await expect(locationButton).toHaveAttribute("aria-busy", "false")
   expect(new URL(page.url()).search).toBe("")
 })
 
