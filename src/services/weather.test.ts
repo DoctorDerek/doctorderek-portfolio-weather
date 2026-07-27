@@ -121,7 +121,7 @@ describe("getCurrentWeather", () => {
     {
       invalidIdentity: {
         ...OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0],
-        country: "MEX",
+        country: "USA",
       },
       violatedContract: "invalid country codes",
     },
@@ -153,8 +153,8 @@ describe("getCurrentWeather", () => {
           {
             ...OPEN_WEATHER_MAP_GEOCODING_RESPONSE_FIXTURE[0],
             name: `  ${OPEN_WEATHER_MAP_TEST_CITY}  `,
-            state: "  Mexico City  ",
-            country: "mx",
+            state: "  California  ",
+            country: "us",
           },
         ]),
       ),
@@ -166,8 +166,8 @@ describe("getCurrentWeather", () => {
       status: "success",
       location: {
         name: OPEN_WEATHER_MAP_TEST_CITY,
-        stateName: "Mexico City",
-        countryCode: "MX",
+        stateName: "California",
+        countryCode: "US",
       },
     })
   })
@@ -179,7 +179,7 @@ describe("getCurrentWeather", () => {
         HttpResponse.json([
           {
             name: OPEN_WEATHER_MAP_TEST_CITY,
-            country: "MX",
+            country: "US",
             lat: OPEN_WEATHER_MAP_TEST_COORDINATES.latitude,
             lon: OPEN_WEATHER_MAP_TEST_COORDINATES.longitude,
           },
@@ -390,7 +390,7 @@ describe("getCurrentWeather", () => {
       http.get(OPEN_WEATHER_MAP_CURRENT_WEATHER_URL, () =>
         HttpResponse.json({
           ...OPEN_WEATHER_MAP_SUCCESS_RESPONSE_FIXTURE,
-          sys: { country: "MEX" },
+          sys: { country: "USA" },
         }),
       ),
     )

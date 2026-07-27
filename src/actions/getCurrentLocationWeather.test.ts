@@ -14,9 +14,9 @@ const SUCCESSFUL_WEATHER_RESULT = {
   description: "clear sky",
   icon: "01d",
   location: {
-    name: "Mexico City",
-    stateName: "Mexico City",
-    countryCode: "MX",
+    name: "San Francisco",
+    stateName: "California",
+    countryCode: "US",
   },
 } satisfies WeatherResult
 
@@ -24,27 +24,27 @@ const INVALID_WEATHER_COORDINATE_CASES = [
   { description: "a missing coordinate object", coordinates: null },
   {
     description: "a non-numeric latitude",
-    coordinates: { latitude: "north", longitude: -99.13 },
+    coordinates: { latitude: "north", longitude: -122.42 },
   },
   {
     description: "a non-finite longitude",
-    coordinates: { latitude: 19.43, longitude: Number.POSITIVE_INFINITY },
+    coordinates: { latitude: 37.77, longitude: Number.POSITIVE_INFINITY },
   },
   {
     description: "a latitude above its maximum",
-    coordinates: { latitude: 90.01, longitude: -99.13 },
+    coordinates: { latitude: 90.01, longitude: -122.42 },
   },
   {
     description: "a latitude below its minimum",
-    coordinates: { latitude: -90.01, longitude: -99.13 },
+    coordinates: { latitude: -90.01, longitude: -122.42 },
   },
   {
     description: "a longitude above its maximum",
-    coordinates: { latitude: 19.43, longitude: 180.01 },
+    coordinates: { latitude: 37.77, longitude: 180.01 },
   },
   {
     description: "a longitude below its minimum",
-    coordinates: { latitude: 19.43, longitude: -180.01 },
+    coordinates: { latitude: 37.77, longitude: -180.01 },
   },
 ] satisfies { description: string; coordinates: unknown }[]
 
@@ -59,15 +59,15 @@ describe("getCurrentLocationWeather", () => {
   it("rounds valid coordinates before requesting current weather", async () => {
     await expect(
       getCurrentLocationWeather({
-        latitude: 19.432_608,
-        longitude: -99.133_209,
+        latitude: 37.774_9,
+        longitude: -122.419_4,
       }),
     ).resolves.toEqual(SUCCESSFUL_WEATHER_RESULT)
 
     expect(getCurrentWeatherByCoordinatesMock).toHaveBeenCalledOnce()
     expect(getCurrentWeatherByCoordinatesMock).toHaveBeenCalledWith({
-      latitude: 19.43,
-      longitude: -99.13,
+      latitude: 37.77,
+      longitude: -122.42,
     })
   })
 
