@@ -155,16 +155,16 @@ describe("WeatherSearch", () => {
 
   it("uses restrained spatial feedback for workspace and forecast entry", () => {
     renderWeatherSearch({
-      initialCity: "Mexico City",
+      initialCity: "San Francisco",
       weatherResult: {
         status: "success",
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
         location: {
-          name: "Mexico City",
-          stateName: "Mexico City",
-          countryCode: "MX",
+          name: "San Francisco",
+          stateName: "California",
+          countryCode: "US",
         },
       },
     })
@@ -197,18 +197,18 @@ describe("WeatherSearch", () => {
   })
 
   it("disables location auto-detect when a city query is active", () => {
-    searchParameters.value = "city=Mexico%20City"
+    searchParameters.value = "city=San%20Francisco"
     renderWeatherSearch({
-      initialCity: "Mexico City",
+      initialCity: "San Francisco",
       weatherResult: {
         status: "success",
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
         location: {
-          name: "Mexico City",
-          stateName: "Mexico City",
-          countryCode: "MX",
+          name: "San Francisco",
+          stateName: "California",
+          countryCode: "US",
         },
       },
     })
@@ -222,16 +222,16 @@ describe("WeatherSearch", () => {
   it("removes spatial workspace and forecast transitions for reduced motion", () => {
     reducedMotionPreference.value = true
     renderWeatherSearch({
-      initialCity: "Mexico City",
+      initialCity: "San Francisco",
       weatherResult: {
         status: "success",
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
         location: {
-          name: "Mexico City",
-          stateName: "Mexico City",
-          countryCode: "MX",
+          name: "San Francisco",
+          stateName: "California",
+          countryCode: "US",
         },
       },
     })
@@ -257,11 +257,11 @@ describe("WeatherSearch", () => {
       name: "City or place",
     })
 
-    await user.type(cityInput, "  Mexico City  ")
+    await user.type(cityInput, "  San Francisco  ")
     await user.click(screen.getByRole("button", { name: "Search" }))
 
     expect(routerPush).toHaveBeenCalledOnce()
-    expect(routerPush).toHaveBeenCalledWith("/?city=Mexico%20City")
+    expect(routerPush).toHaveBeenCalledWith("/?city=San%20Francisco")
   })
 
   it("displays search-pending status while awaiting a city weather lookup", async () => {
@@ -273,30 +273,30 @@ describe("WeatherSearch", () => {
     const cityInput = screen.getByRole("textbox", { name: "City or place" })
     const submitButton = screen.getByRole("button", { name: "Search" })
 
-    await user.type(cityInput, "Mexico City")
+    await user.type(cityInput, "San Francisco")
     await user.click(submitButton)
 
     expect(submitButton).toBeDisabled()
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Loading forecast for Mexico City...",
+      "Loading forecast for San Francisco...",
     )
-    expect(routerPush).toHaveBeenCalledWith("/?city=Mexico%20City")
+    expect(routerPush).toHaveBeenCalledWith("/?city=San%20Francisco")
 
-    searchParameters.value = "city=Mexico%20City"
+    searchParameters.value = "city=San%20Francisco"
     rerender(
       <>
         <Toaster />
         <WeatherSearch
-          initialCity="Mexico City"
+          initialCity="San Francisco"
           weatherResult={{
             status: "success",
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
             location: {
-              name: "Mexico City",
-              stateName: "Mexico City",
-              countryCode: "MX",
+              name: "San Francisco",
+              stateName: "California",
+              countryCode: "US",
             },
           }}
         />
@@ -305,7 +305,7 @@ describe("WeatherSearch", () => {
 
     expect(screen.getByRole("button", { name: "Search" })).not.toBeDisabled()
     expect(
-      screen.queryByText("Loading forecast for Mexico City..."),
+      screen.queryByText("Loading forecast for San Francisco..."),
     ).not.toBeInTheDocument()
   })
 
@@ -376,19 +376,19 @@ describe("WeatherSearch", () => {
   })
 
   it("shows ephemeral location weather without placing coordinates in history", () => {
-    searchParameters.value = "city=Mexico%20City"
-    window.history.replaceState(null, "", "/?city=Mexico%20City")
+    searchParameters.value = "city=San%20Francisco"
+    window.history.replaceState(null, "", "/?city=San%20Francisco")
     const { rerender } = renderWeatherSearch({
-      initialCity: "Mexico City",
+      initialCity: "San Francisco",
       weatherResult: {
         status: "success",
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
         location: {
-          name: "Mexico City",
-          stateName: "Mexico City",
-          countryCode: "MX",
+          name: "San Francisco",
+          stateName: "California",
+          countryCode: "US",
         },
       },
     })
@@ -403,16 +403,16 @@ describe("WeatherSearch", () => {
       <>
         <Toaster />
         <WeatherSearch
-          initialCity="Mexico City"
+          initialCity="San Francisco"
           weatherResult={{
             status: "success",
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
             location: {
-              name: "Mexico City",
-              stateName: "Mexico City",
-              countryCode: "MX",
+              name: "San Francisco",
+              stateName: "California",
+              countryCode: "US",
             },
           }}
         />
@@ -425,16 +425,16 @@ describe("WeatherSearch", () => {
         description: "few clouds",
         icon: "02d",
         location: {
-          name: "Cuauhtémoc",
-          stateName: "Mexico City",
-          countryCode: "MX",
+          name: "SoMa",
+          stateName: "California",
+          countryCode: "US",
         },
       })
     })
 
     expect(window.location.pathname).toBe("/")
     expect(window.location.search).toBe("")
-    expect(screen.getByRole("heading", { name: "Cuauhtémoc" })).toBeVisible()
+    expect(screen.getByRole("heading", { name: "SoMa" })).toBeVisible()
     expect(screen.getByText("Few Clouds")).toBeVisible()
     expect(screen.getByRole("textbox", { name: "City or place" })).toHaveValue(
       "",
@@ -458,23 +458,23 @@ describe("WeatherSearch", () => {
   it("does not reuse stale weather while navigation selects a new city", () => {
     searchParameters.value = "city=Puebla"
     renderWeatherSearch({
-      initialCity: "Mexico City",
+      initialCity: "San Francisco",
       weatherResult: {
         status: "success",
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
         location: {
-          name: "Mexico City",
-          stateName: "Mexico City",
-          countryCode: "MX",
+          name: "San Francisco",
+          stateName: "California",
+          countryCode: "US",
         },
       },
     })
 
     expect(screen.getByRole("status")).toHaveTextContent("Loading weather…")
     expect(
-      screen.queryByRole("heading", { name: "Mexico City" }),
+      screen.queryByRole("heading", { name: "San Francisco" }),
     ).not.toBeInTheDocument()
     expect(screen.getByRole("textbox", { name: "City or place" })).toHaveValue(
       "Puebla",
@@ -482,18 +482,18 @@ describe("WeatherSearch", () => {
   })
 
   it("restores city weather when browser history returns to a city query", () => {
-    searchParameters.value = "city=Mexico%20City"
+    searchParameters.value = "city=San%20Francisco"
     const { rerender } = renderWeatherSearch({
-      initialCity: "Mexico City",
+      initialCity: "San Francisco",
       weatherResult: {
         status: "success",
         temperatureKelvin: 300.15,
         description: "clear sky",
         icon: "01d",
         location: {
-          name: "Mexico City",
-          stateName: "Mexico City",
-          countryCode: "MX",
+          name: "San Francisco",
+          stateName: "California",
+          countryCode: "US",
         },
       },
     })
@@ -508,43 +508,43 @@ describe("WeatherSearch", () => {
       <>
         <Toaster />
         <WeatherSearch
-          initialCity="Mexico City"
+          initialCity="San Francisco"
           weatherResult={{
             status: "success",
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
             location: {
-              name: "Mexico City",
-              stateName: "Mexico City",
-              countryCode: "MX",
+              name: "San Francisco",
+              stateName: "California",
+              countryCode: "US",
             },
           }}
         />
       </>,
     )
-    searchParameters.value = "city=Mexico%20City"
+    searchParameters.value = "city=San%20Francisco"
     rerender(
       <>
         <Toaster />
         <WeatherSearch
-          initialCity="Mexico City"
+          initialCity="San Francisco"
           weatherResult={{
             status: "success",
             temperatureKelvin: 300.15,
             description: "clear sky",
             icon: "01d",
             location: {
-              name: "Mexico City",
-              stateName: "Mexico City",
-              countryCode: "MX",
+              name: "San Francisco",
+              stateName: "California",
+              countryCode: "US",
             },
           }}
         />
       </>,
     )
 
-    expect(screen.getByRole("heading", { name: "Mexico City" })).toBeVisible()
+    expect(screen.getByRole("heading", { name: "San Francisco" })).toBeVisible()
     expect(screen.getByText("Clear Sky")).toBeVisible()
   })
 })
