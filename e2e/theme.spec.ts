@@ -57,6 +57,9 @@ test("removes spatial feedback when the user prefers reduced motion", async ({
   const themeToggle = getThemeToggle(page)
   const submitButton = page.getByRole("button", { name: "Search" })
 
+  await expect(themeToggle).toBeVisible()
+  await expect(submitButton).toBeVisible()
+  await expect(submitButton).toBeEnabled()
   await expect(themeToggle.locator(".sun")).toHaveCSS(
     "transition-duration",
     "0s",
@@ -128,6 +131,7 @@ test("keeps the theme control in the expected top-right control area", async ({
   await page.goto("/")
 
   const themeToggle = getThemeToggle(page)
+  await expect(themeToggle).toBeVisible()
   const viewport = page.viewportSize()
   const toggleBounds = await themeToggle.boundingBox()
 
@@ -137,5 +141,4 @@ test("keeps the theme control in the expected top-right control area", async ({
   const toggleRightEdge = toggleBounds!.x + toggleBounds!.width
   expect(toggleRightEdge).toBeGreaterThan(viewport!.width - 24)
   expect(toggleRightEdge).toBeLessThanOrEqual(viewport!.width)
-  await expect(themeToggle).toBeVisible()
 })
