@@ -49,17 +49,17 @@ describe("App", () => {
       description: "clear sky",
       icon: "01d",
       location: {
-        name: "Mexico City",
-        stateName: "Mexico City",
-        countryCode: "MX",
+        name: "San Francisco",
+        stateName: "California",
+        countryCode: "US",
       },
     } satisfies WeatherResult
 
-    render(<App initialCity="Mexico City" weatherResult={weatherResult} />)
+    render(<App initialCity="San Francisco" weatherResult={weatherResult} />)
 
     expect(screen.getByTestId("weather-search")).toBeInTheDocument()
     expect(weatherSearchProperties).toHaveBeenCalledWith({
-      initialCity: "Mexico City",
+      initialCity: "San Francisco",
       weatherResult,
     })
   })

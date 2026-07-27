@@ -54,9 +54,9 @@ const SUCCESSFUL_WEATHER_RESULT = {
   description: "clear sky",
   icon: "01d",
   location: {
-    name: "Mexico City",
-    stateName: "Mexico City",
-    countryCode: "MX",
+    name: "San Francisco",
+    stateName: "California",
+    countryCode: "US",
   },
 } satisfies WeatherResult
 

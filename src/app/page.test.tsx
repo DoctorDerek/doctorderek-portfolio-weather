@@ -11,9 +11,9 @@ const SUCCESSFUL_WEATHER_RESULT = {
   description: "clear sky",
   icon: "01d",
   location: {
-    name: "Mexico City",
-    stateName: "Mexico City",
-    countryCode: "MX",
+    name: "San Francisco",
+    stateName: "California",
+    countryCode: "US",
   },
 } satisfies WeatherResult
 
@@ -67,15 +67,15 @@ describe("Page", () => {
 
     render(
       await Page({
-        searchParams: Promise.resolve({ city: "Mexico City" }),
+        searchParams: Promise.resolve({ city: "San Francisco" }),
       }),
     )
 
     expect(getCurrentWeatherMock).toHaveBeenCalledOnce()
-    expect(getCurrentWeatherMock).toHaveBeenCalledWith("Mexico City")
+    expect(getCurrentWeatherMock).toHaveBeenCalledWith("San Francisco")
     expect(screen.getByTestId("application-boundary")).toHaveAttribute(
       "data-city",
-      "Mexico City",
+      "San Francisco",
     )
     expect(screen.getByTestId("application-boundary")).toHaveAttribute(
       "data-weather-result",
@@ -88,15 +88,15 @@ describe("Page", () => {
 
     render(
       await Page({
-        searchParams: Promise.resolve({ city: "  Mexico City  " }),
+        searchParams: Promise.resolve({ city: "  San Francisco  " }),
       }),
     )
 
     expect(getCurrentWeatherMock).toHaveBeenCalledOnce()
-    expect(getCurrentWeatherMock).toHaveBeenCalledWith("Mexico City")
+    expect(getCurrentWeatherMock).toHaveBeenCalledWith("San Francisco")
     expect(screen.getByTestId("application-boundary")).toHaveAttribute(
       "data-city",
-      "Mexico City",
+      "San Francisco",
     )
   })
 
@@ -137,16 +137,16 @@ describe("Page", () => {
     render(
       await Page({
         searchParams: Promise.resolve({
-          city: ["Mexico City", "London"],
+          city: ["San Francisco", "London"],
         }),
       }),
     )
 
     expect(getCurrentWeatherMock).toHaveBeenCalledOnce()
-    expect(getCurrentWeatherMock).toHaveBeenCalledWith("Mexico City")
+    expect(getCurrentWeatherMock).toHaveBeenCalledWith("San Francisco")
     expect(screen.getByTestId("application-boundary")).toHaveAttribute(
       "data-city",
-      "Mexico City",
+      "San Francisco",
     )
   })
 

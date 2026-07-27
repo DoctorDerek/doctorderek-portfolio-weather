@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 import CityWeather from "@/src/components/CityWeather"
 import type { WeatherResult } from "@/src/types/weather"
 
-const TEST_CITY = "Mexico City"
+const TEST_CITY = "San Francisco"
 
 const SUCCESSFUL_WEATHER_RESULT = {
   status: "success",
@@ -13,8 +13,8 @@ const SUCCESSFUL_WEATHER_RESULT = {
   icon: "01d",
   location: {
     name: TEST_CITY,
-    stateName: "Mexico City",
-    countryCode: "MX",
+    stateName: "California",
+    countryCode: "US",
   },
 } satisfies WeatherResult
 
@@ -53,13 +53,13 @@ describe("CityWeather", () => {
     )
 
     expect(screen.getByRole("heading", { name: TEST_CITY })).toBeVisible()
-    expect(screen.getByText("Mexico City, Mexico")).toBeVisible()
+    expect(screen.getByText("California, United States")).toBeVisible()
     const locationDetails = screen.getByLabelText("Location details")
 
     expect(within(locationDetails).getByText("State or region")).toBeVisible()
-    expect(within(locationDetails).getByText("Mexico City")).toBeVisible()
+    expect(within(locationDetails).getByText("California")).toBeVisible()
     expect(within(locationDetails).getByText("Country")).toBeVisible()
-    expect(within(locationDetails).getByText("Mexico")).toBeVisible()
+    expect(within(locationDetails).getByText("United States")).toBeVisible()
     expect(screen.getByText("Clear Sky")).toBeVisible()
     expect(screen.getByText("81 °F")).toBeVisible()
     expect(screen.getByText("27 °C")).toBeVisible()
