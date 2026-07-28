@@ -89,6 +89,7 @@ export default function CityWeather({
             src={iconUrl}
             alt=""
             fill
+            unoptimized
             sizes="112px"
             className="object-contain drop-shadow-sm"
           />
