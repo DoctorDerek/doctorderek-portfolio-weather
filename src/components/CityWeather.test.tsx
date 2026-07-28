@@ -22,10 +22,11 @@ vi.mock("next/image", async () => {
   const { createElement } = await import("react")
 
   return {
-    default: ({ alt, src }: ImageProps) =>
+    default: ({ alt, src, unoptimized }: ImageProps) =>
       createElement("img", {
         alt,
         src: typeof src === "string" ? src : undefined,
+        "data-unoptimized": unoptimized ? "true" : undefined,
       }),
   }
 })
@@ -63,6 +64,13 @@ describe("CityWeather", () => {
     expect(screen.getByText("Clear Sky")).toBeVisible()
     expect(screen.getByText("81 °F")).toBeVisible()
     expect(screen.getByText("27 °C")).toBeVisible()
+    const weatherIcon = screen.getByRole("status").querySelector("img")
+
+    expect(weatherIcon).toHaveAttribute(
+      "src",
+      "https://openweathermap.org/img/wn/01d@4x.png",
+    )
+    expect(weatherIcon).toHaveAttribute("data-unoptimized", "true")
     expect(screen.queryByRole("img")).not.toBeInTheDocument()
     expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite")
     expect(screen.getByRole("status")).toHaveAttribute("aria-atomic", "true")
