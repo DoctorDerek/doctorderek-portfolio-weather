@@ -89,4 +89,6 @@ test("removes spatial workspace and forecast motion when requested", async ({
     "transform",
     "none",
   )
+  await expect(page.locator("html")).toHaveCSS("scroll-behavior", "auto")
+  await expect(page.locator("body")).toHaveCSS("scroll-behavior", "auto")
 })
