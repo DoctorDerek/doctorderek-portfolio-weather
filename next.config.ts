@@ -5,10 +5,10 @@ const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "ts", "tsx"],
 
   images: {
-    remotePatterns: [
+    localPatterns: [
       {
-        protocol: "https",
-        hostname: "openweathermap.org",
+        pathname: "/_next/static/media/**",
+        search: "",
       },
     ],
   },
