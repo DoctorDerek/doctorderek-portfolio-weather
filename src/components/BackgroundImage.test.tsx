@@ -7,7 +7,13 @@ vi.mock("next/image", async () => {
   const { createElement } = await import("react")
 
   return {
-    default: ({ alt }: ImageProps) => createElement("img", { alt }),
+    default: ({ alt, preload, priority, sizes }: ImageProps) =>
+      createElement("img", {
+        alt,
+        "data-preload": preload ? "true" : undefined,
+        "data-priority": priority ? "true" : undefined,
+        sizes,
+      }),
   }
 })
 
@@ -17,5 +23,14 @@ describe("BackgroundImage", () => {
 
     expect(container.querySelector("img")).toHaveAttribute("alt", "")
     expect(screen.queryByRole("img")).not.toBeInTheDocument()
+  })
+
+  it("preloads the full-viewport responsive source without deprecated priority", () => {
+    const { container } = render(<BackgroundImage />)
+    const backgroundImage = container.querySelector("img")
+
+    expect(backgroundImage).toHaveAttribute("data-preload", "true")
+    expect(backgroundImage).toHaveAttribute("sizes", "100vw")
+    expect(backgroundImage).not.toHaveAttribute("data-priority")
   })
 })
