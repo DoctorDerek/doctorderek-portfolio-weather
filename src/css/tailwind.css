@@ -14,3 +14,10 @@ body {
   scroll-behavior: smooth;
   font-family: Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  html,
+  body {
+    scroll-behavior: auto;
+  }
+}
