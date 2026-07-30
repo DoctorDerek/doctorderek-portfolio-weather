@@ -57,20 +57,11 @@ pnpm lint
 pnpm exec vitest run --coverage --passWithNoTests
 pnpm exec playwright test --pass-with-no-tests
 pnpm build
+pnpm audit --prod
 pnpm format
 ```
 
 GitHub Actions runs ESLint and Vitest coverage on pull requests, reports coverage through Codecov, and runs Playwright against successful Vercel Preview deployments. The Vitest integration suite covers the server-only weather service, validated coordinate actions, explicit browser-permission states, accessible search navigation, weather presentation states, and API error feedback. Playwright exercises city and location searches against the deployed live API. Coverage remains a measured progress signal rather than a merge-blocking threshold.
-
-## Production quality
-
-A Lighthouse 13.4.1 mobile audit of the production deployment on July 30, 2026 scored 96 for Performance and 100 for Accessibility, Best Practices, and SEO. Lighthouse scores are lab measurements and can vary with network and runtime conditions. [Run a current PageSpeed Insights audit](https://pagespeed.web.dev/analysis?url=https%3A%2F%2Fportfolio-weather.doctorderek.com%2F).
-
-On the same date, `pnpm audit --prod` reported no known vulnerabilities in the production dependency graph. Recheck the current graph with:
-
-```bash
-pnpm audit --prod
-```
 
 ## Provenance and attribution
 
