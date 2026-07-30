@@ -2,6 +2,8 @@ packages:
   - "."
 
 overrides:
+  "@testing-library/jest-dom": "6.9.1"
+  "next>sharp": "^0.35.3"
   postcss: ">=8.5.10 <9"
   "vitest>jsdom": "-"
 

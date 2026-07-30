@@ -9,7 +9,7 @@ export default function BackgroundImage() {
         alt=""
         placeholder="blur"
         sizes="100vw"
-        priority
+        preload
         className="object-cover"
         fill
       />
