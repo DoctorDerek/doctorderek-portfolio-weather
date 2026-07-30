@@ -57,6 +57,7 @@ pnpm lint
 pnpm exec vitest run --coverage --passWithNoTests
 pnpm exec playwright test --pass-with-no-tests
 pnpm build
+pnpm audit --prod
 pnpm format
 ```
 
