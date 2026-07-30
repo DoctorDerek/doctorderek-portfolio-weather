@@ -66,6 +66,12 @@ GitHub Actions runs ESLint and Vitest coverage on pull requests, reports coverag
 
 A Lighthouse 13.4.1 mobile audit of the production deployment on July 30, 2026 scored 96 for Performance and 100 for Accessibility, Best Practices, and SEO. Lighthouse scores are lab measurements and can vary with network and runtime conditions. [Run a current PageSpeed Insights audit](https://pagespeed.web.dev/analysis?url=https%3A%2F%2Fportfolio-weather.doctorderek.com%2F).
 
+On the same date, `pnpm audit --prod` reported no known vulnerabilities in the production dependency graph. Recheck the current graph with:
+
+```bash
+pnpm audit --prod
+```
+
 ## Provenance and attribution
 
 This project began as a weather-app repair and refactor exercise based on an [assessment scaffold](https://codesandbox.io/s/blazing-butterfly-6qudf) and supplied design brief. The current application has since been substantially rebuilt and modernized.
