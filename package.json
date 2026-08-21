@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4",
+    "@lhci/cli": "^0.15.1",
     "@next/env": "^16",
     "@playwright/test": "^1",
     "@tailwindcss/postcss": "^4",
