@@ -62,21 +62,6 @@ vi.mock("motion/react", async (importOriginal) => {
         })
         return <div {...divProperties}>{children}</div>
       },
-      section: ({
-        children,
-        initial,
-        animate,
-        transition,
-        ...sectionProperties
-      }: MotionContainerProps) => {
-        motionContainerConfiguration({
-          element: "section",
-          initial,
-          animate,
-          transition,
-        })
-        return <section {...sectionProperties}>{children}</section>
-      },
     },
     useReducedMotion: () => reducedMotionPreference.value,
   }
@@ -153,7 +138,7 @@ describe("WeatherSearch", () => {
     ).toBe(false)
   })
 
-  it("uses restrained spatial feedback for workspace and forecast entry", () => {
+  it("keeps the workspace paintable while animating forecast entry", () => {
     renderWeatherSearch({
       initialCity: "San Francisco",
       weatherResult: {
@@ -169,13 +154,8 @@ describe("WeatherSearch", () => {
       },
     })
 
-    expect(motionContainerConfiguration).toHaveBeenCalledWith(
-      expect.objectContaining({
-        element: "section",
-        initial: { opacity: 0, y: 12 },
-        animate: { opacity: 1, y: 0 },
-      }),
-    )
+    expect(screen.getByTestId("weather-workspace").tagName).toBe("SECTION")
+    expect(motionContainerConfiguration).toHaveBeenCalledTimes(1)
     expect(motionContainerConfiguration).toHaveBeenCalledWith(
       expect.objectContaining({
         element: "div",
@@ -219,7 +199,7 @@ describe("WeatherSearch", () => {
     ).toBe(false)
   })
 
-  it("removes spatial workspace and forecast transitions for reduced motion", () => {
+  it("removes forecast entry transitions for reduced motion", () => {
     reducedMotionPreference.value = true
     renderWeatherSearch({
       initialCity: "San Francisco",
@@ -236,9 +216,8 @@ describe("WeatherSearch", () => {
       },
     })
 
-    expect(motionContainerConfiguration).toHaveBeenCalledWith(
-      expect.objectContaining({ element: "section", initial: false }),
-    )
+    expect(screen.getByTestId("weather-workspace").tagName).toBe("SECTION")
+    expect(motionContainerConfiguration).toHaveBeenCalledTimes(1)
     expect(motionContainerConfiguration).toHaveBeenCalledWith(
       expect.objectContaining({
         element: "div",
