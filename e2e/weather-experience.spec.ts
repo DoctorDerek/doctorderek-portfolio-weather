@@ -75,7 +75,7 @@ test("renders the weather workspace as a translucent backdrop surface", async ({
   expect(visualContract.borderRadius).toBe("32px")
 })
 
-test("removes spatial workspace and forecast motion when requested", async ({
+test("keeps the workspace static and removes forecast motion when requested", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" })
