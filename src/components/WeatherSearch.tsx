@@ -100,13 +100,10 @@ export default function WeatherSearch({
 
   return (
     <main className="relative z-10 flex min-h-svh items-center justify-center px-4 py-24 sm:px-6 sm:py-20">
-      <motion.section
+      <section
         aria-labelledby="weather-workspace-title"
         data-testid="weather-workspace"
         className="w-full max-w-xl rounded-[2rem] border border-white/60 bg-white/70 p-5 shadow-2xl ring-1 shadow-slate-900/20 ring-black/5 backdrop-blur-xl sm:p-8 dark:border-white/15 dark:bg-slate-950/70 dark:shadow-black/50 dark:ring-white/5"
-        initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
       >
         <header className="mb-6 text-center">
           <p className="text-xs font-bold tracking-[0.22em] text-slate-700 uppercase dark:text-slate-200">
@@ -204,7 +201,7 @@ export default function WeatherSearch({
             </motion.div>
           ) : null}
         </AnimatePresence>
-      </motion.section>
+      </section>
     </main>
   )
 }
