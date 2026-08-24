@@ -24,7 +24,8 @@
     "lint": "eslint .",
     "lighthouse": "lhci autorun",
     "lighthouse:prepare": "node scripts/runTypeScript.mjs scripts/lighthouse/prepareLighthouseReports.cli.ts",
-    "xstate:diff": "node scripts/runTypeScript.mjs scripts/xstate-diff/xstateDiff.cli.ts"
+    "xstate:diff": "node scripts/runTypeScript.mjs scripts/xstate-diff/xstateDiff.cli.ts",
+    "test:xstate-diff": "vitest run --coverage --config vitest.xstate.config.ts"
   },
   "browserslist": [
     ">0.2%",
