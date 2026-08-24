@@ -1,6 +1,6 @@
 # Weather Portfolio
 
-[![Production](https://img.shields.io/website?url=https%3A%2F%2Fportfolio-weather.doctorderek.com%2F&up_message=live&down_message=offline&label=production&logo=vercel&logoColor=white)](https://portfolio-weather.doctorderek.com/) [![Codecov](https://codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather/graph/badge.svg)](https://app.codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather) [![Test and Lint](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/test-and-lint.yml/badge.svg)](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/test-and-lint.yml) [![Playwright](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/playwright.yml/badge.svg)](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/playwright.yml)
+[![Production](https://img.shields.io/website?url=https%3A%2F%2Fportfolio-weather.doctorderek.com%2F&up_message=live&down_message=offline&label=production&logo=vercel&logoColor=white)](https://portfolio-weather.doctorderek.com/) [![Codecov](https://codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather/graph/badge.svg)](https://app.codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather) [![ESLint, Vitest, and XState](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/eslint-vitest-xstate.yml/badge.svg)](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/eslint-vitest-xstate.yml) [![Playwright](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/playwright.yml/badge.svg)](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/playwright.yml)
 
 A responsive current-weather search built with Next.js 16, React 19, TypeScript 6, and Tailwind CSS 4. Visitors can search by city or optionally use browser location when permission is granted. OpenWeatherMap requests run exclusively on the server so the API key is never sent to the browser.
 
@@ -61,13 +61,14 @@ The development server is available at [http://localhost:3000](http://localhost:
 pnpm exec tsc --noEmit
 pnpm lint
 pnpm exec vitest run --coverage --passWithNoTests
+pnpm test:xstate-diff
 pnpm exec playwright test --pass-with-no-tests
 pnpm build
 pnpm audit --prod
 pnpm format
 ```
 
-GitHub Actions runs ESLint and Vitest coverage on pull requests, reports coverage through Codecov, and runs Playwright against successful Vercel Preview deployments. The Vitest integration suite covers the server-only weather service, validated coordinate actions, explicit browser-permission states, accessible search navigation, weather presentation states, and API error feedback. Playwright exercises city and location searches against the deployed live API. Coverage remains a measured progress signal rather than a merge-blocking threshold.
+GitHub Actions runs ESLint and Vitest coverage on pull requests, reports coverage through Codecov, publishes an advisory static XState v5 state-machine diff visualization, and runs Playwright against successful Vercel Preview deployments. The Vitest integration suite covers the server-only weather service, validated coordinate actions, explicit browser-permission states, accessible search navigation, weather presentation states, and API error feedback. Playwright exercises city and location searches against the deployed live API. Coverage remains a measured progress signal rather than a merge-blocking threshold.
 
 ## Provenance and attribution
 
