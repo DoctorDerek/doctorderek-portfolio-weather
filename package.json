@@ -22,7 +22,7 @@
     "build": "next build",
     "format": "prettier --write .",
     "lint": "eslint .",
-    "lighthouse": "lhci autorun",
+    "lighthouse": "node scripts/runTypeScript.mjs scripts/lighthouse/collectLighthouseReports.cli.ts",
     "lighthouse:prepare": "node scripts/runTypeScript.mjs scripts/lighthouse/prepareLighthouseReports.cli.ts",
     "xstate:diff": "node scripts/runTypeScript.mjs scripts/xstate-diff/xstateDiff.cli.ts",
     "test:xstate-diff": "vitest run --coverage --config vitest.xstate.config.ts"
@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4",
-    "@lhci/cli": "^0.15.1",
+    "chrome-launcher": "^1",
     "@next/env": "^16",
     "@playwright/test": "^1",
     "@tailwindcss/postcss": "^4",
@@ -65,6 +65,7 @@
     "eslint-plugin-prettier": "^5",
     "happy-dom": "^20",
     "jiti": "^2",
+    "lighthouse": "^13",
     "msw": "^2",
     "postcss": "^8",
     "prettier": "^3",
