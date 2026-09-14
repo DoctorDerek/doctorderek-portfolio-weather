@@ -1,6 +1,8 @@
 name: ESLint, Vitest, and XState Pipeline
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -71,10 +73,14 @@ jobs:
     needs: initialize-comments
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      EXPECTED_EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ env.EXPECTED_EVIDENCE_SHA }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
@@ -86,11 +92,13 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install
+        id: install
+        run: pnpm install --frozen-lockfile
 
       - name: Run Lint and Capture Output
         id: lint
-        if: always()
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        shell: bash
         run: |
           set +e
           pnpm lint 2>&1 | tee "$RUNNER_TEMP/lint-output.txt"
@@ -108,7 +116,7 @@ jobs:
           echo "LINT_OUTPUT_FILE=$RUNNER_TEMP/lint-output.txt" >> "$GITHUB_ENV"
 
       - name: Post Lint PR Comment
-        if: always() && github.event_name == 'pull_request'
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         continue-on-error: true
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
@@ -166,7 +174,8 @@ jobs:
 
       - name: Run Vitest and Capture Summary
         id: vitest
-        if: always()
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        shell: bash
         run: |
           set +e
           pnpm vitest run --coverage --passWithNoTests 2>&1 | tee "$RUNNER_TEMP/vitest-output.txt"
@@ -175,9 +184,10 @@ jobs:
 
           echo "VITEST_EXIT_CODE=$VITEST_EXIT_CODE" >> "$GITHUB_ENV"
           echo "VITEST_OUTPUT_FILE=$RUNNER_TEMP/vitest-output.txt" >> "$GITHUB_ENV"
+          exit "$VITEST_EXIT_CODE"
 
       - name: Post Vitest PR Comment
-        if: always() && github.event_name == 'pull_request'
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         continue-on-error: true
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
@@ -233,17 +243,91 @@ jobs:
               });
             }
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@04b047e8bb82a0c002c8312c1c880fbc6a999d45 # v5
+      - name: Run Blocking XState Analyzer Tests
+        id: xstate
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        shell: bash
+        run: |
+          set +e
+          pnpm test:xstate-diff 2>&1 | tee "$RUNNER_TEMP/xstate-output.txt"
+          XSTATE_EXIT_CODE=${PIPESTATUS[0]}
+          set -e
+
+          echo "XSTATE_EXIT_CODE=$XSTATE_EXIT_CODE" >> "$GITHUB_ENV"
+          echo "XSTATE_OUTPUT_FILE=$RUNNER_TEMP/xstate-output.txt" >> "$GITHUB_ENV"
+          exit "$XSTATE_EXIT_CODE"
+
+      - name: Inspect Coverage Evidence
+        id: coverage
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        with:
+          script: |
+            const fs = require('node:fs');
+            const path = require('node:path');
+            const checkoutSha = (await exec.getExecOutput('git', ['rev-parse', 'HEAD'])).stdout.trim();
+            if (checkoutSha !== process.env.EXPECTED_EVIDENCE_SHA) throw new Error('Coverage checkout does not match the expected commit.');
+            for (const [flag, reports] of [
+              ['vitest', ['lcov.info', 'coverage-final.json', 'index.html']],
+              ['xstate', ['lcov.info', 'coverage-summary.json']],
+            ]) {
+              const directory = `coverage/${flag}`;
+              const missing = reports.filter(file => !fs.existsSync(`${directory}/${file}`) || fs.statSync(`${directory}/${file}`).size === 0);
+              let sources = [];
+              let available = false;
+              try {
+                const lcov = fs.readFileSync(`${directory}/lcov.info`, 'utf8').trim();
+                sources = [...lcov.matchAll(/^SF:(.+)$/gm)].map(match => match[1].trim());
+                available = lcov.endsWith('end_of_record') && sources.length > 0 && sources.every(file => {
+                  const relative = path.relative(process.cwd(), path.resolve(file));
+                  return !relative.startsWith('..') && !path.isAbsolute(relative) && fs.existsSync(file);
+                });
+                const jsonPath = `${directory}/${flag === 'vitest' ? 'coverage-final.json' : 'coverage-summary.json'}`;
+                const jsonSources = Object.keys(JSON.parse(fs.readFileSync(jsonPath, 'utf8'))).filter(file => file !== 'total');
+                const mappedSources = new Set(sources.map(file => path.resolve(file)));
+                if (jsonSources.length !== mappedSources.size || jsonSources.some(file => !mappedSources.has(path.resolve(file)))) {
+                  core.warning(`${flag}: JSON and LCOV source contributions differ; available evidence may be partial.`);
+                }
+              } catch {
+                core.warning(`${flag}: some coverage evidence could not be read.`);
+              }
+              core.setOutput(`${flag}_available`, available);
+              if (!available || missing.length) core.warning(`${flag}: incomplete evidence; missing reports: ${missing.join(', ') || 'none'}. Do not interpret unavailable evidence as zero coverage.`);
+              core.summary.addRaw(`${flag}: runner exit ${process.env[`${flag.toUpperCase()}_EXIT_CODE`] ?? 'unavailable'}; LCOV sources ${sources.length}; missing reports: ${missing.join(', ') || 'none'}.\n\n`);
+            }
+            await core.summary.addRaw(`Tested commit: ${checkoutSha}. Single root package, no shards. Report presence does not prove complete execution; do not compare partial evidence as a complete baseline.\n`).write();
+
+      - name: Preserve Test Coverage Evidence
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: vitest-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: coverage/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Vitest Coverage to Codecov
+        if: ${{ !cancelled() && steps.coverage.outputs.vitest_available == 'true' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/vitest/lcov.info
+          disable_search: true
+          override_commit: ${{ env.EXPECTED_EVIDENCE_SHA }}
           flags: vitest
 
-      - name: Run Blocking XState Analyzer Tests
-        run: pnpm test:xstate-diff
+      - name: Upload XState Coverage to Codecov
+        if: ${{ !cancelled() && steps.coverage.outputs.xstate_available == 'true' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/xstate/lcov.info
+          disable_search: true
+          override_commit: ${{ env.EXPECTED_EVIDENCE_SHA }}
+          flags: xstate
 
       - name: Enforce Test and Tooling Results
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           FAILED=0
 
@@ -254,6 +338,11 @@ jobs:
 
           if ! [[ "$VITEST_EXIT_CODE" =~ ^[0-9]+$ ]] || [ "$VITEST_EXIT_CODE" -ne 0 ]; then
             echo "Vitest tests failed or the runner could not complete."
+            FAILED=1
+          fi
+
+          if ! [[ "$XSTATE_EXIT_CODE" =~ ^[0-9]+$ ]] || [ "$XSTATE_EXIT_CODE" -ne 0 ]; then
+            echo "XState tests failed or the runner could not complete."
             FAILED=1
           fi
 
