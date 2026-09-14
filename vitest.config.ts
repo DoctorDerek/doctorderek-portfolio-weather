@@ -13,6 +13,8 @@ export default defineConfig({
   test: {
     coverage: {
       provider: "v8",
+      reportOnFailure: true,
+      reportsDirectory: "coverage/vitest",
       reporter: ["text", "json", "html", "lcov"],
       include: ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx}"],
       exclude: [
