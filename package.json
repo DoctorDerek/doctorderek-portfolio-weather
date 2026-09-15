@@ -21,11 +21,7 @@
     "start": "next start",
     "build": "next build",
     "format": "prettier --write .",
-    "lint": "eslint .",
-    "lighthouse": "node scripts/runTypeScript.mjs scripts/lighthouse/collectLighthouseReports.cli.ts",
-    "lighthouse:prepare": "node scripts/runTypeScript.mjs scripts/lighthouse/prepareLighthouseReports.cli.ts",
-    "xstate:diff": "node scripts/runTypeScript.mjs scripts/xstate-diff/xstateDiff.cli.ts",
-    "test:xstate-diff": "vitest run --coverage --config vitest.xstate.config.ts"
+    "lint": "eslint ."
   },
   "browserslist": [
     ">0.2%",
