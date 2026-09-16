@@ -8,13 +8,13 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: "html",
+  reporter: [["html"], ["json", { outputFile: "test-results/results.json" }]],
   use: {
     baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || "http://localhost:3000",
     extraHTTPHeaders: vercelTrustedOidcToken
       ? { "x-vercel-trusted-oidc-idp-token": vercelTrustedOidcToken }
       : undefined,
-    trace: "on-first-retry",
+    trace: vercelTrustedOidcToken ? "off" : "on-first-retry",
   },
   projects: [
     {

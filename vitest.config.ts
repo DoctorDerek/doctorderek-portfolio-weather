@@ -1,6 +1,6 @@
 import path from "path"
 import react from "@vitejs/plugin-react"
-import { configDefaults, defineConfig } from "vitest/config"
+import { defineConfig } from "vitest/config"
 
 export default defineConfig({
   plugins: [react()],
@@ -13,19 +13,19 @@ export default defineConfig({
   test: {
     coverage: {
       provider: "v8",
+      reportOnFailure: true,
+      reportsDirectory: "coverage/vitest",
       reporter: ["text", "json", "html", "lcov"],
       include: ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx}"],
       exclude: [
         "**/*.test.{ts,tsx}",
         "scripts/**/*.cli.ts",
-        "scripts/xstate-diff/**",
         "src/test/**",
         "src/types/**",
       ],
     },
     environment: "happy-dom",
     include: ["**/*.test.tsx", "**/*.test.ts"],
-    exclude: [...configDefaults.exclude, "scripts/xstate-diff/**/*.test.ts"],
     setupFiles: ["./vitest.setup.ts"],
   },
 })

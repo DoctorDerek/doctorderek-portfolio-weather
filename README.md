@@ -61,7 +61,6 @@ The development server is available at [http://localhost:3000](http://localhost:
 pnpm exec tsc --noEmit
 pnpm lint
 pnpm exec vitest run --coverage --passWithNoTests
-pnpm test:xstate-diff
 pnpm exec playwright test --pass-with-no-tests
 pnpm build
 pnpm audit --prod
