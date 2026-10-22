@@ -69,6 +69,14 @@ pnpm format
 
 GitHub Actions runs ESLint and Vitest coverage on pull requests, reports coverage through Codecov, publishes an advisory static XState v5 state-machine diff visualization, and runs Playwright against successful Vercel Preview deployments. The Vitest integration suite covers the server-only weather service, validated coordinate actions, explicit browser-permission states, accessible search navigation, weather presentation states, and API error feedback. Playwright exercises city and location searches against the deployed live API. Coverage remains a measured progress signal rather than a merge-blocking threshold.
 
+### TypeScript lint coverage
+
+The pinned [DoctorDerekCICD quality workflow](https://github.com/DoctorDerek/DoctorDerekCICD/blob/28018031ea1409487e9919b0c62dd58602a3e649/.github/workflows/eslint-vitest-xstate.yml) verifies that every tracked, non-ignored `.ts`, `.tsx`, `.mts`, and `.cts` file resolves to an ESLint configuration with active TypeScript-specific rules. This blocks missing configuration without changing the existing advisory severity of ordinary lint findings. It checks configuration coverage, not type-aware linting or runtime correctness; TypeScript and Vitest remain separate checks.
+
+`eslint.config.ts` owns Weather’s policy and applies the installed Next.js TypeScript preset alongside the existing Next.js rules. Generated `next-env.d.ts`, build outputs, reports, and private local files retain their existing exclusions. The only rule exception allows the `_whileHover` and `_whileTap` parameters in `src/components/LocationWeatherButton.test.tsx`: its Motion adapter deliberately strips animation props before forwarding HTML button props. Other unused bindings and unsafe types remain checked, including in that file. Exceptions belong in the configuration, not inline suppressions.
+
+`eslint.config.test.ts` exercises the actual ESLint instance to verify these boundaries and diagnostics. The repository consumes the shared guard rather than maintaining a second scanner or workflow.
+
 ## Provenance and attribution
 
 This project began as a weather-app repair and refactor exercise based on an [assessment scaffold](https://codesandbox.io/s/blazing-butterfly-6qudf) and supplied design brief. The current application has since been substantially rebuilt and modernized.
