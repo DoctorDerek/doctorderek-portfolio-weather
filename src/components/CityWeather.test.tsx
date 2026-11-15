@@ -32,6 +32,30 @@ vi.mock("next/image", async () => {
 })
 
 describe("CityWeather", () => {
+  it("keeps a failed lookup in the result card until the result changes", () => {
+    const view = render(
+      <CityWeather
+        city={TEST_CITY}
+        weatherResult={{
+          status: "error",
+          code: 503,
+          message: "service unavailable",
+        }}
+      />,
+    )
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Error 503: Service Unavailable",
+    )
+    expect(screen.queryByLabelText("Temperature")).not.toBeInTheDocument()
+    view.rerender(
+      <CityWeather
+        city={TEST_CITY}
+        weatherResult={SUCCESSFUL_WEATHER_RESULT}
+      />,
+    )
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    expect(screen.getByText("27 °C")).toBeVisible()
+  })
   it("announces the loading state without interrupting the user", () => {
     render(<CityWeather city={TEST_CITY} weatherResult={null} />)
 

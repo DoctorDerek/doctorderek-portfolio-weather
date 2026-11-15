@@ -1,8 +1,6 @@
 "use client"
 
 import ImageFixed from "next/image"
-import { useEffect } from "react"
-import toast from "react-hot-toast"
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
 import WeatherLocationDetails from "@/src/components/WeatherLocationDetails"
@@ -21,25 +19,6 @@ export default function CityWeather({
   city: string
   weatherResult: WeatherResult | null
 }) {
-  const weatherErrorMessage =
-    weatherResult?.status === "error"
-      ? `Error ${weatherResult.code}: ${upperCaseFirstLetterOfEachWord(
-          weatherResult.message,
-        )}`
-      : null
-
-  useEffect(() => {
-    if (!weatherErrorMessage) return
-
-    toast.error(weatherErrorMessage, {
-      id: `weather-error-${city}-${weatherErrorMessage}`,
-      ariaProps: {
-        role: "alert",
-        "aria-live": "assertive",
-      },
-    })
-  }, [city, weatherErrorMessage])
-
   if (!weatherResult)
     return (
       <Card
@@ -58,7 +37,14 @@ export default function CityWeather({
       </Card>
     )
 
-  if (weatherResult.status === "error") return null
+  if (weatherResult.status === "error")
+    return (
+      <Card
+        key={`weather-error-${city}`}
+        heading={`Error ${weatherResult.code}: ${upperCaseFirstLetterOfEachWord(weatherResult.message)}`}
+        ariaLive="assertive"
+      />
+    )
 
   const { icon, description, location, temperatureKelvin } = weatherResult
   const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`

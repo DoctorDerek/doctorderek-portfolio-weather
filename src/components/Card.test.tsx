@@ -3,6 +3,14 @@ import { describe, expect, it } from "vitest"
 import Card from "@/src/components/Card"
 
 describe("Card", () => {
+  it("presents assertive error content as an atomic alert", () => {
+    render(
+      <Card heading="Error 503: Service Unavailable" ariaLive="assertive" />,
+    )
+    expect(screen.getByRole("alert")).toHaveAttribute("aria-live", "assertive")
+    expect(screen.getByRole("alert")).toHaveAttribute("aria-atomic", "true")
+    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+  })
   it("presents live content as one atomic status update", () => {
     render(<Card heading="Loading weather…" ariaLive="polite" />)
 
