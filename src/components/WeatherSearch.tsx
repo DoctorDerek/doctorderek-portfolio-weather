@@ -84,7 +84,11 @@ export default function WeatherSearch({
       const formData = new FormData(event.currentTarget)
       const inputCity = normalizeCityQuery(String(formData.get("city")))
 
-      if (!inputCity || inputCity === selectedCity) return
+      if (!inputCity) return
+      if (inputCity === selectedCity) {
+        router.refresh()
+        return
+      }
 
       setSearchWeatherState({ status: "pending", city: inputCity })
       router.push(`/?city=${encodeURIComponent(inputCity)}`)
