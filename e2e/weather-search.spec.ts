@@ -45,6 +45,39 @@ test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" })
 })
 
+for (const width of [320, 390]) {
+  test(`contains the search controls and error with enlarged text at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 844 })
+    await page.goto(`/?city=${INVALID_LIVE_WEATHER_TEST_CITY}`)
+    await expect(page.getByTestId("theme-toggle")).toBeVisible()
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "200%"
+    })
+    const workspace = page.getByTestId("weather-workspace")
+    const bounds = await workspace.boundingBox()
+    expect(bounds).not.toBeNull()
+    for (const containedElement of [
+      page.getByTestId("weather-input"),
+      page.getByTestId("weather-search-submit"),
+      workspace.getByRole("alert"),
+    ]) {
+      const elementBounds = await containedElement.boundingBox()
+      expect(elementBounds).not.toBeNull()
+      expect(elementBounds!.x).toBeGreaterThanOrEqual(bounds!.x)
+      expect(elementBounds!.x + elementBounds!.width).toBeLessThanOrEqual(
+        bounds!.x + bounds!.width,
+      )
+    }
+    const root = await page.evaluate(() => ({
+      width: document.documentElement.clientWidth,
+      scroll: document.documentElement.scrollWidth,
+    }))
+    expect(root.scroll).toBeLessThanOrEqual(root.width)
+  })
+}
+
 test("provides restrained pointer feedback without changing submission semantics", async ({
   page,
 }) => {
@@ -143,6 +176,7 @@ test("auto-loads local weather when location permission is already granted", asy
 test("announces live API errors without stale weather output", async ({
   page,
 }) => {
+  await page.clock.install()
   await page.goto("/")
   await waitForSearchSubmitReadiness(page)
 
@@ -157,4 +191,19 @@ test("announces live API errors without stale weather output", async ({
     page.getByRole("alert").filter({ hasText: "Error 404: City Not Found" }),
   ).toBeVisible()
   await expect(page.getByLabel("Temperature", { exact: true })).toHaveCount(0)
+  await page.clock.fastForward(6000)
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Error 404: City Not Found" }),
+  ).toBeVisible()
+  const retryResponse = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).searchParams.get("city") ===
+        INVALID_LIVE_WEATHER_TEST_CITY &&
+      response.request().resourceType() === "fetch",
+  )
+  await submitButton.click()
+  expect((await retryResponse).ok()).toBe(true)
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Error 404: City Not Found" }),
+  ).toBeVisible()
 })
