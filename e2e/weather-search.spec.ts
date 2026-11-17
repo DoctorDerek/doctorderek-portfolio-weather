@@ -187,14 +187,19 @@ test("announces live API errors without stale weather output", async ({
     waitForCityForecastNavigation(page, INVALID_LIVE_WEATHER_TEST_CITY),
     submitButton.click(),
   ])
-  await expect(
-    page.getByRole("alert").filter({ hasText: "Error 404: City Not Found" }),
-  ).toBeVisible()
+  const persistentError = page
+    .getByTestId("weather-workspace")
+    .getByRole("alert")
+  const errorToast = page
+    .getByRole("status")
+    .filter({ hasText: "Error 404: City Not Found" })
+  await expect(persistentError).toHaveText("Error 404: City Not Found")
+  await expect(errorToast).toBeVisible()
+  await expect(errorToast).toHaveAttribute("aria-live", "off")
   await expect(page.getByLabel("Temperature", { exact: true })).toHaveCount(0)
-  await page.clock.fastForward(6000)
-  await expect(
-    page.getByRole("alert").filter({ hasText: "Error 404: City Not Found" }),
-  ).toBeVisible()
+  await page.clock.runFor(6000)
+  await expect(errorToast).toHaveCount(0)
+  await expect(persistentError).toBeVisible()
   const retryResponse = page.waitForResponse(
     (response) =>
       new URL(response.url()).searchParams.get("city") ===
@@ -203,7 +208,6 @@ test("announces live API errors without stale weather output", async ({
   )
   await submitButton.click()
   expect((await retryResponse).ok()).toBe(true)
-  await expect(
-    page.getByRole("alert").filter({ hasText: "Error 404: City Not Found" }),
-  ).toBeVisible()
+  await expect(persistentError).toBeVisible()
+  await expect(errorToast).toBeVisible()
 })

@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ButtonHTMLAttributes, HTMLAttributes } from "react"
-import { Toaster } from "react-hot-toast"
+import toast, { Toaster } from "react-hot-toast"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import WeatherSearch from "@/src/components/WeatherSearch"
 import type { WeatherResult } from "@/src/types/weather"
@@ -98,6 +98,7 @@ function renderWeatherSearch(
 
 describe("WeatherSearch", () => {
   beforeEach(() => {
+    toast.remove()
     routerPush.mockClear()
     routerRefresh.mockClear()
     searchParameters.value = ""
