@@ -11,7 +11,7 @@ Check the current weather by city or use your location. OpenWeatherMap requests 
 - Searches current weather conditions by city through a server-only OpenWeatherMap integration.
 - Offers an optional browser location lookup after permission is granted without storing precise coordinates.
 - Validates upstream success payloads at runtime before rendering typed application data.
-- Keeps request errors visible and lets you retry.
+- Shows error toasts, keeps request errors visible, and lets you retry.
 - Persists light and dark themes through an animated, keyboard-accessible control.
 - Adapts the search and weather presentation across mobile and desktop viewports.
 
