@@ -176,6 +176,8 @@ test("auto-loads local weather when location permission is already granted", asy
 test("announces live API errors without stale weather output", async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.emulateMedia({ reducedMotion: "reduce" })
   await page.clock.install()
   await page.goto("/")
   await waitForSearchSubmitReadiness(page)
@@ -196,6 +198,17 @@ test("announces live API errors without stale weather output", async ({
   await expect(persistentError).toHaveText("Error 404: City Not Found")
   await expect(errorToast).toBeVisible()
   await expect(errorToast).toHaveAttribute("aria-live", "off")
+  const errorToastBar = errorToast.locator("..")
+  const errorToastPlacement = errorToastBar.locator("..")
+  await expect(errorToastBar).toHaveCSS("width", "358px")
+  await expect(errorToastBar).toHaveCSS("pointer-events", "none")
+  await expect(errorToastPlacement).toHaveCSS("bottom", "0px")
+  await expect(errorToastPlacement).toHaveCSS("justify-content", "center")
+
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await expect(errorToastBar).toHaveCSS("width", "576px")
+  await expect(errorToastPlacement).toHaveCSS("top", "0px")
+  await expect(errorToastPlacement).toHaveCSS("justify-content", "center")
   await expect(page.getByLabel("Temperature", { exact: true })).toHaveCount(0)
   await page.clock.runFor(6000)
   await expect(errorToast).toHaveCount(0)
