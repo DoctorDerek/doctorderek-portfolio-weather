@@ -1,12 +1,13 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ButtonHTMLAttributes, HTMLAttributes } from "react"
-import { Toaster } from "react-hot-toast"
+import toast, { Toaster } from "react-hot-toast"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import WeatherSearch from "@/src/components/WeatherSearch"
 import type { WeatherResult } from "@/src/types/weather"
 
 const routerPush = vi.hoisted(() => vi.fn())
+const routerRefresh = vi.hoisted(() => vi.fn())
 const searchParameters = vi.hoisted(() => ({ value: "" }))
 const locationWeatherButtonProperties = vi.hoisted(() => vi.fn())
 const reducedMotionPreference = vi.hoisted(() => ({
@@ -68,7 +69,7 @@ vi.mock("motion/react", async (importOriginal) => {
 })
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: routerPush }),
+  useRouter: () => ({ push: routerPush, refresh: routerRefresh }),
   useSearchParams: () => new URLSearchParams(searchParameters.value),
 }))
 
@@ -97,7 +98,9 @@ function renderWeatherSearch(
 
 describe("WeatherSearch", () => {
   beforeEach(() => {
+    toast.remove()
     routerPush.mockClear()
+    routerRefresh.mockClear()
     searchParameters.value = ""
     reducedMotionPreference.value = false
     motionGestureConfiguration.mockClear()
@@ -415,6 +418,39 @@ describe("WeatherSearch", () => {
       screen.queryByRole("heading", { name: "Atlantis" }),
     ).not.toBeInTheDocument()
     expect(screen.queryByLabelText("Temperature")).not.toBeInTheDocument()
+  })
+
+  it("retries the selected city through the existing server route", async () => {
+    searchParameters.value = "city=Atlantis"
+    const user = userEvent.setup()
+    const view = renderWeatherSearch({
+      initialCity: "Atlantis",
+      weatherResult: {
+        status: "error",
+        code: 503,
+        message: "service unavailable",
+      },
+    })
+    await user.click(screen.getByRole("button", { name: "Search" }))
+    expect(routerRefresh).toHaveBeenCalledOnce()
+    expect(routerPush).not.toHaveBeenCalled()
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Error 503: Service Unavailable",
+    )
+    view.rerender(
+      <WeatherSearch
+        initialCity="Atlantis"
+        weatherResult={{
+          status: "success",
+          temperatureKelvin: 300.15,
+          description: "clear sky",
+          icon: "01d",
+          location: { name: "Atlantis", stateName: null, countryCode: "US" },
+        }}
+      />,
+    )
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    expect(screen.getByText("27 °C")).toBeVisible()
   })
 
   it("shows ephemeral location weather without placing coordinates in history", () => {

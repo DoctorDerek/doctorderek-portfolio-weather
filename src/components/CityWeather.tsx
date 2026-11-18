@@ -26,19 +26,21 @@ export default function CityWeather({
       ? `Error ${weatherResult.code}: ${upperCaseFirstLetterOfEachWord(
           weatherResult.message,
         )}`
-      : null
+      : ""
 
   useEffect(() => {
-    if (!weatherErrorMessage) return
+    if (weatherResult?.status !== "error") return
 
-    toast.error(weatherErrorMessage, {
+    const toastId = toast.error(weatherErrorMessage, {
       id: `weather-error-${city}-${weatherErrorMessage}`,
       ariaProps: {
-        role: "alert",
-        "aria-live": "assertive",
+        role: "status",
+        "aria-live": "off",
       },
     })
-  }, [city, weatherErrorMessage])
+
+    return () => toast.dismiss(toastId)
+  }, [city, weatherErrorMessage, weatherResult])
 
   if (!weatherResult)
     return (
@@ -58,7 +60,14 @@ export default function CityWeather({
       </Card>
     )
 
-  if (weatherResult.status === "error") return null
+  if (weatherResult.status === "error")
+    return (
+      <Card
+        key={`weather-error-${city}`}
+        heading={weatherErrorMessage}
+        ariaLive="assertive"
+      />
+    )
 
   const { icon, description, location, temperatureKelvin } = weatherResult
   const iconUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`

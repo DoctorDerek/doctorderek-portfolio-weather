@@ -1,6 +1,7 @@
-import { render, screen, within } from "@testing-library/react"
+import { act, render, screen, within } from "@testing-library/react"
 import type { ImageProps } from "next/image"
-import { describe, expect, it, vi } from "vitest"
+import toast, { Toaster } from "react-hot-toast"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import CityWeather from "@/src/components/CityWeather"
 import type { WeatherResult } from "@/src/types/weather"
 
@@ -32,6 +33,83 @@ vi.mock("next/image", async () => {
 })
 
 describe("CityWeather", () => {
+  beforeEach(() => {
+    toast.remove()
+  })
+
+  afterEach(() => {
+    toast.remove()
+    vi.useRealTimers()
+  })
+
+  it("keeps the error card after toast expiry and notifies a new failed response", async () => {
+    vi.useFakeTimers()
+    const failedWeather = {
+      status: "error",
+      code: 503,
+      message: "service unavailable",
+    } satisfies WeatherResult
+    const errorMessage = "Error 503: Service Unavailable"
+    const renderResult = (weatherResult: WeatherResult | null) => (
+      <>
+        <Toaster toastOptions={{ duration: 5000 }} />
+        <CityWeather city={TEST_CITY} weatherResult={weatherResult} />
+      </>
+    )
+    const view = render(renderResult(failedWeather))
+
+    expect(screen.getByRole("alert")).toHaveTextContent(errorMessage)
+    expect(screen.getByRole("status")).toHaveTextContent(errorMessage)
+    expect(screen.getByRole("status")).toHaveAttribute("aria-live", "off")
+    expect(screen.getAllByRole("alert")).toHaveLength(1)
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5000)
+    })
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000)
+    })
+    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    expect(screen.getByRole("alert")).toHaveTextContent(errorMessage)
+
+    view.rerender(renderResult({ ...failedWeather }))
+    expect(screen.getByRole("status")).toHaveTextContent(errorMessage)
+
+    view.rerender(renderResult(null))
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000)
+    })
+    expect(screen.queryByText(errorMessage)).not.toBeInTheDocument()
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: "Loading weather…" }),
+    ).toBeVisible()
+  })
+
+  it("keeps a failed lookup in the result card until the result changes", () => {
+    const view = render(
+      <CityWeather
+        city={TEST_CITY}
+        weatherResult={{
+          status: "error",
+          code: 503,
+          message: "service unavailable",
+        }}
+      />,
+    )
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Error 503: Service Unavailable",
+    )
+    expect(screen.queryByLabelText("Temperature")).not.toBeInTheDocument()
+    view.rerender(
+      <CityWeather
+        city={TEST_CITY}
+        weatherResult={SUCCESSFUL_WEATHER_RESULT}
+      />,
+    )
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    expect(screen.getByText("27 °C")).toBeVisible()
+  })
   it("announces the loading state without interrupting the user", () => {
     render(<CityWeather city={TEST_CITY} weatherResult={null} />)
 

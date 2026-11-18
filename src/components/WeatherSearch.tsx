@@ -84,7 +84,11 @@ export default function WeatherSearch({
       const formData = new FormData(event.currentTarget)
       const inputCity = normalizeCityQuery(String(formData.get("city")))
 
-      if (!inputCity || inputCity === selectedCity) return
+      if (!inputCity) return
+      if (inputCity === selectedCity) {
+        router.refresh()
+        return
+      }
 
       setSearchWeatherState({ status: "pending", city: inputCity })
       router.push(`/?city=${encodeURIComponent(inputCity)}`)
@@ -103,7 +107,7 @@ export default function WeatherSearch({
       <section
         aria-labelledby="weather-workspace-title"
         data-testid="weather-workspace"
-        className="w-full max-w-xl rounded-[2rem] border border-white/60 bg-white/70 p-5 shadow-2xl ring-1 shadow-slate-900/20 ring-black/5 backdrop-blur-xl sm:p-8 dark:border-white/15 dark:bg-slate-950/70 dark:shadow-black/50 dark:ring-white/5"
+        className="w-full max-w-xl min-w-0 rounded-[2rem] border border-white/60 bg-white/70 p-5 wrap-anywhere shadow-2xl ring-1 shadow-slate-900/20 ring-black/5 backdrop-blur-xl sm:p-8 dark:border-white/15 dark:bg-slate-950/70 dark:shadow-black/50 dark:ring-white/5"
       >
         <header className="mb-6 text-center">
           <p className="text-xs font-bold tracking-[0.22em] text-slate-700 uppercase dark:text-slate-200">
@@ -131,10 +135,10 @@ export default function WeatherSearch({
           >
             City or place
           </label>
-          <div className="flex">
+          <div className="flex flex-wrap gap-2">
             <input
               data-testid="weather-input"
-              className="h-12 min-w-0 flex-1 rounded-l-xl border border-solid border-slate-300 bg-white/90 px-4 text-base text-slate-950 placeholder:text-slate-500 dark:border-white/20 dark:bg-slate-900/85 dark:text-white dark:placeholder:text-slate-400"
+              className="h-12 min-w-0 flex-1 basis-32 rounded-xl border border-solid border-slate-300 bg-white/90 px-4 text-base text-slate-950 placeholder:text-slate-500 dark:border-white/20 dark:bg-slate-900/85 dark:text-white dark:placeholder:text-slate-400"
               type="text"
               name="city"
               id="city"
@@ -146,7 +150,7 @@ export default function WeatherSearch({
             />
             <motion.button
               data-testid="weather-search-submit"
-              className="h-12 rounded-r-xl bg-blue-700 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 disabled:cursor-wait disabled:opacity-70 dark:bg-blue-500 dark:hover:bg-blue-400"
+              className="h-12 max-w-full rounded-xl bg-blue-700 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 disabled:cursor-wait disabled:opacity-70 dark:bg-blue-500 dark:hover:bg-blue-400"
               type="submit"
               disabled={shouldDisplaySearchPending}
               aria-busy={shouldDisplaySearchPending}

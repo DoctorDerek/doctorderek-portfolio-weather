@@ -13,8 +13,10 @@ export default function Card({
 
   return (
     <div
-      className="mt-6 flex w-full flex-col items-center justify-center"
-      role={ariaLive ? "status" : undefined}
+      className="mt-6 flex w-full min-w-0 flex-col items-center justify-center wrap-anywhere"
+      role={
+        ariaLive ? (ariaLive === "assertive" ? "alert" : "status") : undefined
+      }
       aria-live={ariaLive}
       aria-atomic={ariaLive ? true : undefined}
     >

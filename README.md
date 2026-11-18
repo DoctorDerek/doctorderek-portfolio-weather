@@ -2,7 +2,7 @@
 
 [![Production](https://img.shields.io/website?url=https%3A%2F%2Fportfolio-weather.doctorderek.com%2F&up_message=live&down_message=offline&label=production&logo=vercel&logoColor=white)](https://portfolio-weather.doctorderek.com/) [![Codecov](https://codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather/graph/badge.svg)](https://app.codecov.io/gh/DoctorDerek/doctorderek-portfolio-weather) [![ESLint, Vitest, and XState](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/eslint-vitest-xstate.yml/badge.svg)](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/eslint-vitest-xstate.yml) [![Playwright](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/playwright.yml/badge.svg)](https://github.com/DoctorDerek/doctorderek-portfolio-weather/actions/workflows/playwright.yml)
 
-A responsive current-weather search built with Next.js 16, React 19, TypeScript 6, and Tailwind CSS 4. Visitors can search by city or optionally use browser location when permission is granted. OpenWeatherMap requests run exclusively on the server so the API key is never sent to the browser.
+Check the current weather by city or use your location. OpenWeatherMap requests stay on the server, keeping the API key out of the browser.
 
 [Open the live application](https://portfolio-weather.doctorderek.com/)
 
@@ -11,7 +11,7 @@ A responsive current-weather search built with Next.js 16, React 19, TypeScript 
 - Searches current weather conditions by city through a server-only OpenWeatherMap integration.
 - Offers an optional browser location lookup after permission is granted without storing precise coordinates.
 - Validates upstream success payloads at runtime before rendering typed application data.
-- Presents API failures in accessible, auto-dismissing toast notifications.
+- Shows error toasts, keeps request errors visible, and lets you retry.
 - Persists light and dark themes through an animated, keyboard-accessible control.
 - Adapts the search and weather presentation across mobile and desktop viewports.
 
