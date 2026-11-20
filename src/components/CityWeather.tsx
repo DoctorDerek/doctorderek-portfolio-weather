@@ -2,7 +2,7 @@
 
 import ImageFixed from "next/image"
 import { useEffect } from "react"
-import toast from "react-hot-toast"
+import toast from "react-hot-toast/headless"
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
 import WeatherLocationDetails from "@/src/components/WeatherLocationDetails"

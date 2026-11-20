@@ -1,8 +1,9 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ButtonHTMLAttributes, HTMLAttributes } from "react"
-import toast, { Toaster } from "react-hot-toast"
+import toast from "react-hot-toast/headless"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import WeatherNotices from "@/src/components/WeatherNotices"
 import WeatherSearch from "@/src/components/WeatherSearch"
 import type { WeatherResult } from "@/src/types/weather"
 
@@ -90,7 +91,7 @@ function renderWeatherSearch(
 ) {
   return render(
     <>
-      <Toaster />
+      <WeatherNotices />
       <WeatherSearch {...properties} />
     </>,
   )
@@ -271,7 +272,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = "city=San%20Francisco"
     rerender(
       <>
-        <Toaster />
+        <WeatherNotices />
         <WeatherSearch
           initialCity="San Francisco"
           weatherResult={{
@@ -412,7 +413,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = "city=San%20Francisco"
     rerender(
       <>
-        <Toaster />
+        <WeatherNotices />
         <WeatherSearch
           initialCity="San Francisco"
           weatherResult={weatherResult}
@@ -429,7 +430,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = ""
     rerender(
       <>
-        <Toaster />
+        <WeatherNotices />
         <WeatherSearch
           initialCity="San Francisco"
           weatherResult={weatherResult}
@@ -570,7 +571,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = ""
     rerender(
       <>
-        <Toaster />
+        <WeatherNotices />
         <WeatherSearch
           initialCity="San Francisco"
           weatherResult={{
@@ -683,7 +684,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = ""
     rerender(
       <>
-        <Toaster />
+        <WeatherNotices />
         <WeatherSearch
           initialCity="San Francisco"
           weatherResult={{
@@ -703,7 +704,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = "city=San%20Francisco"
     rerender(
       <>
-        <Toaster />
+        <WeatherNotices />
         <WeatherSearch
           initialCity="San Francisco"
           weatherResult={{

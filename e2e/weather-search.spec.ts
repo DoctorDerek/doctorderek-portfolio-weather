@@ -199,12 +199,12 @@ test("announces live API errors without stale weather output", async ({
   await expect(errorToast).toBeVisible()
   await expect(errorToast).toHaveAttribute("aria-live", "off")
   const errorToastBar = errorToast.locator("..")
-  const errorToastPlacement = errorToastBar.locator("..")
+  const noticeNode = await errorToast.elementHandle()
   await expect(errorToastBar).toHaveCSS("width", "358px")
   await expect(errorToastBar).toHaveCSS("pointer-events", "none")
   const searchViewport = page.locator("[data-search-viewport]")
-  const tray = page.locator(".weather-notice-tray")
-  await expect(errorToastPlacement).toHaveCSS("position", "relative")
+  const tray = page.locator("[data-weather-notices]")
+  await expect(tray).toHaveCSS("position", "relative")
   for (const { width, height, fontSize } of [
     { width: 390, height: 844, fontSize: "100%" },
     { width: 320, height: 568, fontSize: "200%" },
@@ -235,12 +235,19 @@ test("announces live API errors without stale weather output", async ({
   await page.evaluate(() => {
     document.documentElement.style.fontSize = ""
   })
-  await expect(errorToastPlacement).toHaveCSS("justify-content", "center")
 
   await page.setViewportSize({ width: 1440, height: 900 })
   await expect(errorToastBar).toHaveCSS("width", "576px")
-  await expect(errorToastPlacement).toHaveCSS("top", "0px")
-  await expect(errorToastPlacement).toHaveCSS("justify-content", "center")
+  await expect(tray).toHaveCSS("position", "fixed")
+  await expect(tray).toHaveCSS("top", "16px")
+  expect(
+    await errorToast.evaluate(
+      (node, original) => node === original,
+      noticeNode,
+    ),
+  ).toBe(true)
+  const desktopBar = await errorToastBar.boundingBox()
+  expect(desktopBar?.x).toBe((1440 - 576) / 2)
   await expect(page.getByLabel("Temperature", { exact: true })).toHaveCount(0)
   await page.clock.runFor(6000)
   await expect(errorToast).toHaveCount(0)
