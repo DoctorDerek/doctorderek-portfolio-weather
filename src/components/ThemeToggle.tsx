@@ -1,7 +1,4 @@
-import type { CSSProperties } from "react"
 import ThemeToggleArtwork from "@/src/components/ThemeToggleArtwork"
-
-const classNames = (...args: string[]) => args.filter(Boolean).join(" ")
 
 export default function ThemeToggle({
   isDarkTheme,
@@ -10,11 +7,6 @@ export default function ThemeToggle({
   isDarkTheme: boolean
   onToggle: () => void
 }) {
-  const themeButtonStyle: CSSProperties = {
-    top: "max(1rem, env(safe-area-inset-top))",
-    right: "max(1rem, env(safe-area-inset-right))",
-  }
-
   return (
     <button
       type="button"
@@ -23,12 +15,7 @@ export default function ThemeToggle({
         isDarkTheme ? "Switch to light theme" : "Switch to dark theme"
       }
       data-testid="theme-toggle"
-      style={themeButtonStyle}
-      className={classNames(
-        "fixed z-20 inline-flex bg-transparent text-gray-900",
-        "cursor-pointer rounded-[35px] border-0 p-0",
-        isDarkTheme ? "theme-toggle--dark" : "theme-toggle--light",
-      )}
+      className="group/theme fixed top-[max(1rem,env(safe-area-inset-top))] right-[max(1rem,env(safe-area-inset-right))] z-20 inline-flex cursor-pointer rounded-full border-0 bg-transparent p-0 text-gray-900"
       onClick={onToggle}
     >
       <ThemeToggleArtwork />

@@ -60,7 +60,7 @@ test("removes spatial feedback when the user prefers reduced motion", async ({
   await expect(themeToggle).toBeVisible()
   await expect(submitButton).toBeVisible()
   await expect(submitButton).toBeEnabled()
-  await expect(themeToggle.locator(".sun")).toHaveCSS(
+  await expect(themeToggle.locator("[data-artwork='sun']")).toHaveCSS(
     "transition-duration",
     "0s",
   )
