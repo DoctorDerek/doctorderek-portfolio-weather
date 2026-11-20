@@ -227,6 +227,24 @@ test("announces live API errors without stale weather output", async ({
         )
       })
       .toBe(true)
+    expect(
+      await errorToastBar.evaluate((bar: HTMLElement) => {
+        // Temporarily make the notice hit-testable to detect an opaque layer covering it.
+        const previous = bar.style.pointerEvents
+        try {
+          bar.style.pointerEvents = "auto"
+          const bounds = bar.getBoundingClientRect()
+          return bar.contains(
+            document.elementFromPoint(
+              bounds.x + bounds.width / 2,
+              bounds.y + bounds.height / 2,
+            ),
+          )
+        } finally {
+          bar.style.pointerEvents = previous
+        }
+      }),
+    ).toBe(true)
     await submitButton.scrollIntoViewIfNeeded()
     await expect(submitButton).toBeInViewport({ ratio: 1 })
     await expect(submitButton).toBeEnabled()
