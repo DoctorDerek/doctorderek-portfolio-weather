@@ -187,7 +187,7 @@ export default function WeatherSearch({
             />
             <motion.button
               data-testid="weather-search-submit"
-              className="h-12 max-w-full rounded-xl bg-blue-700 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 disabled:cursor-wait disabled:opacity-70 dark:bg-blue-500 dark:hover:bg-blue-400"
+              className="h-12 max-w-full rounded-xl bg-blue-700 px-4 text-sm font-semibold text-white shadow-sm transition-[color,background-color,border-color] hover:bg-blue-800 disabled:cursor-wait disabled:opacity-70 dark:bg-blue-500 dark:hover:bg-blue-400"
               type="submit"
               disabled={shouldDisplaySearchPending}
               aria-busy={shouldDisplaySearchPending}
