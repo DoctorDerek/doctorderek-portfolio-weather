@@ -202,7 +202,39 @@ test("announces live API errors without stale weather output", async ({
   const errorToastPlacement = errorToastBar.locator("..")
   await expect(errorToastBar).toHaveCSS("width", "358px")
   await expect(errorToastBar).toHaveCSS("pointer-events", "none")
-  await expect(errorToastPlacement).toHaveCSS("bottom", "0px")
+  const searchViewport = page.locator("[data-search-viewport]")
+  const tray = page.locator(".weather-notice-tray")
+  await expect(errorToastPlacement).toHaveCSS("position", "relative")
+  for (const { width, height, fontSize } of [
+    { width: 390, height: 844, fontSize: "100%" },
+    { width: 320, height: 568, fontSize: "200%" },
+  ]) {
+    await page.setViewportSize({ width, height })
+    await page.evaluate((size) => {
+      document.documentElement.style.fontSize = size
+    }, fontSize)
+    await expect
+      .poll(async () => {
+        const [search, notice] = await Promise.all([
+          searchViewport.boundingBox(),
+          tray.boundingBox(),
+        ])
+        return (
+          !!search &&
+          !!notice &&
+          search.y + search.height <= notice.y + 1 &&
+          Math.abs(notice.y + notice.height - height) <= 1
+        )
+      })
+      .toBe(true)
+    await submitButton.scrollIntoViewIfNeeded()
+    await expect(submitButton).toBeInViewport({ ratio: 1 })
+    await expect(submitButton).toBeEnabled()
+    await submitButton.click({ trial: true })
+  }
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = ""
+  })
   await expect(errorToastPlacement).toHaveCSS("justify-content", "center")
 
   await page.setViewportSize({ width: 1440, height: 900 })
