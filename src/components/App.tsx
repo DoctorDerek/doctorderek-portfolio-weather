@@ -41,22 +41,33 @@ export default function App({
 
   return (
     <>
-      <Toaster
-        position={desktopToastPlacement ? "top-center" : "bottom-center"}
-        containerStyle={{
-          top: "max(1rem, env(safe-area-inset-top, 0px))",
-          right: "max(1rem, env(safe-area-inset-right, 0px))",
-          bottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))",
-          left: "max(1rem, env(safe-area-inset-left, 0px))",
-        }}
-        toastOptions={{
-          duration: WEATHER_ERROR_TOAST_DURATION_MILLISECONDS,
-          className:
-            "pointer-events-none! min-h-14 w-full max-w-xl! justify-center gap-2 wrap-anywhere text-center lg:max-w-[min(var(--container-xl),50vw)]! lg:text-lg! [&>[aria-live]]:m-0! [&>[aria-live]]:flex-initial!",
-        }}
-      />
       <ToggleDarkMode />
-      <WeatherSearch initialCity={initialCity} weatherResult={weatherResult} />
+      <div className="grid h-dvh grid-rows-[minmax(0,1fr)_auto] lg:contents">
+        <div
+          data-search-viewport=""
+          className="min-h-0 overflow-y-auto lg:contents"
+        >
+          <WeatherSearch
+            initialCity={initialCity}
+            weatherResult={weatherResult}
+          />
+        </div>
+        <Toaster
+          containerClassName="weather-notice-tray"
+          position={desktopToastPlacement ? "top-center" : "bottom-center"}
+          containerStyle={{
+            top: "max(1rem, env(safe-area-inset-top, 0px))",
+            right: "max(1rem, env(safe-area-inset-right, 0px))",
+            bottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))",
+            left: "max(1rem, env(safe-area-inset-left, 0px))",
+          }}
+          toastOptions={{
+            duration: WEATHER_ERROR_TOAST_DURATION_MILLISECONDS,
+            className:
+              "pointer-events-none! min-h-14 w-full max-w-xl! justify-center gap-2 wrap-anywhere text-center lg:max-w-[min(var(--container-xl),50vw)]! lg:text-lg! [&>[aria-live]]:m-0! [&>[aria-live]]:flex-initial!",
+          }}
+        />
+      </div>
       <BackgroundImage />
     </>
   )

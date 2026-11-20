@@ -21,3 +21,23 @@ body {
     scroll-behavior: auto;
   }
 }
+
+@media (width < 64rem) {
+  .weather-notice-tray {
+    position: relative !important;
+    inset: auto !important;
+    padding-inline: max(1rem, env(safe-area-inset-left))
+      max(1rem, env(safe-area-inset-right));
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .weather-notice-tray:empty {
+    display: none;
+  }
+
+  .weather-notice-tray > div {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+  }
+}
