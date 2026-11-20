@@ -14,11 +14,12 @@ describe("ThemeToggle", () => {
     })
     const artwork = container.querySelector("svg")
 
-    expect(themeToggle).toHaveClass("fixed", "theme-toggle--light")
-    expect(themeToggle).toHaveStyle({
-      top: "max(1rem, env(safe-area-inset-top))",
-      right: "max(1rem, env(safe-area-inset-right))",
-    })
+    expect(themeToggle).toHaveAttribute("aria-pressed", "false")
+    expect(themeToggle).toHaveClass(
+      "fixed",
+      "top-[max(1rem,env(safe-area-inset-top))]",
+      "right-[max(1rem,env(safe-area-inset-right))]",
+    )
     expect(artwork).toHaveAttribute("aria-hidden", "true")
     expect(artwork).toHaveAttribute("focusable", "false")
   })
@@ -28,7 +29,7 @@ describe("ThemeToggle", () => {
 
     expect(
       screen.getByRole("button", { name: "Switch to light theme" }),
-    ).toHaveClass("theme-toggle--dark")
+    ).toHaveAttribute("aria-pressed", "true")
   })
 
   it("delegates activation without owning application theme state", async () => {

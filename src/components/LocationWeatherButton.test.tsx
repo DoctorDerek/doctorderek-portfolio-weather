@@ -2,9 +2,10 @@ import { act, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ButtonHTMLAttributes } from "react"
 import type { GeolocatedConfig } from "react-geolocated"
-import toast, { Toaster } from "react-hot-toast"
+import toast from "react-hot-toast/headless"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import LocationWeatherButton from "@/src/components/LocationWeatherButton"
+import WeatherNotices from "@/src/components/WeatherNotices"
 import type { WeatherResult } from "@/src/types/weather"
 
 const getCurrentLocationWeatherMock = vi.hoisted(() => vi.fn())
@@ -125,7 +126,7 @@ function renderLocationWeatherButton({
 
   render(
     <>
-      <Toaster />
+      <WeatherNotices />
       <LocationWeatherButton
         onLocationWeatherLoading={onLocationWeatherLoading}
         onLocationWeatherResult={onLocationWeatherResult}
@@ -177,7 +178,7 @@ describe("LocationWeatherButton", () => {
     setGeolocationPermissionState("granted")
     render(
       <>
-        <Toaster />
+        <WeatherNotices />
         <LocationWeatherButton
           onLocationWeatherLoading={vi.fn()}
           onLocationWeatherResult={vi.fn()}

@@ -28,7 +28,7 @@ describe("ToggleDarkMode", () => {
       name: "Switch to dark theme",
     })
 
-    expect(themeToggle).toHaveClass("theme-toggle--light")
+    expect(themeToggle).toHaveAttribute("aria-pressed", "false")
 
     await user.click(themeToggle)
 
@@ -45,7 +45,7 @@ describe("ToggleDarkMode", () => {
       name: "Switch to light theme",
     })
 
-    expect(themeToggle).toHaveClass("theme-toggle--dark")
+    expect(themeToggle).toHaveAttribute("aria-pressed", "true")
 
     await user.click(themeToggle)
 

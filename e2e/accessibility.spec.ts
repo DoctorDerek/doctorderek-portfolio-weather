@@ -1,57 +1,48 @@
 import { expect, test, type Locator } from "@playwright/test"
-import type { Page } from "@playwright/test"
-
-const getThemeToggle = (page: Page) => page.getByTestId("theme-toggle")
-const MAX_TAB_PRESSES_TO_REACH_CONTROL = 12
-
-async function tabToControl(page: Page, control: Locator) {
-  for (
-    let tabPresses = 0;
-    tabPresses < MAX_TAB_PRESSES_TO_REACH_CONTROL;
-    tabPresses += 1
-  ) {
-    const isFocused = await control.evaluate(
-      (element) => element === document.activeElement,
-    )
-
-    if (isFocused) return
-
-    await page.keyboard.press("Tab")
-  }
-
-  throw new Error("Keyboard navigation did not reach the expected control")
-}
 
 async function expectKeyboardVisibleFocus(control: Locator) {
   await expect(control).toBeFocused()
-  await expect(control).toHaveCSS("outline-style", "solid")
-  await expect(control).toHaveCSS("outline-width", "3px")
-  await expect(control).toHaveCSS("outline-color", "rgb(255, 255, 255)")
-  await expect(control).toHaveCSS(
-    "box-shadow",
-    /rgb\(4, 120, 87\) 0px 0px 0px 5px/,
-  )
+  const ring = await control.evaluate((element) => {
+    const style = getComputedStyle(element)
+    return {
+      keyboardFocus: element.matches(":focus-visible"),
+      width: style.outlineWidth,
+      style: style.outlineStyle,
+      color: style.outlineColor,
+      shadow: style.boxShadow,
+    }
+  })
+  expect(ring).toEqual({
+    keyboardFocus: true,
+    width: "3px",
+    style: "solid",
+    color: "rgb(255, 255, 255)",
+    shadow: expect.stringContaining("rgb(4, 120, 87) 0px 0px 0px 5px"),
+  })
 }
 
-test("keeps every primary weather control visibly keyboard focused", async ({
-  page,
-}) => {
-  await page.addInitScript(() => {
-    window.localStorage.setItem("theme", "light")
+for (const theme of ["light", "dark"] as const) {
+  test(`keeps the keyboard focus ring visible on every primary control in the ${theme} theme`, async ({
+    page,
+  }) => {
+    await page.addInitScript((theme) => {
+      window.localStorage.setItem("theme", theme)
+    }, theme)
+    await page.goto("/")
+    const themeSwitch = page.getByRole("button", {
+      name:
+        theme === "light" ? "Switch to dark theme" : "Switch to light theme",
+    })
+    await themeSwitch.waitFor()
+    const controls = [
+      themeSwitch,
+      page.getByRole("textbox", { name: "City or place" }),
+      page.getByRole("button", { name: "Search", exact: true }),
+      page.getByRole("button", { name: "Use my location", exact: true }),
+    ]
+    for (const control of controls) {
+      await page.keyboard.press("Tab")
+      await expectKeyboardVisibleFocus(control)
+    }
   })
-  await page.goto("/")
-
-  const primaryWeatherControls = [
-    getThemeToggle(page),
-    page.getByRole("textbox", { name: "City or place" }),
-    page.getByRole("button", { name: "Search" }),
-    page.getByTestId("weather-location-button"),
-  ]
-
-  await expect(primaryWeatherControls[0]).toBeVisible()
-
-  for (const control of primaryWeatherControls) {
-    await tabToControl(page, control)
-    await expectKeyboardVisibleFocus(control)
-  }
-})
+}

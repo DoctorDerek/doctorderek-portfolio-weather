@@ -176,6 +176,8 @@ test("auto-loads local weather when location permission is already granted", asy
 test("announces live API errors without stale weather output", async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.emulateMedia({ reducedMotion: "reduce" })
   await page.clock.install()
   await page.goto("/")
   await waitForSearchSubmitReadiness(page)
@@ -196,6 +198,74 @@ test("announces live API errors without stale weather output", async ({
   await expect(persistentError).toHaveText("Error 404: City Not Found")
   await expect(errorToast).toBeVisible()
   await expect(errorToast).toHaveAttribute("aria-live", "off")
+  const errorToastBar = errorToast.locator("..")
+  const noticeNode = await errorToast.elementHandle()
+  await expect(errorToastBar).toHaveCSS("width", "358px")
+  await expect(errorToastBar).toHaveCSS("pointer-events", "none")
+  const searchViewport = page.locator("[data-search-viewport]")
+  const tray = page.locator("[data-weather-notices]")
+  await expect(tray).toHaveCSS("position", "relative")
+  for (const { width, height, fontSize } of [
+    { width: 390, height: 844, fontSize: "100%" },
+    { width: 320, height: 568, fontSize: "200%" },
+  ]) {
+    await page.setViewportSize({ width, height })
+    await page.evaluate((size) => {
+      document.documentElement.style.fontSize = size
+    }, fontSize)
+    await expect
+      .poll(async () => {
+        const [search, notice] = await Promise.all([
+          searchViewport.boundingBox(),
+          tray.boundingBox(),
+        ])
+        return (
+          !!search &&
+          !!notice &&
+          search.y + search.height <= notice.y + 1 &&
+          Math.abs(notice.y + notice.height - height) <= 1
+        )
+      })
+      .toBe(true)
+    expect(
+      await errorToastBar.evaluate((bar: HTMLElement) => {
+        // Temporarily make the notice hit-testable to detect an opaque layer covering it.
+        const previous = bar.style.pointerEvents
+        try {
+          bar.style.pointerEvents = "auto"
+          const bounds = bar.getBoundingClientRect()
+          return bar.contains(
+            document.elementFromPoint(
+              bounds.x + bounds.width / 2,
+              bounds.y + bounds.height / 2,
+            ),
+          )
+        } finally {
+          bar.style.pointerEvents = previous
+        }
+      }),
+    ).toBe(true)
+    await submitButton.scrollIntoViewIfNeeded()
+    await expect(submitButton).toBeInViewport({ ratio: 1 })
+    await expect(submitButton).toBeEnabled()
+    await submitButton.click({ trial: true })
+  }
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = ""
+  })
+
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await expect(errorToastBar).toHaveCSS("width", "576px")
+  await expect(tray).toHaveCSS("position", "fixed")
+  await expect(tray).toHaveCSS("top", "16px")
+  expect(
+    await errorToast.evaluate(
+      (node, original) => node === original,
+      noticeNode,
+    ),
+  ).toBe(true)
+  const desktopBar = await errorToastBar.boundingBox()
+  expect(desktopBar?.x).toBe((1440 - 576) / 2)
   await expect(page.getByLabel("Temperature", { exact: true })).toHaveCount(0)
   await page.clock.runFor(6000)
   await expect(errorToast).toHaveCount(0)

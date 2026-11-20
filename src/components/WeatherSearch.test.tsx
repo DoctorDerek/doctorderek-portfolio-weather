@@ -1,8 +1,9 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ButtonHTMLAttributes, HTMLAttributes } from "react"
-import toast, { Toaster } from "react-hot-toast"
+import toast from "react-hot-toast/headless"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import WeatherNotices from "@/src/components/WeatherNotices"
 import WeatherSearch from "@/src/components/WeatherSearch"
 import type { WeatherResult } from "@/src/types/weather"
 
@@ -90,7 +91,7 @@ function renderWeatherSearch(
 ) {
   return render(
     <>
-      <Toaster />
+      <WeatherNotices />
       <WeatherSearch {...properties} />
     </>,
   )
@@ -243,7 +244,9 @@ describe("WeatherSearch", () => {
     await user.click(screen.getByRole("button", { name: "Search" }))
 
     expect(routerPush).toHaveBeenCalledOnce()
-    expect(routerPush).toHaveBeenCalledWith("/?city=San%20Francisco")
+    expect(routerPush).toHaveBeenCalledWith("/?city=San%20Francisco", {
+      scroll: false,
+    })
   })
 
   it("displays search-pending status while awaiting a city weather lookup", async () => {
@@ -262,12 +265,14 @@ describe("WeatherSearch", () => {
     expect(screen.getByRole("status")).toHaveTextContent(
       "Loading forecast for San Francisco...",
     )
-    expect(routerPush).toHaveBeenCalledWith("/?city=San%20Francisco")
+    expect(routerPush).toHaveBeenCalledWith("/?city=San%20Francisco", {
+      scroll: false,
+    })
 
     searchParameters.value = "city=San%20Francisco"
     rerender(
       <>
-        <Toaster />
+        <WeatherNotices />
         <WeatherSearch
           initialCity="San Francisco"
           weatherResult={{
@@ -290,6 +295,93 @@ describe("WeatherSearch", () => {
       screen.queryByText("Loading forecast for San Francisco..."),
     ).not.toBeInTheDocument()
   })
+
+  it.for([
+    { top: -24, scroll: true },
+    { top: 360, scroll: true },
+    { top: 140, scroll: false },
+  ])(
+    "keeps the submitted search reachable when the notice reduces the viewport (top $top)",
+    ({ top, scroll }, { onTestFinished }) => {
+      let resize: () => void = () => {
+        throw new Error("The search viewport was never observed")
+      }
+      const observe = vi.fn()
+      const disconnect = vi.fn()
+      vi.stubGlobal(
+        "ResizeObserver",
+        class {
+          constructor(callback: () => void) {
+            resize = callback
+          }
+          observe = observe
+          disconnect = disconnect
+        },
+      )
+      onTestFinished(() => {
+        vi.unstubAllGlobals()
+      })
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <div>
+          <div data-search-viewport="">{children}</div>
+        </div>
+      )
+      const view = render(
+        <WeatherSearch initialCity={null} weatherResult={null} />,
+        { wrapper },
+      )
+      const form = screen.getByTestId("weather-search-form")
+      const viewport = form.closest<HTMLElement>("[data-search-viewport]")!
+      const frame = viewport.parentElement!
+      const scrollIntoView = vi
+        .spyOn(form, "scrollIntoView")
+        .mockImplementation(() => {})
+      vi.spyOn(frame, "clientHeight", "get").mockReturnValue(520)
+      const viewportHeight = vi
+        .spyOn(viewport, "clientHeight", "get")
+        .mockReturnValue(520)
+      vi.spyOn(viewport, "getBoundingClientRect").mockReturnValue(
+        new DOMRect(0, 0, 320, 400),
+      )
+      vi.spyOn(form, "getBoundingClientRect").mockReturnValue(
+        new DOMRect(0, top, 320, 80),
+      )
+      fireEvent.change(screen.getByLabelText("City or place"), {
+        target: { value: "Missing" },
+      })
+      fireEvent.submit(form)
+      const error = {
+        status: "error",
+        code: 404,
+        message: "City Not Found",
+      } as const
+      searchParameters.value = "city=Missing"
+      view.rerender(<WeatherSearch initialCity="Old" weatherResult={error} />)
+      expect(observe).not.toHaveBeenCalled()
+      view.rerender(
+        <WeatherSearch initialCity="Missing" weatherResult={null} />,
+      )
+      expect(observe).not.toHaveBeenCalled()
+      view.rerender(
+        <WeatherSearch initialCity="Missing" weatherResult={error} />,
+      )
+      expect(observe).toHaveBeenCalledWith(viewport)
+      resize()
+      expect(scrollIntoView).not.toHaveBeenCalled()
+      expect(disconnect).not.toHaveBeenCalled()
+      viewportHeight.mockReturnValue(400)
+      resize()
+      if (scroll)
+        expect(scrollIntoView).toHaveBeenCalledWith({
+          block: "nearest",
+          behavior: "instant",
+        })
+      else expect(scrollIntoView).not.toHaveBeenCalled()
+      expect(disconnect).toHaveBeenCalledOnce()
+      view.unmount()
+      expect(disconnect).toHaveBeenCalledTimes(2)
+    },
+  )
 
   it("clears city search status when location weather starts loading", async () => {
     const user = userEvent.setup()
@@ -321,7 +413,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = "city=San%20Francisco"
     rerender(
       <>
-        <Toaster />
+        <WeatherNotices />
         <WeatherSearch
           initialCity="San Francisco"
           weatherResult={weatherResult}
@@ -338,7 +430,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = ""
     rerender(
       <>
-        <Toaster />
+        <WeatherNotices />
         <WeatherSearch
           initialCity="San Francisco"
           weatherResult={weatherResult}
@@ -479,7 +571,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = ""
     rerender(
       <>
-        <Toaster />
+        <WeatherNotices />
         <WeatherSearch
           initialCity="San Francisco"
           weatherResult={{
@@ -592,7 +684,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = ""
     rerender(
       <>
-        <Toaster />
+        <WeatherNotices />
         <WeatherSearch
           initialCity="San Francisco"
           weatherResult={{
@@ -612,7 +704,7 @@ describe("WeatherSearch", () => {
     searchParameters.value = "city=San%20Francisco"
     rerender(
       <>
-        <Toaster />
+        <WeatherNotices />
         <WeatherSearch
           initialCity="San Francisco"
           weatherResult={{

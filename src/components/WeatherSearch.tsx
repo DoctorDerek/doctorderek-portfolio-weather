@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import type { FormEvent } from "react"
 import CityWeather from "@/src/components/CityWeather"
 import LocationWeatherButton from "@/src/components/LocationWeatherButton"
@@ -25,6 +25,10 @@ export default function WeatherSearch({
   initialCity: string | null
   weatherResult: WeatherResult | null
 }) {
+  const submittedSearch = useRef<{
+    city: string
+    form: HTMLFormElement
+  } | null>(null)
   const router = useRouter()
   const searchParameters = useSearchParams()
   const shouldReduceMotion = useReducedMotion()
@@ -59,7 +63,39 @@ export default function WeatherSearch({
         }
       : null
 
+  useEffect(() => {
+    const search = submittedSearch.current
+    if (
+      !search ||
+      search.city !== selectedCity ||
+      search.city !== initialCity ||
+      !weatherResult
+    )
+      return
+    submittedSearch.current = null
+    const viewport = search.form.closest<HTMLElement>("[data-search-viewport]")
+    if (
+      weatherResult.status !== "error" ||
+      !viewport ||
+      getComputedStyle(viewport).display === "contents"
+    )
+      return
+
+    const observer = new ResizeObserver(() => {
+      const frame = viewport.parentElement
+      if (!frame || viewport.clientHeight >= frame.clientHeight) return
+      const form = search.form.getBoundingClientRect()
+      const available = viewport.getBoundingClientRect()
+      if (form.top < available.top || form.bottom > available.bottom)
+        search.form.scrollIntoView({ block: "nearest", behavior: "instant" })
+      observer.disconnect()
+    })
+    observer.observe(viewport)
+    return () => observer.disconnect()
+  }, [initialCity, selectedCity, weatherResult])
+
   const handleLocationWeatherLoading = useCallback(() => {
+    submittedSearch.current = null
     if (selectedCity) {
       window.history.pushState(null, "", "/")
     }
@@ -85,13 +121,14 @@ export default function WeatherSearch({
       const inputCity = normalizeCityQuery(String(formData.get("city")))
 
       if (!inputCity) return
+      submittedSearch.current = { city: inputCity, form: event.currentTarget }
       if (inputCity === selectedCity) {
         router.refresh()
         return
       }
 
       setSearchWeatherState({ status: "pending", city: inputCity })
-      router.push(`/?city=${encodeURIComponent(inputCity)}`)
+      router.push(`/?city=${encodeURIComponent(inputCity)}`, { scroll: false })
     },
     [router, selectedCity],
   )
@@ -103,7 +140,7 @@ export default function WeatherSearch({
     : locationWeatherState.status === "inactive"
 
   return (
-    <main className="relative z-10 flex min-h-svh items-center justify-center px-4 py-24 sm:px-6 sm:py-20">
+    <main className="relative z-10 flex min-h-full items-center justify-center px-4 py-24 sm:px-6 sm:py-20 lg:min-h-svh">
       <section
         aria-labelledby="weather-workspace-title"
         data-testid="weather-workspace"
@@ -150,7 +187,7 @@ export default function WeatherSearch({
             />
             <motion.button
               data-testid="weather-search-submit"
-              className="h-12 max-w-full rounded-xl bg-blue-700 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 disabled:cursor-wait disabled:opacity-70 dark:bg-blue-500 dark:hover:bg-blue-400"
+              className="h-12 max-w-full rounded-xl bg-blue-700 px-4 text-sm font-semibold text-white shadow-sm transition-[color,background-color,border-color] hover:bg-blue-800 disabled:cursor-wait disabled:opacity-70 dark:bg-blue-500 dark:hover:bg-blue-400"
               type="submit"
               disabled={shouldDisplaySearchPending}
               aria-busy={shouldDisplaySearchPending}

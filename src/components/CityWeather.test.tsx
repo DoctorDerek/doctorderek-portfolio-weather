@@ -1,8 +1,9 @@
 import { act, render, screen, within } from "@testing-library/react"
 import type { ImageProps } from "next/image"
-import toast, { Toaster } from "react-hot-toast"
+import toast from "react-hot-toast/headless"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import CityWeather from "@/src/components/CityWeather"
+import WeatherNotices from "@/src/components/WeatherNotices"
 import type { WeatherResult } from "@/src/types/weather"
 
 const TEST_CITY = "San Francisco"
@@ -52,7 +53,7 @@ describe("CityWeather", () => {
     const errorMessage = "Error 503: Service Unavailable"
     const renderResult = (weatherResult: WeatherResult | null) => (
       <>
-        <Toaster toastOptions={{ duration: 5000 }} />
+        <WeatherNotices />
         <CityWeather city={TEST_CITY} weatherResult={weatherResult} />
       </>
     )

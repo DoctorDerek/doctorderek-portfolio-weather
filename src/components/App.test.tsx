@@ -1,4 +1,6 @@
-import { render, screen } from "@testing-library/react"
+import { act, render, screen } from "@testing-library/react"
+import { renderToString } from "react-dom/server"
+import toast from "react-hot-toast/headless"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import App from "@/src/components/App"
 import type { WeatherResult } from "@/src/types/weather"
@@ -40,6 +42,26 @@ describe("App", () => {
     await expect(dynamicImportLoader()).resolves.toMatchObject({
       default: expect.any(Function),
     })
+  })
+
+  it("renders the notice region on the server and updates a repeated error in place", () => {
+    const app = <App initialCity={null} weatherResult={null} />
+    expect(renderToString(app)).toContain("data-weather-notices")
+    const { unmount } = render(app)
+    try {
+      act(() => {
+        toast.error("City not found", { id: "search-error" })
+      })
+      const notice = screen.getByRole("status")
+      act(() => {
+        toast.error("City still unavailable", { id: "search-error" })
+      })
+      expect(screen.getByRole("status")).toBe(notice)
+      expect(notice).toHaveTextContent("City still unavailable")
+    } finally {
+      unmount()
+      toast.remove()
+    }
   })
 
   it("forwards server-rendered weather to the search boundary", () => {
