@@ -24,6 +24,13 @@ test("keeps the complete forecast workspace inside a narrow viewport", async ({
     page.getByRole("heading", { name: LIVE_WEATHER_TEST_CITY }),
   ).toBeVisible()
 
+  const temperatures = workspace.locator('dl[aria-label="Temperature"]')
+  await expect(temperatures).toBeInViewport({ ratio: 1 })
+  await expect(temperatures.getByText("Fahrenheit")).toBeInViewport({
+    ratio: 1,
+  })
+  await expect(temperatures.getByText("Celsius")).toBeInViewport({ ratio: 1 })
+
   const workspaceBounds = await workspace.boundingBox()
   const themeToggleBounds = await themeToggle.boundingBox()
 

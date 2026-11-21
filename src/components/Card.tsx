@@ -13,18 +13,18 @@ export default function Card({
 
   return (
     <div
-      className="mt-6 flex w-full min-w-0 flex-col items-center justify-center wrap-anywhere"
+      className="forecast-fit:mt-2 mt-6 flex w-full min-w-0 flex-col items-center justify-center wrap-anywhere"
       role={
         ariaLive ? (ariaLive === "assertive" ? "alert" : "status") : undefined
       }
       aria-live={ariaLive}
       aria-atomic={ariaLive ? true : undefined}
     >
-      <div className="flex w-full flex-col items-center justify-center rounded-2xl border border-white/70 bg-white/65 p-5 text-slate-600 shadow-lg shadow-slate-900/10 backdrop-blur-md dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-300 dark:shadow-black/25">
+      <div className="forecast-fit:grid forecast-fit:grid-cols-[auto_minmax(0,1fr)] forecast-fit:justify-items-center forecast-fit:gap-x-2 forecast-fit:p-3 flex w-full flex-col items-center justify-center rounded-2xl border border-white/70 bg-white/65 p-5 text-slate-600 shadow-lg shadow-slate-900/10 backdrop-blur-md dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-300 dark:shadow-black/25">
         <h2
           className={classNames(
             useSmallFont ? "text-xl" : "text-2xl",
-            "text-center font-semibold tracking-tight text-slate-950 dark:text-white",
+            "forecast-fit:col-span-full text-center font-semibold tracking-tight text-slate-950 dark:text-white",
           )}
         >
           {heading}

@@ -2,6 +2,14 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@custom-variant forecast-fit {
+  @media (height < 51rem) and (width < theme(--breakpoint-xl)) {
+    &:where([data-forecast-ready], [data-forecast-ready] *) {
+      @slot;
+    }
+  }
+}
+
 :focus-visible {
   outline: 3px solid rgb(255 255 255);
   outline-offset: 2px;
