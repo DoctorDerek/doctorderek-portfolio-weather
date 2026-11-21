@@ -140,23 +140,28 @@ export default function WeatherSearch({
     : locationWeatherState.status === "inactive"
 
   return (
-    <main className="relative z-10 flex min-h-full items-center justify-center px-4 py-24 sm:px-6 sm:py-20 lg:min-h-svh">
+    <main
+      data-forecast-ready={
+        displayedWeather?.weatherResult?.status === "success" || undefined
+      }
+      className="forecast-fit:pt-23 forecast-fit:pb-3 relative z-10 flex min-h-full items-center justify-center px-4 py-24 sm:px-6 sm:py-20 lg:min-h-svh"
+    >
       <section
         aria-labelledby="weather-workspace-title"
         data-testid="weather-workspace"
-        className="w-full max-w-xl min-w-0 rounded-[2rem] border border-white/60 bg-white/70 p-5 wrap-anywhere shadow-2xl ring-1 shadow-slate-900/20 ring-black/5 backdrop-blur-xl sm:p-8 dark:border-white/15 dark:bg-slate-950/70 dark:shadow-black/50 dark:ring-white/5"
+        className="forecast-fit:p-3 w-full max-w-xl min-w-0 rounded-[2rem] border border-white/60 bg-white/70 p-5 wrap-anywhere shadow-2xl ring-1 shadow-slate-900/20 ring-black/5 backdrop-blur-xl sm:p-8 dark:border-white/15 dark:bg-slate-950/70 dark:shadow-black/50 dark:ring-white/5"
       >
-        <header className="mb-6 text-center">
+        <header className="forecast-fit:mb-3 mb-6 text-center">
           <p className="text-xs font-bold tracking-[0.22em] text-slate-700 uppercase dark:text-slate-200">
             Live conditions
           </p>
           <h1
             id="weather-workspace-title"
-            className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl dark:text-white"
+            className="forecast-fit:mt-1 mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl dark:text-white"
           >
             Weather, right now
           </h1>
-          <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-700 dark:text-slate-200">
+          <p className="forecast-fit:mt-1 mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-700 dark:text-slate-200">
             Search a city or use your current location.
           </p>
         </header>
@@ -210,7 +215,10 @@ export default function WeatherSearch({
           </p>
         ) : null}
 
-        <div className="my-4 flex items-center gap-3" aria-hidden="true">
+        <div
+          className="forecast-fit:my-1.5 my-4 flex items-center gap-3"
+          aria-hidden="true"
+        >
           <div className="h-px flex-1 bg-slate-500/30" />
           <span className="text-xs font-semibold text-slate-700 uppercase dark:text-slate-200">
             or

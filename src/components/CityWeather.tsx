@@ -85,14 +85,18 @@ export default function CityWeather({
       heading={location.name}
       ariaLive="polite"
     >
+      <Temperature
+        temperatureCelsius={temperatureCelsius}
+        temperatureFahrenheit={temperatureFahrenheit}
+      />
       <p
         aria-hidden="true"
-        className="mt-2 text-xs tracking-wide text-slate-500 dark:text-slate-300"
+        className="forecast-fit:col-span-full mt-2 text-xs tracking-wide text-slate-500 dark:text-slate-300"
       >
         {locationSummary}
       </p>
       <WeatherLocationDetails location={location} />
-      <div className="mt-2 grid h-28 w-28">
+      <div className="forecast-fit:col-start-1 forecast-fit:row-start-3 forecast-fit:m-0 forecast-fit:size-11 forecast-fit:justify-self-end mt-2 grid h-28 w-28">
         <div className="relative">
           <ImageFixed
             src={iconUrl}
@@ -104,13 +108,9 @@ export default function CityWeather({
           />
         </div>
       </div>
-      <p className="-mt-2 text-lg font-medium text-slate-700 dark:text-slate-200">
+      <p className="forecast-fit:col-start-2 forecast-fit:row-start-3 forecast-fit:m-0 forecast-fit:justify-self-start -mt-2 text-lg font-medium text-slate-700 dark:text-slate-200">
         {upperCaseFirstLetterOfEachWord(description)}
       </p>
-      <Temperature
-        temperatureCelsius={temperatureCelsius}
-        temperatureFahrenheit={temperatureFahrenheit}
-      />
     </Card>
   )
 }
