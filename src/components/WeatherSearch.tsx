@@ -47,10 +47,13 @@ export default function WeatherSearch({
     selectedCity ||
     (locationWeatherState.status === "inactive" ? initialCity : null) ||
     ""
+  const lastSyncedCity = useRef(cityInputValue)
   const syncCityInput = useCallback(
     (input: HTMLInputElement | null) => {
-      if (input && submittedSearch.current?.city !== cityInputValue) {
-        input.value = cityInputValue
+      if (input && lastSyncedCity.current !== cityInputValue) {
+        lastSyncedCity.current = cityInputValue
+        if (submittedSearch.current?.city !== cityInputValue)
+          input.value = cityInputValue
       }
     },
     [cityInputValue],
