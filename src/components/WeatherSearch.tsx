@@ -2,7 +2,14 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useRef, useState } from "react"
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useOptimistic,
+  useRef,
+  useState,
+} from "react"
 import type { FormEvent } from "react"
 import CityWeather from "@/src/components/CityWeather"
 import LocationWeatherButton from "@/src/components/LocationWeatherButton"
@@ -13,10 +20,6 @@ type LocationWeatherState =
   | { status: "inactive" }
   | { status: "loading" }
   | { status: "complete"; weatherResult: WeatherResult }
-type SearchWeatherState =
-  { status: "idle" } | { status: "pending"; city: string }
-
-const CURRENT_LOCATION_LABEL = "Current location"
 
 export default function WeatherSearch({
   initialCity,
@@ -35,20 +38,15 @@ export default function WeatherSearch({
   const shouldReduceMotion = useReducedMotion()
   const [locationWeatherState, setLocationWeatherState] =
     useState<LocationWeatherState>({ status: "inactive" })
-  const [searchWeatherState, setSearchWeatherState] =
-    useState<SearchWeatherState>({ status: "idle" })
+  const [pendingCity, setPendingCity] = useOptimistic<string | null>(null)
 
   const selectedCity = normalizeCityQuery(
     searchParameters.get("city") || searchParameters.get("q"),
   )
-  const shouldDisplayLocationWeather =
-    locationWeatherState.status !== "inactive" && !selectedCity
-  const displayedCity =
+  const cityInputValue =
     selectedCity ||
-    (locationWeatherState.status === "inactive" ? initialCity : null)
-  const cityInputValue = shouldDisplayLocationWeather
-    ? ""
-    : selectedCity || initialCity || ""
+    (locationWeatherState.status === "inactive" ? initialCity : null) ||
+    ""
   const syncCityInput = useCallback(
     (input: HTMLInputElement | null) => {
       if (input && submittedSearch.current?.city !== cityInputValue) {
@@ -57,18 +55,20 @@ export default function WeatherSearch({
     },
     [cityInputValue],
   )
-  const displayedWeather = shouldDisplayLocationWeather
+  const displayedCity = pendingCity || cityInputValue
+  const displayedWeather = displayedCity
     ? {
-        city: CURRENT_LOCATION_LABEL,
+        city: displayedCity,
         weatherResult:
-          locationWeatherState.status === "complete"
-            ? locationWeatherState.weatherResult
-            : null,
+          !pendingCity && displayedCity === initialCity ? weatherResult : null,
       }
-    : displayedCity
+    : locationWeatherState.status !== "inactive"
       ? {
-          city: displayedCity,
-          weatherResult: displayedCity === initialCity ? weatherResult : null,
+          city: null,
+          weatherResult:
+            locationWeatherState.status === "complete"
+              ? locationWeatherState.weatherResult
+              : null,
         }
       : null
 
@@ -114,10 +114,15 @@ export default function WeatherSearch({
       window.history.pushState(null, "", "/")
     }
 
-    setSearchWeatherState({ status: "idle" })
+    if (pendingCity) {
+      startTransition(() => {
+        setPendingCity(null)
+        router.replace("/", { scroll: false })
+      })
+    }
     setLocationWeatherState({ status: "loading" })
     return true
-  }, [selectedCity])
+  }, [pendingCity, router, selectedCity, setPendingCity])
 
   const handleLocationWeatherResult = useCallback(
     (locationWeatherResult: WeatherResult) => {
@@ -143,17 +148,17 @@ export default function WeatherSearch({
         return
       }
 
-      setSearchWeatherState({ status: "pending", city: inputCity })
-      router.push(`/?city=${encodeURIComponent(inputCity)}`, { scroll: false })
+      startTransition(() => {
+        setPendingCity(inputCity)
+        router.push(`/?city=${encodeURIComponent(inputCity)}`, {
+          scroll: false,
+        })
+      })
     },
-    [router, selectedCity],
+    [router, selectedCity, setPendingCity],
   )
-  const shouldDisplaySearchPending =
-    searchWeatherState.status === "pending" &&
-    searchWeatherState.city !== selectedCity
-  const shouldAutoDetectLocation = selectedCity
-    ? false
-    : locationWeatherState.status === "inactive"
+  const shouldAutoDetectLocation =
+    !pendingCity && !selectedCity && locationWeatherState.status === "inactive"
 
   return (
     <main
@@ -210,8 +215,8 @@ export default function WeatherSearch({
               data-testid="weather-search-submit"
               className="h-12 max-w-full rounded-xl bg-blue-700 px-4 text-sm font-semibold text-white shadow-sm transition-[color,background-color,border-color] hover:bg-blue-800 disabled:cursor-wait disabled:opacity-70 dark:bg-blue-500 dark:hover:bg-blue-400"
               type="submit"
-              disabled={shouldDisplaySearchPending}
-              aria-busy={shouldDisplaySearchPending}
+              disabled={pendingCity !== null}
+              aria-busy={pendingCity !== null}
               whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
               whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
             >
@@ -219,17 +224,6 @@ export default function WeatherSearch({
             </motion.button>
           </div>
         </form>
-
-        {shouldDisplaySearchPending ? (
-          <p
-            data-testid="weather-search-status"
-            role="status"
-            aria-live="polite"
-            className="mx-auto mt-4 max-w-full text-sm font-semibold text-blue-900 dark:text-blue-200"
-          >
-            Loading forecast for {searchWeatherState.city}...
-          </p>
-        ) : null}
 
         <div
           className="forecast-fit:my-1.5 my-4 flex items-center gap-3"
@@ -250,10 +244,10 @@ export default function WeatherSearch({
           shouldReduceMotion={shouldReduceMotion ?? false}
         />
 
-        <AnimatePresence initial={false} mode="wait">
+        <AnimatePresence initial={false}>
           {displayedWeather ? (
             <motion.div
-              key={displayedWeather.city}
+              key="forecast"
               data-testid="forecast-transition"
               initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
