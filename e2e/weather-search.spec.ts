@@ -121,6 +121,54 @@ test.describe("short-phone search recovery", () => {
   })
 })
 
+test("gives a corrected city the only result until its route finishes and restores the failure on Back", async ({
+  page,
+}) => {
+  await page.goto(`/?city=${INVALID_LIVE_WEATHER_TEST_CITY}`)
+  const workspace = page.getByTestId("weather-workspace")
+  const field = workspace.getByRole("textbox", { name: "City or place" })
+  const search = workspace.getByRole("button", { name: "Search", exact: true })
+  const error = workspace.getByRole("alert")
+  const notice = page.locator("[data-weather-notices]")
+  await expect(notice).toContainText(/city not found/i)
+  await field.fill(LIVE_WEATHER_TEST_CITY)
+  await expect(error).toHaveText(/city not found/i)
+
+  const responseGate = Promise.withResolvers<void>()
+  const isDestination = (url: URL) =>
+    url.pathname === "/" &&
+    url.searchParams.get("city") === LIVE_WEATHER_TEST_CITY
+  await page.route(isDestination, async (route) => {
+    await responseGate.promise
+    await route.continue()
+  })
+  try {
+    await Promise.all([
+      page.waitForRequest((request) => isDestination(new URL(request.url()))),
+      field.press("Enter"),
+    ])
+    await expect(workspace.getByRole("status")).toHaveText(
+      `Loading forecast for ${LIVE_WEATHER_TEST_CITY}…`,
+    )
+    await expect(search).toHaveAttribute("aria-busy", "true")
+    await expect(error).toHaveCount(0)
+    await expect(notice).not.toContainText(/city not found/i)
+    await expect(workspace.getByLabel("Temperature")).toHaveCount(0)
+  } finally {
+    responseGate.resolve()
+  }
+  await expect(
+    workspace.getByRole("heading", { name: LIVE_WEATHER_TEST_CITY }),
+  ).toBeVisible()
+  await expect(workspace.getByLabel("Temperature")).toBeVisible()
+  await expect(field).toBeFocused()
+  await expect(search).toBeEnabled()
+  await page.goBack()
+  await expect(field).toHaveValue(INVALID_LIVE_WEATHER_TEST_CITY)
+  await expect(error).toHaveText(/city not found/i)
+  await expect(search).toBeEnabled()
+})
+
 test("provides restrained pointer feedback without changing submission semantics", async ({
   page,
 }) => {
