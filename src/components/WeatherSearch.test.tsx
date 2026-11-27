@@ -432,66 +432,47 @@ describe("WeatherSearch", () => {
     },
   )
 
-  it("clears city search status when location weather starts loading", async () => {
+  it("ignores an older location operation and lets a newer location choice supersede the city", async () => {
     const user = userEvent.setup()
-    const { rerender } = renderWeatherSearch({
-      initialCity: null,
-      weatherResult: null,
+    renderWeatherSearch({ initialCity: null, weatherResult: null })
+    const earlierLocation = locationWeatherButtonProperties.mock.lastCall?.[0]
+    act(() => {
+      earlierLocation.onLocationWeatherRequest()
+      expect(earlierLocation.onLocationWeatherLoading()).toBe(true)
     })
-    const cityInput = screen.getByRole("textbox", { name: "City or place" })
-
-    await user.type(cityInput, "San Francisco")
+    const finishNavigation = holdNextCityNavigation()
+    await user.type(
+      screen.getByRole("textbox", { name: "City or place" }),
+      "San Francisco",
+    )
     await user.click(screen.getByRole("button", { name: "Search" }))
 
-    expect(screen.getByTestId("weather-search-status")).toHaveTextContent(
-      "Loading forecast for San Francisco...",
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading forecast for San Francisco…",
     )
-
-    const weatherResult = {
-      status: "success",
-      temperatureKelvin: 300.15,
-      description: "clear sky",
-      icon: "01d",
-      location: {
-        name: "San Francisco",
-        stateName: "California",
-        countryCode: "US",
-      },
-    } satisfies WeatherResult
-
-    searchParameters.value = "city=San%20Francisco"
-    rerender(
-      <>
-        <WeatherNotices />
-        <WeatherSearch
-          initialCity="San Francisco"
-          weatherResult={weatherResult}
-        />
-      </>,
-    )
-
-    const locationButtonProperties =
-      locationWeatherButtonProperties.mock.lastCall?.[0]
-
+    const location = locationWeatherButtonProperties.mock.lastCall?.[0]
     act(() => {
-      locationButtonProperties.onLocationWeatherLoading()
+      expect(location.onLocationWeatherLoading()).toBe(false)
+      location.onLocationWeatherResult({
+        status: "error",
+        code: 503,
+        message: "service unavailable",
+      })
     })
-    searchParameters.value = ""
-    rerender(
-      <>
-        <WeatherNotices />
-        <WeatherSearch
-          initialCity="San Francisco"
-          weatherResult={weatherResult}
-        />
-      </>,
+    expect(routerReplace).not.toHaveBeenCalled()
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading forecast for San Francisco…",
     )
-
+    act(() => {
+      location.onLocationWeatherRequest()
+      expect(location.onLocationWeatherLoading()).toBe(true)
+    })
+    expect(routerReplace).toHaveBeenCalledWith("/", { scroll: false })
+    expect(screen.getByRole("status")).toHaveTextContent("Loading weather…")
+    await act(async () => finishNavigation())
+    expect(screen.getByRole("status")).toHaveTextContent("Loading weather…")
     expect(
-      screen.getByRole("heading", { name: "Loading weather…" }),
-    ).toBeVisible()
-    expect(
-      screen.queryByTestId("weather-search-status"),
+      screen.queryByText("Loading forecast for San Francisco…"),
     ).not.toBeInTheDocument()
   })
 
