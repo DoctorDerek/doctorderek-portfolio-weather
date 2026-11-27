@@ -121,13 +121,15 @@ function getCurrentGeolocatedConfiguration() {
 function renderLocationWeatherButton({
   shouldAutoFetchIfPermitted = false,
 }: { shouldAutoFetchIfPermitted?: boolean } = {}) {
-  const onLocationWeatherLoading = vi.fn()
+  const onLocationWeatherRequest = vi.fn()
+  const onLocationWeatherLoading = vi.fn(() => true)
   const onLocationWeatherResult = vi.fn()
 
   render(
     <>
       <WeatherNotices />
       <LocationWeatherButton
+        onLocationWeatherRequest={onLocationWeatherRequest}
         onLocationWeatherLoading={onLocationWeatherLoading}
         onLocationWeatherResult={onLocationWeatherResult}
         shouldReduceMotion={false}
@@ -136,7 +138,11 @@ function renderLocationWeatherButton({
     </>,
   )
 
-  return { onLocationWeatherLoading, onLocationWeatherResult }
+  return {
+    onLocationWeatherRequest,
+    onLocationWeatherLoading,
+    onLocationWeatherResult,
+  }
 }
 
 describe("LocationWeatherButton", () => {
@@ -176,21 +182,14 @@ describe("LocationWeatherButton", () => {
 
   it("auto-fills on mount only when geolocation permission is already granted", async () => {
     setGeolocationPermissionState("granted")
-    render(
-      <>
-        <WeatherNotices />
-        <LocationWeatherButton
-          onLocationWeatherLoading={vi.fn()}
-          onLocationWeatherResult={vi.fn()}
-          shouldReduceMotion={false}
-          shouldAutoFetchIfPermitted={true}
-        />
-      </>,
-    )
+    const { onLocationWeatherRequest } = renderLocationWeatherButton({
+      shouldAutoFetchIfPermitted: true,
+    })
 
     await waitFor(() => {
       expect(getPositionMock).toHaveBeenCalledOnce()
     })
+    expect(onLocationWeatherRequest).toHaveBeenCalledOnce()
     expect(
       screen.getByRole("button", { name: "Allow location access…" }),
     ).toBeDisabled()
@@ -324,6 +323,26 @@ describe("LocationWeatherButton", () => {
       ).toBeEnabled()
     },
   )
+
+  it("returns to idle without fetching when a city supersedes a pending position", async () => {
+    const user = userEvent.setup()
+    const {
+      onLocationWeatherRequest,
+      onLocationWeatherLoading,
+      onLocationWeatherResult,
+    } = renderLocationWeatherButton()
+    onLocationWeatherLoading.mockReturnValue(false)
+    await user.click(screen.getByRole("button", { name: "Use my location" }))
+    expect(onLocationWeatherRequest).toHaveBeenCalledOnce()
+    act(() => {
+      getCurrentGeolocatedConfiguration().onSuccess?.(TEST_POSITION)
+    })
+    expect(getCurrentLocationWeatherMock).not.toHaveBeenCalled()
+    expect(onLocationWeatherResult).not.toHaveBeenCalled()
+    expect(
+      screen.getByRole("button", { name: "Use my location" }),
+    ).toBeEnabled()
+  })
 
   it("rounds successful coordinates before loading server weather", async () => {
     const user = userEvent.setup()

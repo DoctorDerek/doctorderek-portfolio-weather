@@ -29,6 +29,7 @@ export default function WeatherSearch({
     city: string
     form: HTMLFormElement
   } | null>(null)
+  const requestedWeatherSource = useRef<"city" | "location">("location")
   const router = useRouter()
   const searchParameters = useSearchParams()
   const shouldReduceMotion = useReducedMotion()
@@ -102,7 +103,12 @@ export default function WeatherSearch({
     return () => observer.disconnect()
   }, [initialCity, selectedCity, weatherResult])
 
+  const handleLocationWeatherRequest = useCallback(() => {
+    requestedWeatherSource.current = "location"
+  }, [])
+
   const handleLocationWeatherLoading = useCallback(() => {
+    if (requestedWeatherSource.current !== "location") return false
     submittedSearch.current = null
     if (selectedCity) {
       window.history.pushState(null, "", "/")
@@ -110,6 +116,7 @@ export default function WeatherSearch({
 
     setSearchWeatherState({ status: "idle" })
     setLocationWeatherState({ status: "loading" })
+    return true
   }, [selectedCity])
 
   const handleLocationWeatherResult = useCallback(
@@ -129,6 +136,7 @@ export default function WeatherSearch({
       const inputCity = normalizeCityQuery(String(formData.get("city")))
 
       if (!inputCity) return
+      requestedWeatherSource.current = "city"
       submittedSearch.current = { city: inputCity, form: event.currentTarget }
       if (inputCity === selectedCity) {
         router.refresh()
@@ -235,6 +243,7 @@ export default function WeatherSearch({
         </div>
 
         <LocationWeatherButton
+          onLocationWeatherRequest={handleLocationWeatherRequest}
           onLocationWeatherLoading={handleLocationWeatherLoading}
           onLocationWeatherResult={handleLocationWeatherResult}
           shouldAutoFetchIfPermitted={shouldAutoDetectLocation}
