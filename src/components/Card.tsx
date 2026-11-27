@@ -13,7 +13,7 @@ export default function Card({
 
   return (
     <div
-      className="forecast-fit:mt-2 mt-6 flex w-full min-w-0 flex-col items-center justify-center wrap-anywhere"
+      className="flex w-full min-w-0 flex-col items-center justify-center wrap-anywhere"
       role={
         ariaLive ? (ariaLive === "assertive" ? "alert" : "status") : undefined
       }
