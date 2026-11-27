@@ -121,6 +121,35 @@ test.describe("short-phone search recovery", () => {
   })
 })
 
+test("keeps a city typed before hydration through the first submission", async ({
+  page,
+}) => {
+  const hydrationGate = Promise.withResolvers<void>()
+  await page.route(
+    (url) =>
+      url.pathname.startsWith("/_next/static/") && url.pathname.endsWith(".js"),
+    async (route) => {
+      await hydrationGate.promise
+      await route.continue()
+    },
+  )
+  const field = page.getByRole("textbox", { name: "City or place" })
+  const themeToggle = page.getByTestId("theme-toggle")
+  try {
+    await page.goto("/", { waitUntil: "commit" })
+    await field.fill(LIVE_WEATHER_TEST_CITY)
+    await expect(themeToggle).toHaveCount(0)
+  } finally {
+    hydrationGate.resolve()
+  }
+  await expect(themeToggle).toBeVisible()
+  await expect(field).toHaveValue(LIVE_WEATHER_TEST_CITY)
+  await field.press("Enter")
+  await expect(
+    page.getByRole("heading", { name: LIVE_WEATHER_TEST_CITY }),
+  ).toBeVisible()
+})
+
 test("gives a corrected city the only result until its route finishes and restores the failure on Back", async ({
   page,
 }) => {
@@ -143,10 +172,27 @@ test("gives a corrected city the only result until its route finishes and restor
     await route.continue()
   })
   try {
-    await Promise.all([
+    const [firstPendingFrame] = await Promise.all([
+      page.waitForFunction(
+        (city) => {
+          if (
+            document.querySelector("main [role=status] h2")?.textContent !==
+            `Loading forecast for ${city}…`
+          )
+            return false
+          const notice =
+            document.querySelector("[data-weather-notices]")?.textContent ?? ""
+          return { previousErrorVisible: /city not found/i.test(notice) }
+        },
+        LIVE_WEATHER_TEST_CITY,
+        { polling: "raf" },
+      ),
       page.waitForRequest((request) => isDestination(new URL(request.url()))),
       field.press("Enter"),
     ])
+    expect(await firstPendingFrame.jsonValue()).toEqual({
+      previousErrorVisible: false,
+    })
     await expect(workspace.getByRole("status")).toHaveText(
       `Loading forecast for ${LIVE_WEATHER_TEST_CITY}…`,
     )
