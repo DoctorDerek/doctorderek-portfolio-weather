@@ -1,7 +1,7 @@
 "use client"
 
 import ImageFixed from "next/image"
-import { useEffect } from "react"
+import { useLayoutEffect } from "react"
 import toast from "react-hot-toast/headless"
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
@@ -29,7 +29,7 @@ export default function CityWeather({
         )}`
       : ""
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (weatherResult?.status !== "error") return
 
     const toastId = toast.error(weatherErrorMessage, {
