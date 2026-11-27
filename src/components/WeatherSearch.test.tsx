@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { startTransition } from "react"
 import type { ButtonHTMLAttributes, HTMLAttributes } from "react"
 import toast from "react-hot-toast/headless"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -8,6 +9,7 @@ import WeatherSearch from "@/src/components/WeatherSearch"
 import type { WeatherResult } from "@/src/types/weather"
 
 const routerPush = vi.hoisted(() => vi.fn())
+const routerReplace = vi.hoisted(() => vi.fn())
 const routerRefresh = vi.hoisted(() => vi.fn())
 const searchParameters = vi.hoisted(() => ({ value: "" }))
 const locationWeatherButtonProperties = vi.hoisted(() => vi.fn())
@@ -70,13 +72,18 @@ vi.mock("motion/react", async (importOriginal) => {
 })
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: routerPush, refresh: routerRefresh }),
+  useRouter: () => ({
+    push: routerPush,
+    refresh: routerRefresh,
+    replace: routerReplace,
+  }),
   useSearchParams: () => new URLSearchParams(searchParameters.value),
 }))
 
 vi.mock("@/src/components/LocationWeatherButton", () => ({
   default: (properties: {
-    onLocationWeatherLoading: () => void
+    onLocationWeatherRequest: () => void
+    onLocationWeatherLoading: () => boolean
     onLocationWeatherResult: (weatherResult: WeatherResult) => void
     shouldReduceMotion: boolean
     shouldAutoFetchIfPermitted: boolean
@@ -85,6 +92,14 @@ vi.mock("@/src/components/LocationWeatherButton", () => ({
     return <button type="button">Use my location</button>
   },
 }))
+
+function holdNextCityNavigation() {
+  const navigation = Promise.withResolvers<void>()
+  routerPush.mockImplementationOnce(() => {
+    startTransition(() => navigation.promise)
+  })
+  return navigation.resolve
+}
 
 function renderWeatherSearch(
   properties: React.ComponentProps<typeof WeatherSearch>,
@@ -100,7 +115,8 @@ function renderWeatherSearch(
 describe("WeatherSearch", () => {
   beforeEach(() => {
     toast.remove()
-    routerPush.mockClear()
+    routerPush.mockReset()
+    routerReplace.mockClear()
     routerRefresh.mockClear()
     searchParameters.value = ""
     reducedMotionPreference.value = false
@@ -249,25 +265,44 @@ describe("WeatherSearch", () => {
     })
   })
 
-  it("displays search-pending status while awaiting a city weather lookup", async () => {
+  it("keeps the failed city while editing and gives the submitted city the only result", async () => {
     const user = userEvent.setup()
+    searchParameters.value = "city=Atlantis"
+    const failure = {
+      status: "error",
+      code: 404,
+      message: "city not found",
+    } satisfies WeatherResult
     const { rerender } = renderWeatherSearch({
-      initialCity: null,
-      weatherResult: null,
+      initialCity: "Atlantis",
+      weatherResult: failure,
     })
     const cityInput = screen.getByRole("textbox", { name: "City or place" })
     const submitButton = screen.getByRole("button", { name: "Search" })
+    const finishNavigation = holdNextCityNavigation()
 
+    await user.clear(cityInput)
     await user.type(cityInput, "San Francisco")
-    await user.click(submitButton)
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Error 404: City Not Found",
+    )
+    await user.keyboard("{Enter}")
 
     expect(submitButton).toBeDisabled()
+    expect(submitButton).toHaveAttribute("aria-busy", "true")
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Loading forecast for San Francisco...",
+      "Loading forecast for San Francisco…",
     )
+    expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite")
+    expect(
+      screen.queryByText("Error 404: City Not Found"),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByLabelText("Temperature")).not.toBeInTheDocument()
     expect(routerPush).toHaveBeenCalledWith("/?city=San%20Francisco", {
       scroll: false,
     })
+    await user.clear(cityInput)
+    await user.type(cityInput, "Puebla")
 
     searchParameters.value = "city=San%20Francisco"
     rerender(
@@ -290,10 +325,24 @@ describe("WeatherSearch", () => {
       </>,
     )
 
-    expect(screen.getByRole("button", { name: "Search" })).not.toBeDisabled()
-    expect(
-      screen.queryByText("Loading forecast for San Francisco..."),
-    ).not.toBeInTheDocument()
+    await act(async () => finishNavigation())
+    expect(submitButton).toBeEnabled()
+    expect(cityInput).toHaveFocus()
+    expect(cityInput).toHaveValue("Puebla")
+    expect(screen.getByRole("heading", { name: "San Francisco" })).toBeVisible()
+    expect(screen.getByLabelText("Temperature")).toBeVisible()
+    searchParameters.value = "city=Atlantis"
+    rerender(
+      <>
+        <WeatherNotices />
+        <WeatherSearch initialCity="Atlantis" weatherResult={failure} />
+      </>,
+    )
+    expect(cityInput).toHaveValue("Atlantis")
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Error 404: City Not Found",
+    )
+    expect(screen.getByRole("button", { name: "Search" })).toBeEnabled()
   })
 
   it.for([
@@ -383,66 +432,47 @@ describe("WeatherSearch", () => {
     },
   )
 
-  it("clears city search status when location weather starts loading", async () => {
+  it("ignores an older location operation and lets a newer location choice supersede the city", async () => {
     const user = userEvent.setup()
-    const { rerender } = renderWeatherSearch({
-      initialCity: null,
-      weatherResult: null,
+    renderWeatherSearch({ initialCity: null, weatherResult: null })
+    const earlierLocation = locationWeatherButtonProperties.mock.lastCall?.[0]
+    act(() => {
+      earlierLocation.onLocationWeatherRequest()
+      expect(earlierLocation.onLocationWeatherLoading()).toBe(true)
     })
-    const cityInput = screen.getByRole("textbox", { name: "City or place" })
-
-    await user.type(cityInput, "San Francisco")
+    const finishNavigation = holdNextCityNavigation()
+    await user.type(
+      screen.getByRole("textbox", { name: "City or place" }),
+      "San Francisco",
+    )
     await user.click(screen.getByRole("button", { name: "Search" }))
 
-    expect(screen.getByTestId("weather-search-status")).toHaveTextContent(
-      "Loading forecast for San Francisco...",
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading forecast for San Francisco…",
     )
-
-    const weatherResult = {
-      status: "success",
-      temperatureKelvin: 300.15,
-      description: "clear sky",
-      icon: "01d",
-      location: {
-        name: "San Francisco",
-        stateName: "California",
-        countryCode: "US",
-      },
-    } satisfies WeatherResult
-
-    searchParameters.value = "city=San%20Francisco"
-    rerender(
-      <>
-        <WeatherNotices />
-        <WeatherSearch
-          initialCity="San Francisco"
-          weatherResult={weatherResult}
-        />
-      </>,
-    )
-
-    const locationButtonProperties =
-      locationWeatherButtonProperties.mock.lastCall?.[0]
-
+    const location = locationWeatherButtonProperties.mock.lastCall?.[0]
     act(() => {
-      locationButtonProperties.onLocationWeatherLoading()
+      expect(location.onLocationWeatherLoading()).toBe(false)
+      location.onLocationWeatherResult({
+        status: "error",
+        code: 503,
+        message: "service unavailable",
+      })
     })
-    searchParameters.value = ""
-    rerender(
-      <>
-        <WeatherNotices />
-        <WeatherSearch
-          initialCity="San Francisco"
-          weatherResult={weatherResult}
-        />
-      </>,
+    expect(routerReplace).not.toHaveBeenCalled()
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading forecast for San Francisco…",
     )
-
+    act(() => {
+      location.onLocationWeatherRequest()
+      expect(location.onLocationWeatherLoading()).toBe(true)
+    })
+    expect(routerReplace).toHaveBeenCalledWith("/", { scroll: false })
+    expect(screen.getByRole("status")).toHaveTextContent("Loading weather…")
+    await act(async () => finishNavigation())
+    expect(screen.getByRole("status")).toHaveTextContent("Loading weather…")
     expect(
-      screen.getByRole("heading", { name: "Loading weather…" }),
-    ).toBeVisible()
-    expect(
-      screen.queryByTestId("weather-search-status"),
+      screen.queryByText("Loading forecast for San Francisco…"),
     ).not.toBeInTheDocument()
   })
 
@@ -593,7 +623,7 @@ describe("WeatherSearch", () => {
       screen.getByRole("heading", { name: "Loading weather…" }),
     ).toBeVisible()
     expect(
-      screen.queryByTestId("weather-search-status"),
+      screen.queryByText("Loading forecast for San Francisco…"),
     ).not.toBeInTheDocument()
 
     act(() => {
@@ -650,7 +680,9 @@ describe("WeatherSearch", () => {
       },
     })
 
-    expect(screen.getByRole("status")).toHaveTextContent("Loading weather…")
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading forecast for Puebla…",
+    )
     expect(
       screen.queryByRole("heading", { name: "San Francisco" }),
     ).not.toBeInTheDocument()

@@ -77,13 +77,12 @@ describe("CityWeather", () => {
     expect(screen.getByRole("status")).toHaveTextContent(errorMessage)
 
     view.rerender(renderResult(null))
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(1000)
-    })
     expect(screen.queryByText(errorMessage)).not.toBeInTheDocument()
     expect(screen.queryByRole("alert")).not.toBeInTheDocument()
     expect(
-      screen.getByRole("heading", { name: "Loading weather…" }),
+      screen.getByRole("heading", {
+        name: `Loading forecast for ${TEST_CITY}…`,
+      }),
     ).toBeVisible()
   })
 
@@ -119,9 +118,10 @@ describe("CityWeather", () => {
     expect(loadingStatus).toHaveAttribute("aria-live", "polite")
     expect(loadingStatus).toHaveAttribute("aria-atomic", "true")
     expect(
-      screen.getByRole("heading", { name: "Loading weather…" }),
+      screen.getByRole("heading", {
+        name: `Loading forecast for ${TEST_CITY}…`,
+      }),
     ).toBeVisible()
-    expect(screen.getByText("Fetching current conditions")).toBeVisible()
   })
 
   it("presents normalized weather details in Fahrenheit and Celsius", () => {

@@ -1,7 +1,7 @@
 "use client"
 
 import ImageFixed from "next/image"
-import { useEffect } from "react"
+import { useLayoutEffect } from "react"
 import toast from "react-hot-toast/headless"
 import Card from "@/src/components/Card"
 import Temperature from "@/src/components/Temperature"
@@ -18,9 +18,10 @@ export default function CityWeather({
   city,
   weatherResult,
 }: {
-  city: string
+  city: string | null
   weatherResult: WeatherResult | null
 }) {
+  const resultLocation = city ?? "Current location"
   const weatherErrorMessage =
     weatherResult?.status === "error"
       ? `Error ${weatherResult.code}: ${upperCaseFirstLetterOfEachWord(
@@ -28,31 +29,28 @@ export default function CityWeather({
         )}`
       : ""
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (weatherResult?.status !== "error") return
 
     const toastId = toast.error(weatherErrorMessage, {
-      id: `weather-error-${city}-${weatherErrorMessage}`,
+      id: `weather-error-${resultLocation}-${weatherErrorMessage}`,
       ariaProps: {
         role: "status",
         "aria-live": "off",
       },
     })
 
-    return () => toast.dismiss(toastId)
-  }, [city, weatherErrorMessage, weatherResult])
+    return () => toast.remove(toastId)
+  }, [resultLocation, weatherErrorMessage, weatherResult])
 
   if (!weatherResult)
     return (
       <Card
-        key={`weather-loading-${city}`}
-        heading="Loading weather…"
+        key={`weather-loading-${resultLocation}`}
+        heading={city ? `Loading forecast for ${city}…` : "Loading weather…"}
         ariaLive="polite"
       >
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          Fetching current conditions
-        </p>
-        <div className="mt-4 flex gap-2" aria-hidden="true">
+        <div className="mt-2 flex gap-2" aria-hidden="true">
           <span className="size-2 rounded-full bg-blue-600 motion-safe:animate-pulse dark:bg-blue-400" />
           <span className="size-2 rounded-full bg-blue-600 motion-safe:animate-pulse dark:bg-blue-400" />
           <span className="size-2 rounded-full bg-blue-600 motion-safe:animate-pulse dark:bg-blue-400" />
@@ -63,7 +61,7 @@ export default function CityWeather({
   if (weatherResult.status === "error")
     return (
       <Card
-        key={`weather-error-${city}`}
+        key={`weather-error-${resultLocation}`}
         heading={weatherErrorMessage}
         ariaLive="assertive"
       />
@@ -81,7 +79,7 @@ export default function CityWeather({
 
   return (
     <Card
-      key={`weather-result-${city}`}
+      key={`weather-result-${resultLocation}`}
       heading={location.name}
       ariaLive="polite"
     >

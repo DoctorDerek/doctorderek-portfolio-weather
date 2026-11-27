@@ -2,7 +2,14 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useRef, useState } from "react"
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useOptimistic,
+  useRef,
+  useState,
+} from "react"
 import type { FormEvent } from "react"
 import CityWeather from "@/src/components/CityWeather"
 import LocationWeatherButton from "@/src/components/LocationWeatherButton"
@@ -13,10 +20,6 @@ type LocationWeatherState =
   | { status: "inactive" }
   | { status: "loading" }
   | { status: "complete"; weatherResult: WeatherResult }
-type SearchWeatherState =
-  { status: "idle" } | { status: "pending"; city: string }
-
-const CURRENT_LOCATION_LABEL = "Current location"
 
 export default function WeatherSearch({
   initialCity,
@@ -29,37 +32,46 @@ export default function WeatherSearch({
     city: string
     form: HTMLFormElement
   } | null>(null)
+  const requestedWeatherSource = useRef<"city" | "location">("location")
   const router = useRouter()
   const searchParameters = useSearchParams()
   const shouldReduceMotion = useReducedMotion()
   const [locationWeatherState, setLocationWeatherState] =
     useState<LocationWeatherState>({ status: "inactive" })
-  const [searchWeatherState, setSearchWeatherState] =
-    useState<SearchWeatherState>({ status: "idle" })
+  const [pendingCity, setPendingCity] = useOptimistic<string | null>(null)
 
   const selectedCity = normalizeCityQuery(
     searchParameters.get("city") || searchParameters.get("q"),
   )
-  const shouldDisplayLocationWeather =
-    locationWeatherState.status !== "inactive" && !selectedCity
-  const displayedCity =
+  const cityInputValue =
     selectedCity ||
-    (locationWeatherState.status === "inactive" ? initialCity : null)
-  const cityInputValue = shouldDisplayLocationWeather
-    ? ""
-    : selectedCity || initialCity || ""
-  const displayedWeather = shouldDisplayLocationWeather
-    ? {
-        city: CURRENT_LOCATION_LABEL,
-        weatherResult:
-          locationWeatherState.status === "complete"
-            ? locationWeatherState.weatherResult
-            : null,
+    (locationWeatherState.status === "inactive" ? initialCity : null) ||
+    ""
+  const lastSyncedCity = useRef(cityInputValue)
+  const syncCityInput = useCallback(
+    (input: HTMLInputElement | null) => {
+      if (input && lastSyncedCity.current !== cityInputValue) {
+        lastSyncedCity.current = cityInputValue
+        if (submittedSearch.current?.city !== cityInputValue)
+          input.value = cityInputValue
       }
-    : displayedCity
+    },
+    [cityInputValue],
+  )
+  const displayedCity = pendingCity || cityInputValue
+  const displayedWeather = displayedCity
+    ? {
+        city: displayedCity,
+        weatherResult:
+          !pendingCity && displayedCity === initialCity ? weatherResult : null,
+      }
+    : locationWeatherState.status !== "inactive"
       ? {
-          city: displayedCity,
-          weatherResult: displayedCity === initialCity ? weatherResult : null,
+          city: null,
+          weatherResult:
+            locationWeatherState.status === "complete"
+              ? locationWeatherState.weatherResult
+              : null,
         }
       : null
 
@@ -94,15 +106,26 @@ export default function WeatherSearch({
     return () => observer.disconnect()
   }, [initialCity, selectedCity, weatherResult])
 
+  const handleLocationWeatherRequest = useCallback(() => {
+    requestedWeatherSource.current = "location"
+  }, [])
+
   const handleLocationWeatherLoading = useCallback(() => {
+    if (requestedWeatherSource.current !== "location") return false
     submittedSearch.current = null
     if (selectedCity) {
       window.history.pushState(null, "", "/")
     }
 
-    setSearchWeatherState({ status: "idle" })
+    if (pendingCity) {
+      startTransition(() => {
+        setPendingCity(null)
+        router.replace("/", { scroll: false })
+      })
+    }
     setLocationWeatherState({ status: "loading" })
-  }, [selectedCity])
+    return true
+  }, [pendingCity, router, selectedCity, setPendingCity])
 
   const handleLocationWeatherResult = useCallback(
     (locationWeatherResult: WeatherResult) => {
@@ -121,49 +144,44 @@ export default function WeatherSearch({
       const inputCity = normalizeCityQuery(String(formData.get("city")))
 
       if (!inputCity) return
+      requestedWeatherSource.current = "city"
       submittedSearch.current = { city: inputCity, form: event.currentTarget }
       if (inputCity === selectedCity) {
         router.refresh()
         return
       }
 
-      setSearchWeatherState({ status: "pending", city: inputCity })
-      router.push(`/?city=${encodeURIComponent(inputCity)}`, { scroll: false })
+      startTransition(() => {
+        setPendingCity(inputCity)
+        router.push(`/?city=${encodeURIComponent(inputCity)}`, {
+          scroll: false,
+        })
+      })
     },
-    [router, selectedCity],
+    [router, selectedCity, setPendingCity],
   )
-  const shouldDisplaySearchPending =
-    searchWeatherState.status === "pending" &&
-    searchWeatherState.city !== selectedCity
-  const shouldAutoDetectLocation = selectedCity
-    ? false
-    : locationWeatherState.status === "inactive"
+  const shouldAutoDetectLocation =
+    !pendingCity && !selectedCity && locationWeatherState.status === "inactive"
 
   return (
     <main
       data-forecast-ready={
         displayedWeather?.weatherResult?.status === "success" || undefined
       }
-      className="forecast-fit:pt-23 forecast-fit:pb-3 relative z-10 flex min-h-full items-center justify-center px-4 py-24 sm:px-6 sm:py-20 lg:min-h-svh"
+      className="forecast-fit:pt-23 forecast-fit:pb-3 relative z-10 flex min-h-full items-center justify-center px-4 pt-24 pb-4 sm:px-6 sm:py-20 lg:min-h-svh"
     >
       <section
         aria-labelledby="weather-workspace-title"
         data-testid="weather-workspace"
-        className="forecast-fit:p-3 w-full max-w-xl min-w-0 rounded-[2rem] border border-white/60 bg-white/70 p-5 wrap-anywhere shadow-2xl ring-1 shadow-slate-900/20 ring-black/5 backdrop-blur-xl sm:p-8 dark:border-white/15 dark:bg-slate-950/70 dark:shadow-black/50 dark:ring-white/5"
+        className="forecast-fit:p-3 flex w-full max-w-xl min-w-0 flex-col gap-3 rounded-[2rem] border border-white/60 bg-white/70 p-5 wrap-anywhere shadow-2xl ring-1 shadow-slate-900/20 ring-black/5 backdrop-blur-xl sm:p-8 dark:border-white/15 dark:bg-slate-950/70 dark:shadow-black/50 dark:ring-white/5"
       >
-        <header className="forecast-fit:mb-3 mb-6 text-center">
-          <p className="text-xs font-bold tracking-[0.22em] text-slate-700 uppercase dark:text-slate-200">
-            Live conditions
-          </p>
+        <header className="order-first text-center">
           <h1
             id="weather-workspace-title"
-            className="forecast-fit:mt-1 mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl dark:text-white"
+            className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl dark:text-white"
           >
             Weather, right now
           </h1>
-          <p className="forecast-fit:mt-1 mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-700 dark:text-slate-200">
-            Search a city or use your current location.
-          </p>
         </header>
 
         <form
@@ -187,15 +205,15 @@ export default function WeatherSearch({
               placeholder="e.g. San Francisco"
               required
               pattern={".*\\S.*"}
-              key={cityInputValue}
+              ref={syncCityInput}
               defaultValue={cityInputValue}
             />
             <motion.button
               data-testid="weather-search-submit"
               className="h-12 max-w-full rounded-xl bg-blue-700 px-4 text-sm font-semibold text-white shadow-sm transition-[color,background-color,border-color] hover:bg-blue-800 disabled:cursor-wait disabled:opacity-70 dark:bg-blue-500 dark:hover:bg-blue-400"
               type="submit"
-              disabled={shouldDisplaySearchPending}
-              aria-busy={shouldDisplaySearchPending}
+              disabled={pendingCity !== null}
+              aria-busy={pendingCity !== null}
               whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
               whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
             >
@@ -204,39 +222,19 @@ export default function WeatherSearch({
           </div>
         </form>
 
-        {shouldDisplaySearchPending ? (
-          <p
-            data-testid="weather-search-status"
-            role="status"
-            aria-live="polite"
-            className="mx-auto mt-4 max-w-full text-sm font-semibold text-blue-900 dark:text-blue-200"
-          >
-            Loading forecast for {searchWeatherState.city}...
-          </p>
-        ) : null}
-
-        <div
-          className="forecast-fit:my-1.5 my-4 flex items-center gap-3"
-          aria-hidden="true"
-        >
-          <div className="h-px flex-1 bg-slate-500/30" />
-          <span className="text-xs font-semibold text-slate-700 uppercase dark:text-slate-200">
-            or
-          </span>
-          <div className="h-px flex-1 bg-slate-500/30" />
-        </div>
-
         <LocationWeatherButton
+          onLocationWeatherRequest={handleLocationWeatherRequest}
           onLocationWeatherLoading={handleLocationWeatherLoading}
           onLocationWeatherResult={handleLocationWeatherResult}
           shouldAutoFetchIfPermitted={shouldAutoDetectLocation}
           shouldReduceMotion={shouldReduceMotion ?? false}
         />
 
-        <AnimatePresence initial={false} mode="wait">
+        <AnimatePresence initial={false}>
           {displayedWeather ? (
             <motion.div
-              key={displayedWeather.city}
+              key="forecast"
+              className="-order-1 xl:order-last"
               data-testid="forecast-transition"
               initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}

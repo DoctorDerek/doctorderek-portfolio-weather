@@ -33,12 +33,14 @@ function getLocationErrorMessage(positionError?: GeolocationPositionError) {
 }
 
 export default function LocationWeatherButton({
+  onLocationWeatherRequest,
   onLocationWeatherLoading,
   onLocationWeatherResult,
   shouldReduceMotion,
   shouldAutoFetchIfPermitted,
 }: {
-  onLocationWeatherLoading: () => void
+  onLocationWeatherRequest: () => void
+  onLocationWeatherLoading: () => boolean
   onLocationWeatherResult: (weatherResult: WeatherResult) => void
   shouldReduceMotion: boolean
   shouldAutoFetchIfPermitted?: boolean
@@ -64,8 +66,11 @@ export default function LocationWeatherButton({
 
   const handleLocationSuccess = useCallback(
     async (position: GeolocationPosition) => {
+      if (!onLocationWeatherLoading()) {
+        setLocationRequestPhase("idle")
+        return
+      }
       setLocationRequestPhase("loading")
-      onLocationWeatherLoading()
 
       try {
         const weatherResult = await getCurrentLocationWeather(
@@ -122,6 +127,7 @@ export default function LocationWeatherButton({
     }
 
     const tryAutoFetch = async () => {
+      onLocationWeatherRequest()
       setHasCheckedAutoPermission(true)
 
       try {
@@ -142,6 +148,7 @@ export default function LocationWeatherButton({
     hasCheckedAutoPermission,
     isGeolocationAvailable,
     locationRequestPhase,
+    onLocationWeatherRequest,
     setHasCheckedAutoPermission,
     requestLocationWeather,
     shouldAutoFetchIfPermitted,
@@ -189,6 +196,7 @@ export default function LocationWeatherButton({
             return
           }
 
+          onLocationWeatherRequest()
           requestLocationWeather()
         }}
       >

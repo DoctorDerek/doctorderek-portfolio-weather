@@ -78,6 +78,143 @@ for (const width of [320, 390]) {
   })
 }
 
+test.describe("short-phone search recovery", () => {
+  test.use({ viewport: { width: 320, height: 568 }, hasTouch: true })
+
+  test("keeps the complete error and correction controls in reach with the notice open", async ({
+    page,
+  }) => {
+    await page.goto("/")
+    await expect(page.getByTestId("theme-toggle")).toBeVisible()
+    const field = page.getByRole("textbox", { name: "City or place" })
+    const search = page.getByRole("button", { name: "Search", exact: true })
+    const location = page.getByRole("button", { name: "Use my location" })
+    await field.fill(INVALID_LIVE_WEATHER_TEST_CITY)
+    await search.tap()
+    const alert = page.getByTestId("weather-workspace").getByRole("alert")
+    const notice = page.locator("[data-weather-notices] [data-visible=true]")
+    await expect(notice).toHaveText(/city not found/i)
+    await expect(alert).toBeInViewport({ ratio: 1 })
+    await expect(notice).toBeInViewport({ ratio: 1 })
+    const scroller = page.locator("[data-search-viewport]")
+    const scrollTop = await scroller.evaluate((element) => element.scrollTop)
+    for (const control of [field, search, location]) {
+      await expect(control).toBeInViewport({ ratio: 1 })
+      const targetIsAvailable = await control.evaluate((element) => {
+        const bounds = element.getBoundingClientRect()
+        const rightHandPoint = bounds.right - bounds.height / 2
+        return element.contains(
+          document.elementFromPoint(
+            rightHandPoint,
+            bounds.top + bounds.height / 2,
+          ),
+        )
+      })
+      expect(targetIsAvailable).toBe(true)
+    }
+    await field.tap()
+    await field.fill(LIVE_WEATHER_TEST_CITY)
+    await expect(alert).toHaveText(/city not found/i)
+    expect(await scroller.evaluate((element) => element.scrollTop)).toBe(
+      scrollTop,
+    )
+  })
+})
+
+test("keeps a city typed before hydration through the first submission", async ({
+  page,
+}) => {
+  const hydrationGate = Promise.withResolvers<void>()
+  await page.route(
+    (url) =>
+      url.pathname.startsWith("/_next/static/") && url.pathname.endsWith(".js"),
+    async (route) => {
+      await hydrationGate.promise
+      await route.continue()
+    },
+  )
+  const field = page.getByRole("textbox", { name: "City or place" })
+  const themeToggle = page.getByTestId("theme-toggle")
+  try {
+    await page.goto("/", { waitUntil: "commit" })
+    await field.fill(LIVE_WEATHER_TEST_CITY)
+    await expect(themeToggle).toHaveCount(0)
+  } finally {
+    hydrationGate.resolve()
+  }
+  await expect(themeToggle).toBeVisible()
+  await expect(field).toHaveValue(LIVE_WEATHER_TEST_CITY)
+  await field.press("Enter")
+  await expect(
+    page.getByRole("heading", { name: LIVE_WEATHER_TEST_CITY }),
+  ).toBeVisible()
+})
+
+test("gives a corrected city the only result until its route finishes and restores the failure on Back", async ({
+  page,
+}) => {
+  await page.goto(`/?city=${INVALID_LIVE_WEATHER_TEST_CITY}`)
+  const workspace = page.getByTestId("weather-workspace")
+  const field = workspace.getByRole("textbox", { name: "City or place" })
+  const search = workspace.getByRole("button", { name: "Search", exact: true })
+  const error = workspace.getByRole("alert")
+  const notice = page.locator("[data-weather-notices]")
+  await expect(notice).toContainText(/city not found/i)
+  await field.fill(LIVE_WEATHER_TEST_CITY)
+  await expect(error).toHaveText(/city not found/i)
+
+  const responseGate = Promise.withResolvers<void>()
+  const isDestination = (url: URL) =>
+    url.pathname === "/" &&
+    url.searchParams.get("city") === LIVE_WEATHER_TEST_CITY
+  await page.route(isDestination, async (route) => {
+    await responseGate.promise
+    await route.continue()
+  })
+  try {
+    const [firstPendingFrame] = await Promise.all([
+      page.waitForFunction(
+        (city) => {
+          if (
+            document.querySelector("main [role=status] h2")?.textContent !==
+            `Loading forecast for ${city}…`
+          )
+            return false
+          const notice =
+            document.querySelector("[data-weather-notices]")?.textContent ?? ""
+          return { previousErrorVisible: /city not found/i.test(notice) }
+        },
+        LIVE_WEATHER_TEST_CITY,
+        { polling: "raf" },
+      ),
+      page.waitForRequest((request) => isDestination(new URL(request.url()))),
+      field.press("Enter"),
+    ])
+    expect(await firstPendingFrame.jsonValue()).toEqual({
+      previousErrorVisible: false,
+    })
+    await expect(workspace.getByRole("status")).toHaveText(
+      `Loading forecast for ${LIVE_WEATHER_TEST_CITY}…`,
+    )
+    await expect(search).toHaveAttribute("aria-busy", "true")
+    await expect(error).toHaveCount(0)
+    await expect(notice).not.toContainText(/city not found/i)
+    await expect(workspace.getByLabel("Temperature")).toHaveCount(0)
+  } finally {
+    responseGate.resolve()
+  }
+  await expect(
+    workspace.getByRole("heading", { name: LIVE_WEATHER_TEST_CITY }),
+  ).toBeVisible()
+  await expect(workspace.getByLabel("Temperature")).toBeVisible()
+  await expect(field).toBeFocused()
+  await expect(search).toBeEnabled()
+  await page.goBack()
+  await expect(field).toHaveValue(INVALID_LIVE_WEATHER_TEST_CITY)
+  await expect(error).toHaveText(/city not found/i)
+  await expect(search).toBeEnabled()
+})
+
 test("provides restrained pointer feedback without changing submission semantics", async ({
   page,
 }) => {
