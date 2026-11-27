@@ -48,6 +48,14 @@ export default function WeatherSearch({
   const cityInputValue = shouldDisplayLocationWeather
     ? ""
     : selectedCity || initialCity || ""
+  const syncCityInput = useCallback(
+    (input: HTMLInputElement | null) => {
+      if (input && submittedSearch.current?.city !== cityInputValue) {
+        input.value = cityInputValue
+      }
+    },
+    [cityInputValue],
+  )
   const displayedWeather = shouldDisplayLocationWeather
     ? {
         city: CURRENT_LOCATION_LABEL,
@@ -187,7 +195,7 @@ export default function WeatherSearch({
               placeholder="e.g. San Francisco"
               required
               pattern={".*\\S.*"}
-              key={cityInputValue}
+              ref={syncCityInput}
               defaultValue={cityInputValue}
             />
             <motion.button
