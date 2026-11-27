@@ -78,6 +78,49 @@ for (const width of [320, 390]) {
   })
 }
 
+test.describe("short-phone search recovery", () => {
+  test.use({ viewport: { width: 320, height: 568 }, hasTouch: true })
+
+  test("keeps the complete error and correction controls in reach with the notice open", async ({
+    page,
+  }) => {
+    await page.goto("/")
+    await expect(page.getByTestId("theme-toggle")).toBeVisible()
+    const field = page.getByRole("textbox", { name: "City or place" })
+    const search = page.getByRole("button", { name: "Search", exact: true })
+    const location = page.getByRole("button", { name: "Use my location" })
+    await field.fill(INVALID_LIVE_WEATHER_TEST_CITY)
+    await search.tap()
+    const alert = page.getByTestId("weather-workspace").getByRole("alert")
+    const notice = page.locator("[data-weather-notices] [data-visible=true]")
+    await expect(notice).toHaveText(/city not found/i)
+    await expect(alert).toBeInViewport({ ratio: 1 })
+    await expect(notice).toBeInViewport({ ratio: 1 })
+    const scroller = page.locator("[data-search-viewport]")
+    const scrollTop = await scroller.evaluate((element) => element.scrollTop)
+    for (const control of [field, search, location]) {
+      await expect(control).toBeInViewport({ ratio: 1 })
+      const targetIsAvailable = await control.evaluate((element) => {
+        const bounds = element.getBoundingClientRect()
+        const rightHandPoint = bounds.right - bounds.height / 2
+        return element.contains(
+          document.elementFromPoint(
+            rightHandPoint,
+            bounds.top + bounds.height / 2,
+          ),
+        )
+      })
+      expect(targetIsAvailable).toBe(true)
+    }
+    await field.tap()
+    await field.fill(LIVE_WEATHER_TEST_CITY)
+    await expect(alert).toHaveText(/city not found/i)
+    expect(await scroller.evaluate((element) => element.scrollTop)).toBe(
+      scrollTop,
+    )
+  })
+})
+
 test("provides restrained pointer feedback without changing submission semantics", async ({
   page,
 }) => {
